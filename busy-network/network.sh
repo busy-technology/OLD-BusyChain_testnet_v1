@@ -1,0 +1,22 @@
+#!/bin/bash
+
+. scripts/utils.sh
+
+infoln "Starting busy CA server"
+docker-compose -f docker-compose-ca.yaml up -d
+
+infoln "Waiting for 5s to bootstrap CA server"
+sleep 5
+
+. scripts/registerEnroll.sh
+
+infoln "Generating crypto for Busy org"
+createBusy
+infoln "Generating crypto for Orderer org"
+createOrderer
+
+infoln "Generating channel artifacts"
+./artifacts.sh
+
+infoln "Bootstraping orderer etcdraft cluster"
+docker-compose -f docker-compose-orderer.yaml up -d

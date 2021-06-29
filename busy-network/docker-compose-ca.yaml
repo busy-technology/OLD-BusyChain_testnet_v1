@@ -46,6 +46,6 @@ services:
       ca-database:
         condition: service_healthy
     volumes:
-      - "./fabric-ca-server:/etc/hyperledger/fabric-ca-server"
+      - "./busy-ca-server:/etc/hyperledger/fabric-ca-server"
     command: sh -c 'fabric-ca-server start -b admin:adminpw'
 
