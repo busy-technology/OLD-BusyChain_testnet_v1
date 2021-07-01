@@ -1,7 +1,5 @@
 #!/bin/bash
 
-#export VERBOSE=false
-
 # utility script
 . scripts/utils.sh
 
@@ -26,4 +24,7 @@ docker-compose -f docker-compose-orderer.yaml up -d
 
 infoln "Starting peer0 and peer1 of Busy organization"
 docker-compose -f docker-compose-peers.yaml up -d
+
+infoln "Creating Busy channel."
+./createChannel.sh
 
