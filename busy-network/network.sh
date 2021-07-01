@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#export VERBOSE=false
+
+# utility script
 . scripts/utils.sh
 
 infoln "Starting busy CA server"
@@ -20,3 +23,7 @@ infoln "Generating channel artifacts"
 
 infoln "Bootstraping orderer etcdraft cluster"
 docker-compose -f docker-compose-orderer.yaml up -d
+
+infoln "Starting peer0 and peer1 of Busy organization"
+docker-compose -f docker-compose-peers.yaml up -d
+

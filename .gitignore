@@ -1,4 +1,6 @@
 *.pem
+*.txt
 *_sk
 Issuer*
 organizations
+.DS_Store
