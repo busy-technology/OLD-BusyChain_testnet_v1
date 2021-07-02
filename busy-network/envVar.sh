@@ -9,7 +9,7 @@ export PEER1_BUSYORG_CA=${PWD}/organizations/peerOrganizations/busy.technology/p
 
 
 # Set environment variables for the peer org
-setGlobals() {
+setGlobalsForPeer0BusyOrg() {
 
 local USING_ORG="busyOrg"
   infoln "Using organization ${USING_ORG}"
@@ -20,3 +20,16 @@ local USING_ORG="busyOrg"
     export CORE_PEER_ADDRESS=localhost:7051
   
 }
+
+setGlobalsForPeer1BusyOrg() {
+
+local USING_ORG="busyOrg"
+  infoln "Using organization ${USING_ORG}"
+
+    export CORE_PEER_LOCALMSPID="BusyMSP"
+    export CORE_PEER_TLS_ROOTCERT_FILE=$PEER1_BUSYORG_CA
+    export CORE_PEER_MSPCONFIGPATH=${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp
+    export CORE_PEER_ADDRESS=localhost:9051
+  
+}
+
