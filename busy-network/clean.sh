@@ -8,8 +8,8 @@ rm -rf organizations
 
 cd busy-ca-server
 
-#rm -v ! (fabric-ca-server-config.yaml)
-rm -rf IssuerPublicKey IssuerRevocationPublicKey ca-cert.pem msp tls-cert.pem
+rm -v ! (fabric-ca-server-config.yaml)
+#rm -rf IssuerPublicKey IssuerRevocationPublicKey ca-cert.pem msp tls-cert.pem
 
 cd ..
 
