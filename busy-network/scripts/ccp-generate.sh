@@ -12,7 +12,7 @@ function json_ccp {
         -e "s/\${CAPORT}/$3/" \
         -e "s#\${PEERPEM}#$PP#" \
         -e "s#\${CAPEM}#$CP#" \
-        organizations/ccp-template.json
+        scripts/ccp-template.json
 }
 
 function yaml_ccp {
@@ -23,7 +23,7 @@ function yaml_ccp {
         -e "s/\${CAPORT}/$3/" \
         -e "s#\${PEERPEM}#$PP#" \
         -e "s#\${CAPEM}#$CP#" \
-        organizations/ccp-template.yaml | sed -e $'s/\\\\n/\\\n          /g'
+        scripts/ccp-template.yaml | sed -e $'s/\\\\n/\\\n          /g'
 }
 
 ORG=Busy

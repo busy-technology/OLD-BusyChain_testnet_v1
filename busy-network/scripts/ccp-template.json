@@ -1,5 +1,5 @@
 {
-    "name": "test-network-${ORG}",
+    "name": "${ORG}-network",
     "version": "1.0.0",
     "client": {
         "organization": "${ORG}",
@@ -15,29 +15,40 @@
         "${ORG}": {
             "mspid": "${ORG}MSP",
             "peers": [
-                "peer0.${ORG}.example.com"
+                "peer0.busy.technology",
+                "peer1.busy.technology"
             ],
             "certificateAuthorities": [
-                "ca.${ORG}.example.com"
+                "ca.busy.technology"
             ]
         }
     },
     "peers": {
         "peer0.${ORG}.example.com": {
-            "url": "grpcs://localhost:${P0PORT}",
+            "url": "grpcs://peer0.busy.technology:${P0PORT}",
             "tlsCACerts": {
                 "pem": "${PEERPEM}"
             },
             "grpcOptions": {
-                "ssl-target-name-override": "peer0.${ORG}.example.com",
-                "hostnameOverride": "peer0.${ORG}.example.com"
+                "ssl-target-name-override": "peer0.busy.technology",
+                "hostnameOverride": "peer0.busy.technology"
+            }
+        },
+        "peer1.${ORG}.example.com": {
+            "url": "grpcs://peer0.busy.technology:${P1PORT}",
+            "tlsCACerts": {
+                "pem": "${PEERPEM}"
+            },
+            "grpcOptions": {
+                "ssl-target-name-override": "peer1.busy.technology",
+                "hostnameOverride": "peer1.busy.technology"
             }
         }
     },
     "certificateAuthorities": {
-        "ca.${ORG}.example.com": {
-            "url": "https://localhost:${CAPORT}",
-            "caName": "ca-${ORG}",
+        "ca.busy.technology": {
+            "url": "https://ca.busy.technology:${CAPORT}",
+            "caName": "busy-ca",
             "tlsCACerts": {
                 "pem": ["${CAPEM}"]
             },

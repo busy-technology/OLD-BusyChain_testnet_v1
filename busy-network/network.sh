@@ -28,3 +28,8 @@ docker-compose -f docker-compose-peers.yaml up -d
 infoln "Creating Busy channel."
 ./createChannel.sh
 
+infoln "Generating CCP for Busy org"
+./scripts/ccp-generate.sh
+
+infoln "Deploying busy chaincode"
+./scripts/chaincode.sh busyv1 1
