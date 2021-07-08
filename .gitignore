@@ -4,5 +4,5 @@
 Issuer*
 organizations
 .DS_Store
-*.tar.gz
-channel-artifacts
+node_modules
+wallet

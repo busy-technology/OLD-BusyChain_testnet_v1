@@ -1,0 +1,33 @@
+{
+  "name": "busy-chaincode-api",
+  "version": "1.0.0",
+  "description": "Node Sdk to interact with chaincode",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramboraj123/Raj_Hansraj.git"
+  },
+  "author": "Raj Prajapati & Hansraj Rami",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ramboraj123/Raj_Hansraj/issues"
+  },
+  "homepage": "https://github.com/ramboraj123/Raj_Hansraj#readme",
+  "dependencies": {
+    "bcrypt": "^5.0.1",
+    "bip39": "^3.0.4",
+    "fabric-ca-client": "^2.2.2",
+    "fabric-network": "^2.2.2",
+    "mongoose": "^5.13.2",
+    "mongoose-timestamp": "^0.6.0",
+    "restify": "^8.5.1",
+    "restify-errors": "^8.0.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.9"
+  }
+}
