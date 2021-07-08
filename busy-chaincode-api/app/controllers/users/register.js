@@ -5,12 +5,12 @@ const saltRounds = 10;
 
 module.exports = async (req, res, next) => {
   const userId = req.body.userId,
-    firstName = req.body.firstName,
-    lastName = req.body.lastName,
-    email = req.body.email,
-    mobile = req.body.mobile,
+    firstName = req.body.firstName || "",
+    lastName = req.body.lastName || "",
+    email = req.body.email || "",
+    mobile = req.body.mobile || "",
     password = req.body.password,
-    country = req.body.country,
+    country = req.body.country || "",
     confirmPassword = req.body.confirmPassword;
 
   const user = await User.findOne({ userId: userId });

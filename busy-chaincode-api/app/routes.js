@@ -1,6 +1,7 @@
 const errors = require("restify-errors"),
   trim_req = require("./libs/request/trim"),
-  controller = require("./controllers");
+  controller = require("./controllers"),
+  middleware = require("./middlewares");
 
 /**
  * List of routes
@@ -17,7 +18,11 @@ module.exports = (server) => {
    * @author Raj
    */
 
-  server.post("/register", controller.users.register);
+  server.post(
+    "/register",
+    middleware.utility.required(["userId", "password"]),
+    controller.users.register
+  );
 
   server.post("/login", controller.users.login);
 };

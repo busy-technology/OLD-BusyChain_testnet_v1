@@ -72,7 +72,7 @@ exports.FabricChaincodeInvoke = async (
   }
 };
 
-exports.FabricChaincodeInvokeWithCityFile = async (
+exports.FabricChaincodeInvokeWithCertificate = async (
   channelName,
   contractName,
   functionName,
@@ -85,11 +85,16 @@ exports.FabricChaincodeInvokeWithCityFile = async (
     const ccpPath = path.resolve(
       __dirname,
       "connection-profile",
-      "connection-cityshop.json"
+      "connection-busy.json"
     );
     const ccp = JSON.parse(fs.readFileSync(ccpPath, "utf8"));
     // Create a new file system based wallet for managing identities.
-    const walletPath = path.join(process.cwd(), "..", "network", "wallet");
+    const walletPath = path.join(
+      process.cwd(),
+      "blockchain",
+      "network",
+      "wallet"
+    );
     // const walletPath = path.resolve(__dirname, '..', '..', 'network', 'wallet')
     const wallet = await Wallets.newFileSystemWallet(walletPath);
     // const wallet = await new FileSystemWallet(walletPath);

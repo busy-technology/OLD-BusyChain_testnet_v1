@@ -4,22 +4,22 @@ const timeStamp = require("mongoose-timestamp");
 const UserSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
   },
   lastName: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
   },
   email: {
     type: String,
-    required: true,
+    required: false,
     trim: true,
   },
   mobile: {
     type: Number,
-    required: true,
+    required: false,
     trim: true,
   },
   userId: {
@@ -34,8 +34,7 @@ const UserSchema = new mongoose.Schema({
   },
   country: {
     type: String,
-    required: true,
-    trim: true,
+    required: false,
   },
   txId: {
     type: String,
