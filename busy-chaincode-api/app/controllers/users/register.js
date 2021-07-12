@@ -33,32 +33,40 @@ module.exports = async (req, res, next) => {
     const data = await UserScript.registerUsers(userId);
     console.log("DATA 2", data);
     console.log("HASH", hash);
-    const users = await new User({
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      mobile: mobile,
-      userId: userId,
-      password: hash,
-      country: country,
-      txId: data.chaincodeResponse.txId,
-    });
-
-    await users
-      .save()
-      .then((result, error) => {
-        console.log("User registered.");
-      })
-      .catch((error) => {
-        console.log("ERROR DB", error);
+    if (data.chaincodeResponse.success == true) {
+      const users = await new User({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        mobile: mobile,
+        userId: userId,
+        password: hash,
+        country: country,
+        txId: data.chaincodeResponse.txId,
       });
 
-    return res.send(200, {
-      status: true,
-      message: "User registered.",
-      seedPhase: data.seed,
-      privateKey: data.blockchain_credentials,
-      chaincodeResponse: data.chaincodeResponse,
-    });
+      await users
+        .save()
+        .then((result, error) => {
+          console.log("User registered.");
+        })
+        .catch((error) => {
+          console.log("ERROR DB", error);
+        });
+
+      return res.send(200, {
+        status: true,
+        message: "User registered.",
+        seedPhase: data.seed,
+        privateKey: data.blockchain_credentials,
+        chaincodeResponse: data.chaincodeResponse,
+      });
+    } else {
+      console.log("Failed to execute chaincode function");
+      return res.send(404, {
+        status: false,
+        message: `Failed to execute chaincode function.`,
+      });
+    }
   }
 };
