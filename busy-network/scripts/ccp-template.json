@@ -24,7 +24,7 @@
         }
     },
     "peers": {
-        "peer0.${ORG}.example.com": {
+        "peer0.busy.technology": {
             "url": "grpcs://peer0.busy.technology:${P0PORT}",
             "tlsCACerts": {
                 "pem": "${PEERPEM}"
@@ -34,8 +34,8 @@
                 "hostnameOverride": "peer0.busy.technology"
             }
         },
-        "peer1.${ORG}.example.com": {
-            "url": "grpcs://peer0.busy.technology:${P1PORT}",
+        "peer1.busy.technology": {
+            "url": "grpcs://peer1.busy.technology:${P1PORT}",
             "tlsCACerts": {
                 "pem": "${PEERPEM}"
             },
