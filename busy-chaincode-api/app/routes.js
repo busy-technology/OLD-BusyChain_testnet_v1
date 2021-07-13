@@ -41,4 +41,6 @@ module.exports = (server) => {
     middleware.utility.required(["userId", "credentials"]),
     controller.users.queryWallet
   );
+
+  server.get("/wallets", controller.users.fetchWallets);
 };

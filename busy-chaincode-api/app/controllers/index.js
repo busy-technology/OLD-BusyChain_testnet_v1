@@ -6,5 +6,6 @@ module.exports = {
     login: require("./users/login"),
     wallet: require("./users/createWallet"),
     queryWallet: require("./users/queryWallet"),
+    fetchWallets: require("./users/wallets"),
   },
 };
