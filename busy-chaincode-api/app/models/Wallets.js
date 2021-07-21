@@ -12,6 +12,11 @@ const WalletSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  type: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   txId: {
     type: String,
     required: true,

@@ -133,5 +133,6 @@ exports.FabricUserRegister = async (userData, key) => {
     // logger.error(exception.errors);
     // console.log("EXCEPTIONS", expection.errors);
     return exception;
+  
   }
 };

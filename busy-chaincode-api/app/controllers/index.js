@@ -6,6 +6,12 @@ module.exports = {
     login: require("./users/login"),
     wallet: require("./users/createWallet"),
     queryWallet: require("./users/queryWallet"),
+    queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
+  },
+
+  auth: {
+    generateToken: require("./auth/generate-token"),
+    apiKey: require("./auth/apiKey"),
   },
 };

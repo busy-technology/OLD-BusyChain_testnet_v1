@@ -4,7 +4,8 @@ const WalletScript = require("../../../blockchain/test-scripts/walletCreate");
 
 module.exports = async (req, res, next) => {
   const userId = req.body.userId,
-    blockchain_credentials = req.body.credentials;
+    blockchain_credentials = req.body.credentials,
+    type = req.body.type;
 
   const user = await User.findOne({ userId: userId });
   console.log("User", user);
@@ -21,6 +22,7 @@ module.exports = async (req, res, next) => {
       const wallet = await new Wallet({
         userId: userId,
         walletId: walletId,
+        type: type,
         txId: response.chaincodeResponse.txId,
       });
 
