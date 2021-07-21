@@ -1,5 +1,5 @@
-const is_number = (value) => {
-  return /^-?\d+$/.test(value);
+const is_email = (value) => {
+  return /\S+@\S+\.\S+/.test(value);
 };
 
 module.exports = (fields) => {
@@ -9,13 +9,13 @@ module.exports = (fields) => {
     if (req.method === "GET") params = req.params;
 
     let errors = fields.filter((field) => {
-      if (params[field] && !is_number(params[field].trim())) return field;
+      if (params[field] && !is_email(params[field].trim())) return field;
     });
 
     if (errors.length)
       return res.send(422, {
         status: false,
-        message: `${errors.join(", ")} is not a valid email`,
+        message: `${errors.join(", ")} is not valid.`,
       });
 
     return next();

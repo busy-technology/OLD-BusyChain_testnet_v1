@@ -1,5 +1,8 @@
 const mongoose = require("mongoose");
 const config = require("./config");
+const xss = require("xss-clean");
+const helmet = require("helmet");
+const mongoSanitize = require("express-mongo-sanitize");
 const restify = require("restify"),
   server = restify.createServer({
     name: "Busy chaincode API",
@@ -19,6 +22,12 @@ server.use(
     urlencoded: { extended: false },
   })
 );
+
+//server.use(restify.json({ limit: "10kb" })); // body limit is 10
+
+server.use(xss());
+server.use(helmet());
+server.use(mongoSanitize());
 
 server.use(restify.plugins.queryParser({ mapParams: false }));
 

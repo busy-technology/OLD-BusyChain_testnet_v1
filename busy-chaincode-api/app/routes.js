@@ -32,6 +32,11 @@ module.exports = (server) => {
     middleware.utility.userId(["userId"]),
     middleware.utility.userId(["firstName"]),
     middleware.utility.userId(["lastName"]),
+    middleware.utility.userId(["country"]),
+    middleware.utility.userId(["password"]),
+    middleware.utility.userId(["confirmPassword"]),
+    middleware.utility.isEmail(["email"]),
+    auth,
     controller.users.register
   );
 
