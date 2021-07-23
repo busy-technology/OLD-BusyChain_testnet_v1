@@ -6,3 +6,4 @@ organizations
 .DS_Store
 node_modules
 wallet
+build

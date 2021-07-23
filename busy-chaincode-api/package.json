@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/ramboraj123/Raj_Hansraj#readme",
   "dependencies": {
+    "@fidm/x509": "^1.2.1",
     "bcrypt": "^5.0.1",
     "bip39": "^3.0.4",
     "express-mongo-sanitize": "^2.1.0",

@@ -12,10 +12,10 @@ exports.queryWallet = async (userId, userKey, wallet) => {
     console.log("DATA", data);
 
     if (data) {
-      const response = JSON.parse(data.chaincodeResponse);
-      console.log("RESPONSE FROM CHAINCODE", response);
+      // const response = JSON.parse(data.chaincodeResponse);
+      // console.log("RESPONSE FROM CHAINCODE", response);
       const output = {
-        chaincodeResponse: response,
+        chaincodeResponse: data,
       };
       return output;
     } else {

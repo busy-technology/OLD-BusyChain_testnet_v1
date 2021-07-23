@@ -146,6 +146,7 @@ exports.FabricChaincodeInvokeWithCertificate = async (
     return result.toString();
   } catch (exception) {
     //logger.error(exception.errors);
+    console.log("IN CATCH");
     return exception;
   }
 };

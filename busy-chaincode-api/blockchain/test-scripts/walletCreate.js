@@ -9,15 +9,18 @@ exports.WalletCreation = async (userId, userKey) => {
     console.log("DATA", data);
 
     if (data) {
-      const response = JSON.parse(data.chaincodeResponse);
-      console.log("RESPONSE FROM CHAINCODE", response);
+      //const response = JSON.parse(data.chaincodeResponse);
+      //console.log("RESPONSE FROM CHAINCODE", response);
       const output = {
-        chaincodeResponse: response,
+        chaincodeResponse: data,
       };
+      console.log("OUTPUT", output);
       return output;
     } else {
-      //   return sendResponse(res, false, 200, txId, 'User already exists');
-      console.log("error");
+      const output = {
+        chaincodeResponse: exception.message,
+      };
+      return output;
     }
   } catch (exception) {
     //logger.error(exception.errors);

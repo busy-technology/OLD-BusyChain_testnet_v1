@@ -4,62 +4,80 @@ const Wallet = require("../../models/Wallets");
 const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
-  const userId = req.body.userId;
-  const adminId = "admin";
+  try {
+    const userId = req.body.userId;
+    const adminId = "admin";
 
-  const user = await User.findOne({ userId: userId });
+    const user = await User.findOne({ userId: userId });
 
-  if (user) {
-    try {
-      console.log("IN USER");
-      const adminData = await Admin.findOne({ userId: adminId });
-      console.log("ADMIN", adminData);
+    if (user) {
+      try {
+        console.log("IN USER");
+        const adminData = await Admin.findOne({ userId: adminId });
+        console.log("ADMIN", adminData);
 
-      const credentials = {
-        certificate: adminData.certificate.credentials.certificate,
-        privateKey: adminData.certificate.credentials.privateKey,
-      };
+        const credentials = {
+          certificate: adminData.certificate.credentials.certificate,
+          privateKey: adminData.certificate.credentials.privateKey,
+        };
 
-      const blockchain_credentials = {
-        credentials: credentials,
-        mspId: adminData.certificate.mspId,
-        type: adminData.certificate.type,
-      };
+        const blockchain_credentials = {
+          credentials: credentials,
+          mspId: adminData.certificate.mspId,
+          type: adminData.certificate.type,
+        };
 
-      console.log("BLOCK", blockchain_credentials);
+        console.log("BLOCK", blockchain_credentials);
 
-      const wallet = await Wallet.findOne({ userId: userId });
+        const wallet = await Wallet.findOne({ userId: userId });
+        console.log("WALLET", wallet);
 
-      const response = await QueryScript.queryWallet(
-        userId,
-        blockchain_credentials,
-        wallet.walletId
-      );
-      console.log("DATA 2", response.chaincodeResponse);
-      const balance = response.chaincodeResponse.data;
-      console.log("BALANCE", response.chaincodeResponse.data);
+        if (wallet == null) {
+          return res.send(404, {
+            status: false,
+            message: `Wallet do not exist.`,
+          });
+        }
 
-      if (response.chaincodeResponse.success == true) {
-        return res.send(200, {
-          status: true,
-          message: "Balance fetched",
-          chaincodeResponse: response.chaincodeResponse,
-        });
-      } else {
-        console.log("Failed to execute chaincode function");
-        return res.send(404, {
-          status: false,
-          message: `Failed to execute chaincode function.`,
-        });
+        const response1 = await QueryScript.queryWallet(
+          userId,
+          blockchain_credentials,
+          wallet.walletId
+        );
+        console.log("RESPONSE 1", response1);
+        const response = JSON.parse(response1.chaincodeResponse);
+        console.log("DATA 2", response);
+        const balance = response.data;
+        console.log("BALANCE", response.data);
+
+        if (response.success == true) {
+          return res.send(200, {
+            status: true,
+            message: "Balance fetched",
+            chaincodeResponse: response,
+          });
+        } else {
+          console.log("Failed to execute chaincode function");
+          return res.send(404, {
+            status: false,
+            message: `Failed to execute chaincode function.`,
+          });
+        }
+      } catch (err) {
+        console.log("ERROR", err);
       }
-    } catch (err) {
-      console.log("ERROR", err);
+    } else {
+      console.log("UserId do not exists.");
+      return res.send(404, {
+        status: false,
+        message: `UserId do not exists.`,
+      });
     }
-  } else {
-    console.log("UserId do not exists.");
+  } catch (exception) {
+    console.log(exception);
     return res.send(404, {
       status: false,
-      message: `UserId do not exists.`,
+      message: `Something went wrong`,
     });
   }
 };

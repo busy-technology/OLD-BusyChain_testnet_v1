@@ -1,7 +1,6 @@
-const is_number = (value) => {
-  return /^\+[1-9]{1}[0-9]{3,14}$/.test(value);
-// + followed by your mobile number
-  ///^-?\d+$/
+const is_password = (value) => {
+  return /^\$2[ayb]\$.{56}$/.test(value);
+  //bcrypt regex with 56 length and a specific standard.
 };
 
 module.exports = (fields) => {
@@ -11,13 +10,13 @@ module.exports = (fields) => {
     if (req.method === "GET") params = req.params;
 
     let errors = fields.filter((field) => {
-      if (params[field] && !is_number(params[field].trim())) return field;
+      if (params[field] && !is_password(params[field].trim())) return field;
     });
 
     if (errors.length)
       return res.send(422, {
         status: false,
-        message: `${errors.join(", ")} not valid`,
+        message: `${errors.join(", ")} not valid.`,
       });
 
     return next();

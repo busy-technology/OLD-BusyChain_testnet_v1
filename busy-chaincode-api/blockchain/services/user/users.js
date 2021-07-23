@@ -7,6 +7,7 @@ const registerUser = require("../../sdk/registerUser");
 const enrollAdmin = require("../../sdk/enrollAdmin");
 const invoke = require("../../sdk/invoke");
 const query = require("../../sdk/query");
+const { exception } = require("console");
 
 exports.RegisterUsers = async (userData, mnemonic) => {
   try {
@@ -53,12 +54,12 @@ exports.CreateWallet = async (userId, userKey) => {
       // function to remove the user key
 
       await invoke.removeKeyFromWallet(userId);
-      return {
-        chaincodeResponse: invokeFabricChaincodeWithCertificate,
-      };
+      return invokeFabricChaincodeWithCertificate;
     }
   } catch (exception) {
-    return { error: exception };
+    console.log("IN CATCH OF CREATE WALLET SERVICE.");
+    //return { error: exception };
+    return exception;
   }
 };
 
@@ -75,11 +76,9 @@ exports.WalletQuery = async (walletId, userId, userKey) => {
 
     if (invokeWalletQuery) {
       await invoke.removeKeyFromWallet(userId);
-      return {
-        chaincodeResponse: invokeWalletQuery,
-      };
+      return invokeWalletQuery;
     }
   } catch (exception) {
-    return { error: exception };
+    return exception;
   }
 };
