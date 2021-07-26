@@ -6,6 +6,13 @@ type User struct {
 	UserID  string `json:"userId"`
 }
 
+type Wallet struct {
+	DocType string  `json:"docType"`
+	UserID  string  `json:"userId"`
+	Address string  `json:"address"`
+	Balance float64 `json:"balance"`
+}
+
 // UTXO unspent transaction output
 type UTXO struct {
 	Address string  `json:"address"`
