@@ -7,6 +7,7 @@ const registerUser = require("../../sdk/registerUser");
 const enrollAdmin = require("../../sdk/enrollAdmin");
 const invoke = require("../../sdk/invoke");
 const query = require("../../sdk/query");
+const recoverUser = require("../../sdk/recoverUser");
 const { exception } = require("console");
 
 exports.RegisterUsers = async (userData, mnemonic) => {
@@ -44,7 +45,7 @@ exports.CreateWallet = async (userId, userKey) => {
       await invoke.FabricChaincodeInvokeWithCertificate(
         "busychannel",
         "busytoken",
-        "CreateWallet",
+        "CreateStakingAddress",
         "",
         userId,
         userKey
@@ -77,6 +78,22 @@ exports.WalletQuery = async (walletId, userId, userKey) => {
     if (invokeWalletQuery) {
       await invoke.removeKeyFromWallet(userId);
       return invokeWalletQuery;
+    }
+  } catch (exception) {
+    return exception;
+  }
+};
+
+exports.RecoverUsers = async (userData) => {
+  try {
+    await enrollAdmin.FabricAdminEnroll();
+    const userRegistered = await recoverUser.FabricUserRecover(userData);
+    if (userRegistered) {
+      // remove the user certificate
+      await invoke.removeKeyFromWallet(userData.userId);
+      return {
+        userRegistered: userRegistered,
+      };
     }
   } catch (exception) {
     return exception;

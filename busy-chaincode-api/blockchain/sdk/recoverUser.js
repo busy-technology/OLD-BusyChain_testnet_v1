@@ -5,9 +5,9 @@ const path = require("path");
 
 // bip129 algorith
 const bip39 = require("bip39");
-exports.FabricUserRegister = async (userData, key) => {
+
+exports.FabricUserRecover = async (userData) => {
   try {
-    console.log("IN REGISTER USER SDK");
     // load the network configuration
     const ccpPath = path.resolve(
       __dirname,
@@ -25,7 +25,6 @@ exports.FabricUserRegister = async (userData, key) => {
     );
 
     // Create a new file system based wallet for managing identities.
-    //const walletPath = path.join(process.cwd(), "..", "network", "wallet");
     const walletPath = path.join(
       process.cwd(),
       "blockchain",
@@ -51,28 +50,15 @@ exports.FabricUserRegister = async (userData, key) => {
         'An identity for the admin user "admin" does not exist in the wallet'
       );
       console.log("Run the enrollAdmin.js application before retrying");
-      return `Run the enrollAdmin.js application before retrying`;
+      return;
     }
 
     // build a user object for authenticating with the CA
     const provider = wallet.getProviderRegistry().getProvider(adminExists.type);
     const adminUser = await provider.getUserContext(adminExists, "admin");
 
-    const secret = bip39.mnemonicToSeedSync(key).toString("hex");
+    const secret = bip39.mnemonicToSeedSync(userData.mnemonic).toString("hex");
     console.log("SEC", secret);
-
-    const secret1 = await ca.register(
-      {
-        enrollmentID: userData.userId,
-        enrollmentSecret: secret,
-        role: "client",
-        maxEnrollments: -1,
-      },
-      adminUser
-    );
-
-    console.log("secret1", secret1);
-    console.log("secret1", secret1 === secret);
 
     const enrollment = await ca.enroll({
       enrollmentID: userData.userId,
@@ -86,16 +72,12 @@ exports.FabricUserRegister = async (userData, key) => {
       mspId: "BusyMSP",
       type: "X.509",
     };
-
     await wallet.put(userData.userId, x509Identity);
 
-    console.log(
-      `Successfully registered and enrolled user ${userData.userId}.`
-    );
+    console.log(`Successfully enrolled user ${userData.userId}.`);
     return x509Identity;
   } catch (exception) {
     // logger.error(exception.errors);
-    // console.log("EXCEPTIONS", expection.errors);
-    return exception;
+    throw exception;
   }
 };

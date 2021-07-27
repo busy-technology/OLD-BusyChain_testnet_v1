@@ -8,6 +8,7 @@ module.exports = {
     queryWallet: require("./users/queryWallet"),
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
+    recoverUser: require("./users/recoverUser"),
   },
 
   auth: {

@@ -2,7 +2,7 @@
 
 . ./envVar.sh
 
-peer lifecycle chaincode package busytoken.tar.gz --path ../busytoken --lang golang --label $1
+peer lifecycle chaincode package busytoken.tar.gz --path ../busy-chaincode-api/busytoken --lang golang --label $1
 
 setGlobalsForPeer0BusyOrg
 peer lifecycle chaincode install busytoken.tar.gz 

@@ -66,6 +66,7 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 
 	response.Message = fmt.Sprintf("User %s created", commonName)
 	response.Success = true
+	response.Data = response.TxID
 	logger.Info(response.Message)
 	return response
 }
@@ -179,11 +180,11 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 	defer resultIterator.Close()
 
 	var wallet Wallet
-	var responseData = map[string]float64{}
+	var responseData = map[string]Wallet{}
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
-		responseData[wallet.Address] = wallet.Balance
+		responseData[wallet.Address] = wallet
 	}
 
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
