@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric/common/flogging"
@@ -14,6 +15,66 @@ type BusyToken struct {
 }
 
 var logger = flogging.MustGetLogger("busy")
+
+// Init Initialise chaincocode while deployment
+func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	mspid, _ := ctx.GetClientIdentity().GetMSPID()
+	if mspid != "Org2MSP" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+	commonName, _ := getCommonName(ctx)
+	if commonName != "org2admin" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+
+	token := Token{
+		DocType:     "token",
+		ID:          0,
+		TokenName:   "Busy",
+		TokenSymbol: "busy",
+		Admin:       "admin",
+		TotalSupply: 255_000000_000000_000000_000000,
+	}
+	tokenAsBytes, _ := json.Marshal(token)
+	err := ctx.GetStub().PutState("busy", tokenAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	wallet := Wallet{
+		DocType: "wallet",
+		UserID:  "admin",
+		Address: response.TxID,
+		Balance: 255_000000_000000_000000_000000,
+	}
+	walletAsBytes, _ := json.Marshal(wallet)
+	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	_ = ctx.GetStub().PutState("latestTokenId", []byte(strconv.Itoa(0)))
+
+	response.Message = fmt.Sprintf("Successfully issued token %s", "busy")
+	response.Success = true
+	response.Data = token
+	logger.Info(response.Message)
+	return response
+}
 
 // CreateUser creates new user on busy blockchain
 func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Response {
@@ -32,7 +93,7 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 		return response
 	}
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while fetching user from blockchain: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while fetching user from blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -45,7 +106,7 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 	userAsBytes, _ = json.Marshal(user)
 	err = ctx.GetStub().PutState(commonName, userAsBytes)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -59,14 +120,13 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 	walletAsBytes, _ := json.Marshal(wallet)
 	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
 
 	response.Message = fmt.Sprintf("User %s created", commonName)
 	response.Success = true
-	response.Data = response.TxID
 	logger.Info(response.Message)
 	return response
 }
@@ -103,7 +163,7 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	stakingAddrAsBytes, _ := json.Marshal(stakingAddress)
 	err := ctx.GetStub().PutState(response.TxID, stakingAddrAsBytes)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -126,7 +186,7 @@ func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, add
 
 	walletAsBytes, err := ctx.GetStub().GetState(address)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while fetching balance: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while fetching balance: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -161,7 +221,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 		return response
 	}
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while fetching user from blockchain: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while fetching user from blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -173,7 +233,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 	}`, userID)
 	resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while fetching user wallets: %s" + err.Error())
+		response.Message = fmt.Sprintf("Error while fetching user wallets: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -190,6 +250,127 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
 	response.Success = true
 	response.Data = responseData
+	logger.Info(response.Message)
+	return response
+}
+
+// IssueToken issue token in default wallet address of invoker
+func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount float64) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	commonName, _ := getCommonName(ctx)
+	var token Token
+	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	tokenIdAsBytes, err := ctx.GetStub().GetState("latestTokenId")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching latest token id: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	latestTokenID, _ := strconv.Atoi(string(tokenIdAsBytes))
+
+	if tokenAsBytes == nil {
+		var queryString string = fmt.Sprintf(`{
+			"selector": {
+				"docType": "token",
+				"tokenName": "%s"
+			 } 
+		}`, tokenName)
+		resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while fetching quering data: %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		defer resultIterator.Close()
+		if resultIterator.HasNext() {
+			response.Message = fmt.Sprintf("Token with name %s already issued by someone", tokenName)
+			logger.Error(response.Message)
+			return response
+		}
+
+		_ = ctx.GetStub().PutState("latestTokenId", []byte(strconv.Itoa(latestTokenID+1)))
+		token := Token{
+			DocType:     "token",
+			ID:          uint64(latestTokenID + 1),
+			TokenName:   tokenName,
+			TokenSymbol: symbol,
+			Admin:       commonName,
+			TotalSupply: amount,
+		}
+		tokenAsBytes, _ = json.Marshal(token)
+		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		response.Data = token
+	} else {
+		_ = json.Unmarshal(tokenAsBytes, &token)
+		if token.TokenName != tokenName {
+			response.Message = fmt.Sprintf("You must issue token with same name as before: %s", token.TokenName)
+			logger.Error(response.Message)
+			return response
+		}
+		token.TotalSupply = token.TotalSupply + amount
+		tokenAsBytes, _ = json.Marshal(token)
+		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		response.Data = token
+	}
+
+	var queryString string = fmt.Sprintf(`{
+		"selector": {
+			"userId": "%s",
+			"docType": "wallet"
+		 } 
+	}`, commonName)
+	resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching admin wallet: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	defer resultIterator.Close()
+
+	var wallet Wallet
+	if resultIterator.HasNext() {
+		data, _ := resultIterator.Next()
+		_ = json.Unmarshal(data.Value, &wallet)
+		wallet.Balance += amount
+		walletAsBytes, _ := json.Marshal(token)
+		err = ctx.GetStub().PutState(symbol, walletAsBytes)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while updating wallet on blockchain : %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+	} else {
+		if err != nil {
+			response.Message = fmt.Sprintf("Can not issue token as wallet not found for user %s", commonName)
+			logger.Error(response.Message)
+			return response
+		}
+	}
+
+	response.Message = fmt.Sprintf("Successfully issued token %s", symbol)
+	response.Success = true
 	logger.Info(response.Message)
 	return response
 }
