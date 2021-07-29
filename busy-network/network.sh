@@ -23,7 +23,7 @@ infoln "Bootstraping orderer etcdraft cluster"
 docker-compose -f docker-compose-orderer.yaml up -d
 
 infoln "Starting peer0 and peer1 of Busy organization"
-docker-compose -f docker-compose-peers.yaml up -d
+docker-compose -f docker-compose-peers.yaml -f docker-compose-couchdb.yaml up -d
 
 infoln "Creating Busy channel."
 ./createChannel.sh
