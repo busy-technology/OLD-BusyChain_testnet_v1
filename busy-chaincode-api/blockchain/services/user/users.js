@@ -7,6 +7,7 @@ const registerUser = require("../../sdk/registerUser");
 const enrollAdmin = require("../../sdk/enrollAdmin");
 const invoke = require("../../sdk/invoke");
 const query = require("../../sdk/query");
+const queryUser = require("../../sdk/queryUser");
 const recoverUser = require("../../sdk/recoverUser");
 const { exception } = require("console");
 
@@ -66,6 +67,7 @@ exports.CreateWallet = async (userId, userKey) => {
 
 exports.WalletQuery = async (walletId, userId, userKey) => {
   try {
+    //await enrollAdmin.FabricAdminEnroll();
     const invokeWalletQuery = await query.ChaincodeQuery(
       "busychannel",
       "busytoken",
@@ -76,10 +78,34 @@ exports.WalletQuery = async (walletId, userId, userKey) => {
     );
 
     if (invokeWalletQuery) {
+      console.log("REMOVING KEY FROM QUERY WALLET SERVICE");
       await invoke.removeKeyFromWallet(userId);
       return invokeWalletQuery;
     }
   } catch (exception) {
+    console.log("IN CATCH WALLET QUERY SERVICE.");
+    return exception;
+  }
+};
+
+exports.UserQuery = async (userId, userKey) => {
+  try {
+    //await enrollAdmin.FabricAdminEnroll();
+    const invokeWalletQuery = await queryUser.ChaincodeUserQuery(
+      "busychannel",
+      "busytoken",
+      "GetUser",
+      userId,
+      userKey
+    );
+
+    if (invokeWalletQuery) {
+      console.log("REMOVING KEY FROM QUERY WALLET SERVICE");
+      await invoke.removeKeyFromWallet(userId);
+      return invokeWalletQuery;
+    }
+  } catch (exception) {
+    console.log("IN CATCH WALLET QUERY SERVICE.");
     return exception;
   }
 };

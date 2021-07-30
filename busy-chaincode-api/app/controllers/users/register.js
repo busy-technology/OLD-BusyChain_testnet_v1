@@ -41,6 +41,7 @@ module.exports = async (req, res, next) => {
           email: email,
           mobile: mobile,
           userId: userId,
+          walletId: data.chaincodeResponse.data,
           password: hash,
           country: country,
           txId: data.chaincodeResponse.txId,

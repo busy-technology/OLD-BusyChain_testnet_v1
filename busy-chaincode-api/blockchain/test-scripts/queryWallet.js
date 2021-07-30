@@ -4,9 +4,9 @@ const UserServices = require("../services/user/users");
 exports.queryWallet = async (userId, userKey, wallet) => {
   try {
     const walletID = wallet;
-
+    console.log("UserKey", userKey);
     console.log("WalletID", walletID);
-
+    console.log("UserId", userId);
     const data = await UserServices.WalletQuery(walletID, userId, userKey);
 
     console.log("DATA", data);

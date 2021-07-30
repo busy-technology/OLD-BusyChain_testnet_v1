@@ -98,10 +98,10 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 		return response
 	}
 
-	userID, _ := ctx.GetClientIdentity().GetID()
+	// userID, _ := ctx.GetClientIdentity().GetID()
 	user := User{
 		DocType: "user",
-		UserID:  userID,
+		UserID:  commonName,
 	}
 	userAsBytes, _ = json.Marshal(user)
 	err = ctx.GetStub().PutState(commonName, userAsBytes)
@@ -113,7 +113,7 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 
 	wallet := Wallet{
 		DocType: "wallet",
-		UserID:  userID,
+		UserID:  commonName,
 		Address: response.TxID,
 		Balance: 0.00,
 	}

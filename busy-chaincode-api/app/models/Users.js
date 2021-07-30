@@ -27,6 +27,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  walletId: {
+    type: String,
+    required: false,
+  },
   password: {
     type: String,
     required: true,

@@ -36,6 +36,7 @@ module.exports = (server) => {
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     middleware.utility.isEmail(["email"]),
+    auth,
     controller.users.register
   );
 
@@ -78,6 +79,21 @@ module.exports = (server) => {
   server.post(
     "/recoverUser",
     middleware.utility.required(["userId", "mnemonic"]),
+    auth,
     controller.users.recoverUser
+  );
+
+  server.post(
+    "/addAdmin",
+    middleware.utility.required(["credentials"]),
+    controller.users.addAdmin
+  );
+
+  server.post(
+    "/userWallets",
+    middleware.utility.required(["userId"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.userWallets
   );
 };

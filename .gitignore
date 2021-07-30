@@ -7,3 +7,6 @@ organizations
 node_modules
 wallet
 build
+*.tar.gz
+*.tx
+*.block

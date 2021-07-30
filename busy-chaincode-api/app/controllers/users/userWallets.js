@@ -1,12 +1,10 @@
 const User = require("../../models/Users");
 const Admin = require("../../models/admin");
-const Wallet = require("../../models/Wallets");
-const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
+const QueryUsers = require("../../../blockchain/test-scripts/userWallets");
 
 module.exports = async (req, res, next) => {
   try {
     const userId = req.body.userId;
-    const walletId = req.body.walletId;
     const adminId = "admin";
 
     const user = await User.findOne({ userId: userId });
@@ -30,20 +28,9 @@ module.exports = async (req, res, next) => {
 
         console.log("BLOCK", blockchain_credentials);
 
-        // const wallet = await Wallet.findOne({ userId: userId });
-        // console.log("WALLET", wallet);
-
-        // if (wallet == null) {
-        //   return res.send(404, {
-        //     status: false,
-        //     message: `Wallet do not exist.`,
-        //   });
-        // }
-
-        const response1 = await QueryScript.queryWallet(
+        const response1 = await QueryUsers.queryWallet(
           userId,
-          blockchain_credentials,
-          walletId
+          blockchain_credentials
         );
         console.log("RESPONSE 1", response1);
         const response = JSON.parse(response1.chaincodeResponse);

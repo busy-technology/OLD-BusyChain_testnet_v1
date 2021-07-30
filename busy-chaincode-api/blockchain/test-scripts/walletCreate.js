@@ -4,6 +4,7 @@ const UserServices = require("../services/user/users");
 
 exports.WalletCreation = async (userId, userKey) => {
   try {
+    console.log("USER KEY", userKey);
     const data = await UserServices.CreateWallet(userId, userKey);
 
     console.log("DATA", data);
