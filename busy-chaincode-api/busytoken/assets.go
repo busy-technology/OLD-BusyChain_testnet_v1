@@ -2,8 +2,9 @@ package main
 
 // User user on busy blockchain
 type User struct {
-	DocType string `json:"docType"`
-	UserID  string `json:"userId"`
+	DocType       string `json:"docType"`
+	UserID        string `json:"userId"`
+	DefaultWallet string `json:"defaultWallet"`
 }
 
 type Wallet struct {
