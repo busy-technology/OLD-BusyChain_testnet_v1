@@ -27,13 +27,13 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 	}
 
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
-	if mspid != "Org2MSP" {
+	if mspid != "BusyMSP" {
 		response.Message = "You are not allowed to issue busy coin"
 		logger.Error(response.Message)
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "org2admin" {
+	if commonName != "ordererAdmin" {
 		response.Message = "You are not allowed to issue busy coin"
 		logger.Error(response.Message)
 		return response
@@ -44,7 +44,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		ID:          0,
 		TokenName:   "Busy",
 		TokenSymbol: "busy",
-		Admin:       "admin",
+		Admin:       commonName,
 		TotalSupply: 255_000000_000000_000000_000000,
 	}
 	tokenAsBytes, _ := json.Marshal(token)
@@ -57,7 +57,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 
 	wallet := Wallet{
 		DocType: "wallet",
-		UserID:  "admin",
+		UserID:  commonName,
 		Address: response.TxID,
 		Balance: 255_000000_000000_000000_000000,
 	}
@@ -495,6 +495,34 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 	}
 	response.Message = "succesfully transfered"
 	logger.Info(response.Message)
+	response.Success = true
+	return response
+}
+
+// GetTotalSupply get total supply of specified token
+func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface, symbol string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	if symbol == "" {
+		symbol = "busy"
+	}
+	var token Token
+	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	_ = json.Unmarshal(tokenAsBytes, &token)
+
+	response.Message = "succesfully fetched total supply"
+	logger.Info(response.Message)
+	response.Data = token.TotalSupply
 	response.Success = true
 	return response
 }

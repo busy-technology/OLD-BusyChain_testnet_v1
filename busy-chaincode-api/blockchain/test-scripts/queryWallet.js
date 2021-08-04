@@ -1,13 +1,16 @@
 const UserServices = require("../services/user/users");
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.queryWallet = async (userId, userKey, wallet) => {
+exports.queryWallet = async (userId, userKey, wallet, token) => {
   try {
-    const walletID = wallet;
+    const walletDetails = {
+      walletId: wallet,
+      token: token,
+    };
     console.log("UserKey", userKey);
-    console.log("WalletID", walletID);
+    console.log("WalletDetails", walletDetails);
     console.log("UserId", userId);
-    const data = await UserServices.WalletQuery(walletID, userId, userKey);
+    const data = await UserServices.WalletQuery(walletDetails, userId, userKey);
 
     console.log("DATA", data);
 

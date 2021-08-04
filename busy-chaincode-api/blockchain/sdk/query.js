@@ -6,7 +6,7 @@ exports.ChaincodeQuery = async (
   channelName,
   contractName,
   functionName,
-  walletId,
+  walletDetails,
   userId,
   userKey
 ) => {
@@ -59,7 +59,11 @@ exports.ChaincodeQuery = async (
     // Evaluate the specified transaction.
     // queryCar transaction - requires 1 argument, ex: ('queryCar', 'CAR4')
     // queryAllCars transaction - requires no arguements, ex: ('queryAllCars')
-    const result = await contract.evaluateTransaction(functionName, walletId);
+    const result = await contract.evaluateTransaction(
+      functionName,
+      walletDetails.walletId,
+      walletDetails.token
+    );
     console.log(`Transaction has been evaluated.`);
     return result.toString();
   } catch (exception) {

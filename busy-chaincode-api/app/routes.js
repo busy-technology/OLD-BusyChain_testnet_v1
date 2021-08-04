@@ -36,7 +36,6 @@ module.exports = (server) => {
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     middleware.utility.isEmail(["email"]),
-    auth,
     controller.users.register
   );
 
@@ -55,17 +54,49 @@ module.exports = (server) => {
   );
 
   server.post(
+    "/buyTokens",
+    middleware.utility.required(["recipiant", "amount", "token"]),
+    controller.users.buy
+  );
+
+  server.post(
+    "/transferTokens",
+    middleware.utility.required([
+      "sender",
+      "credentials",
+      "recipiant",
+      "amount",
+      "token",
+    ]),
+    controller.users.transfer
+  );
+
+  server.post(
+    "/issueTokens",
+    middleware.utility.required([
+      "userId",
+      "credentials",
+      "tokenName",
+      "symbol",
+      "amount",
+    ]),
+    auth,
+    controller.users.issue
+  );
+
+  server.post(
     "/queryWallet",
     middleware.utility.required(["userId", "credentials"]),
     auth,
     controller.users.queryWallet
   );
 
+  // middleware.auth.generateToken,
+  // controller.auth.apiKey,
+
   server.post(
     "/queryWalletBalances",
-    middleware.utility.required(["userId"]),
-    middleware.auth.generateToken,
-    controller.auth.apiKey,
+    middleware.utility.required(["walletId"]),
     controller.users.queryWalletAdmin
   );
 
@@ -89,11 +120,14 @@ module.exports = (server) => {
     controller.users.addAdmin
   );
 
+  // Add in user wallets
+
+  //middleware.auth.generateToken,
+  //controller.auth.apiKey,
+
   server.post(
     "/userWallets",
     middleware.utility.required(["userId"]),
-    middleware.auth.generateToken,
-    controller.auth.apiKey,
     controller.users.userWallets
   );
 };

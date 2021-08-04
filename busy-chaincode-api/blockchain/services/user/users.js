@@ -5,6 +5,7 @@ const crypto = require("crypto");
 
 const registerUser = require("../../sdk/registerUser");
 const enrollAdmin = require("../../sdk/enrollAdmin");
+const enrollOrdererAdmin = require("../../sdk/enrollOrdererAdmin");
 const invoke = require("../../sdk/invoke");
 const query = require("../../sdk/query");
 const queryUser = require("../../sdk/queryUser");
@@ -65,14 +66,67 @@ exports.CreateWallet = async (userId, userKey) => {
   }
 };
 
-exports.WalletQuery = async (walletId, userId, userKey) => {
+exports.issueToken = async (userId, userKey, tokenName, symbol, amount) => {
+  try {
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "IssueToken",
+        tokenName,
+        symbol,
+        amount,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF ISSUE TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
+exports.transferToken = async (walletDetails, userId, userKey) => {
+  try {
+    await enrollOrdererAdmin.FabricAdminEnroll();
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "Transfer",
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF TRANSFER TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
+exports.WalletQuery = async (walletDetails, userId, userKey) => {
   try {
     //await enrollAdmin.FabricAdminEnroll();
     const invokeWalletQuery = await query.ChaincodeQuery(
       "busychannel",
       "busytoken",
       "GetBalance",
-      walletId,
+      walletDetails,
       userId,
       userKey
     );

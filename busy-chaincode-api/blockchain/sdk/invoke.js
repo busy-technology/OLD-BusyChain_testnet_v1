@@ -102,9 +102,6 @@ exports.FabricChaincodeInvokeWithCertificate = async (
     // Check to see if we've already enrolled the user.
     // const identity = await wallet.exists(arguements.akcessId);
 
-    // NOTE: Here we are getting the data for test purpose only
-    // when you get the CITY file of user from mobile app put the data in wallet
-
     //let userKeyJson = JSON.parse(userKey);
     await wallet.put(userId, userKey);
 
@@ -133,8 +130,6 @@ exports.FabricChaincodeInvokeWithCertificate = async (
     // const contract = network.getContract('akcess');
     const contract = network.getContract(contractName);
 
-    // Submit the specified transaction.
-    // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
     const result = await contract.submitTransaction(
       functionName,
       ...arrayOfArgs
@@ -161,6 +156,6 @@ exports.removeKeyFromWallet = async (userId) => {
   );
   // const walletPath = path.resolve(__dirname, '..', '..', 'network', 'wallet')
   const wallet = await Wallets.newFileSystemWallet(walletPath);
-
+  console.log("KEY REMOVED");
   return await wallet.remove(userId);
 };
