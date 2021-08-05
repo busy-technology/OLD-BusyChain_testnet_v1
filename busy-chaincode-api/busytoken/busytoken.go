@@ -182,8 +182,9 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-
+	var phase1StakingAmount float64 = 1000
 	commonName, _ := getCommonName(ctx)
+	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
 	stakingAddress := Wallet{
 		DocType: "stakingAddr",
 		UserID:  commonName,
@@ -194,6 +195,13 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	err := ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
