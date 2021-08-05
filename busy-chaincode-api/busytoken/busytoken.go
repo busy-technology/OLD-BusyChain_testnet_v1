@@ -317,6 +317,13 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		return response
 	}
 
+	err = addUTXO(ctx, defaultWalletAddress, -issueTokenFee, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning fees for issue token: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	var token Token
 	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
 	if err != nil {
@@ -402,25 +409,32 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 	}
 	defer resultIterator.Close()
 
-	var wallet Wallet
-	if resultIterator.HasNext() {
-		data, _ := resultIterator.Next()
-		_ = json.Unmarshal(data.Value, &wallet)
-		wallet.Balance += amount
-		walletAsBytes, _ := json.Marshal(token)
-		err = ctx.GetStub().PutState(symbol, walletAsBytes)
-		if err != nil {
-			response.Message = fmt.Sprintf("Error while updating wallet on blockchain : %s", err.Error())
-			logger.Error(response.Message)
-			return response
-		}
-	} else {
-		if err != nil {
-			response.Message = fmt.Sprintf("Can not issue token as wallet not found for user %s", commonName)
-			logger.Error(response.Message)
-			return response
-		}
+	issuerAddress, _ := getDefaultWalletAddress(ctx, commonName)
+	err = addUTXO(ctx, issuerAddress, amount, symbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while generating utxo for new token: %s", err.Error())
+		logger.Error(response.Message)
+		return response
 	}
+	// var wallet Wallet
+	// if resultIterator.HasNext() {
+	// 	data, _ := resultIterator.Next()
+	// 	_ = json.Unmarshal(data.Value, &wallet)
+	// 	wallet.Balance += amount
+	// 	walletAsBytes, _ := json.Marshal(token)
+	// 	err = ctx.GetStub().PutState(symbol, walletAsBytes)
+	// 	if err != nil {
+	// 		response.Message = fmt.Sprintf("Error while updating wallet on blockchain : %s", err.Error())
+	// 		logger.Error(response.Message)
+	// 		return response
+	// 	}
+	// } else {
+	// 	if err != nil {
+	// 		response.Message = fmt.Sprintf("Can not issue token as wallet not found for user %s", commonName)
+	// 		logger.Error(response.Message)
+	// 		return response
+	// 	}
+	// }
 
 	response.Message = fmt.Sprintf("Successfully issued token %s", symbol)
 	response.Success = true

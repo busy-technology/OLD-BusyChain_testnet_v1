@@ -135,3 +135,15 @@ func getDefaultWalletAddress(ctx contractapi.TransactionContextInterface, common
 	_ = json.Unmarshal(userAsBytes, &user)
 	return user.DefaultWallet, nil
 }
+
+func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount float64, symbol string) error {
+	utxo := UTXO{
+		DocType: "utxo",
+		Address: address,
+		Amount:  amount,
+		Token:   symbol,
+	}
+	utxoAsBytes, _ := json.Marshal(utxo)
+	err := ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", ctx.GetStub().GetTxID(), address, symbol), utxoAsBytes)
+	return err
+}
