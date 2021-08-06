@@ -3,6 +3,8 @@ const config = require("./config");
 const xss = require("xss-clean");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
+const enrollAdmin = require("./blockchain/sdk/enrollAdmin");
+const enrollOrdererAdmin = require("./blockchain/sdk/enrollOrdererAdmin");
 const restify = require("restify"),
   server = restify.createServer({
     name: "Busy chaincode API",
@@ -31,11 +33,13 @@ server.use(mongoSanitize());
 
 server.use(restify.plugins.queryParser({ mapParams: false }));
 
-server.listen(config.PORT, () => {
+server.listen(config.PORT, async () => {
   mongoose.connect(config.MONGODB_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
+  await enrollAdmin.FabricAdminEnroll();
+  await enrollOrdererAdmin.FabricAdminEnroll();
 });
 
 const db = mongoose.connection;

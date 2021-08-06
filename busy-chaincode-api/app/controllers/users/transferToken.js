@@ -8,7 +8,6 @@ module.exports = async (req, res, next) => {
     const sender = req.body.sender,
       blockchain_credentials = req.body.credentials,
       recipiant = req.body.recipiant,
-      userId = req.body.recipiant,
       amount = req.body.amount,
       token = req.body.token;
 
@@ -56,7 +55,7 @@ module.exports = async (req, res, next) => {
         const tokenEntry = await new tokenTransactions({
           tokenName: token,
           amount: amount,
-          function: "Buy",
+          function: "Transfer",
           txId: txId,
           sender: sender,
           receiver: recipiant,

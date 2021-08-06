@@ -36,6 +36,7 @@ module.exports = (server) => {
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     middleware.utility.isEmail(["email"]),
+    auth,
     controller.users.register
   );
 
@@ -45,6 +46,8 @@ module.exports = (server) => {
     auth,
     controller.users.login
   );
+
+  //auth,
 
   server.post(
     "/createStakingAddress",
@@ -56,6 +59,7 @@ module.exports = (server) => {
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
+    auth,
     controller.users.buy
   );
 
@@ -68,13 +72,16 @@ module.exports = (server) => {
       "amount",
       "token",
     ]),
+    auth,
     controller.users.transfer
   );
+
+  //auth,
 
   server.post(
     "/issueTokens",
     middleware.utility.required([
-      "userId",
+      "walletId",
       "credentials",
       "tokenName",
       "symbol",
@@ -82,6 +89,14 @@ module.exports = (server) => {
     ]),
     auth,
     controller.users.issue
+  );
+
+  server.post(
+    "/getTotalSupply",
+    middleware.utility.required(["symbol"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.totalSupply
   );
 
   server.post(
@@ -97,6 +112,8 @@ module.exports = (server) => {
   server.post(
     "/queryWalletBalances",
     middleware.utility.required(["walletId"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.queryWalletAdmin
   );
 
@@ -106,6 +123,8 @@ module.exports = (server) => {
     controller.auth.apiKey,
     controller.users.fetchWallets
   );
+
+  //auth,
 
   server.post(
     "/recoverUser",
@@ -128,6 +147,8 @@ module.exports = (server) => {
   server.post(
     "/userWallets",
     middleware.utility.required(["userId"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.userWallets
   );
 };

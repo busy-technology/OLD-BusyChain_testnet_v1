@@ -2,15 +2,13 @@ const UserServices = require("../services/user/users");
 
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.issueToken = async (userId, userKey, tokenName, symbol, amount) => {
+exports.totalSupply = async (userId, userKey, symbol) => {
   try {
     console.log("USER KEY", userKey);
     const walletDetails = {
-      tokenName: tokenName,
       symbol: symbol,
-      amount: amount,
     };
-    const data = await UserServices.issueToken(walletDetails, userId, userKey);
+    const data = await UserServices.totalSupply(walletDetails, userId, userKey);
 
     console.log("DATA", data);
 
@@ -34,5 +32,3 @@ exports.issueToken = async (userId, userKey, tokenName, symbol, amount) => {
     console.log("exception", exception);
   }
 };
-
-//issueToken();

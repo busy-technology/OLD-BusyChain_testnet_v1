@@ -66,16 +66,39 @@ exports.CreateWallet = async (userId, userKey) => {
   }
 };
 
-exports.issueToken = async (userId, userKey, tokenName, symbol, amount) => {
+exports.issueToken = async (walletDetails, userId, userKey) => {
   try {
     const invokeFabricChaincodeWithCertificate =
       await invoke.FabricChaincodeInvokeWithCertificate(
         "busychannel",
         "busytoken",
         "IssueToken",
-        tokenName,
-        symbol,
-        amount,
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF ISSUE TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
+exports.totalSupply = async (walletDetails, userId, userKey) => {
+  try {
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "GetTotalSupply",
+        walletDetails,
         userId,
         userKey
       );
