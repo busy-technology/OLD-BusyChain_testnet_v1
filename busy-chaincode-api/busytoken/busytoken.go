@@ -191,17 +191,16 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 		Address: "staking-" + response.TxID,
 		Balance: 0.00,
 	}
-	stakingAddrAsBytes, _ := json.Marshal(stakingAddress)
-	err := ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
+	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-
-	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
+	stakingAddrAsBytes, _ := json.Marshal(stakingAddress)
+	err = ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
