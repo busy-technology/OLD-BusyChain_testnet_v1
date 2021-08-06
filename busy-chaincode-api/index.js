@@ -38,8 +38,8 @@ server.listen(config.PORT, async () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-  await enrollAdmin.FabricAdminEnroll();
-  await enrollOrdererAdmin.FabricAdminEnroll();
+  //await enrollAdmin.FabricAdminEnroll();
+  //await enrollOrdererAdmin.FabricAdminEnroll();
 });
 
 const db = mongoose.connection;

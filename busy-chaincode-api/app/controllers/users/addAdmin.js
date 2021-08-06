@@ -1,8 +1,8 @@
 const Admin = require("../../models/admin");
 module.exports = async (req, res, next) => {
   try {
-    const userId = "admin";
-    //const userId = "ordererAdmin";
+    //const userId = "admin";
+    const userId = "ordererAdmin";
     const credentials = req.body.credentials;
 
     console.log("CREDENTIALS", credentials);
