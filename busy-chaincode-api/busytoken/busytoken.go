@@ -547,3 +547,61 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 	response.Success = true
 	return response
 }
+
+// Burn reduct balance from user wallet and reduce total supply
+func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount float64, symbol string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	mspid, _ := ctx.GetClientIdentity().GetMSPID()
+	if mspid != "BusyMSP" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+	commonName, _ := getCommonName(ctx)
+	if commonName != "ordererAdmin" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+
+	var token Token
+	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
+	if tokenAsBytes == nil {
+		response.Message = fmt.Sprintf("Token %s doesn't exists", symbol)
+		logger.Error(response.Message)
+		return response
+	}
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	_ = json.Unmarshal(tokenAsBytes, &token)
+	token.TotalSupply = token.TotalSupply - amount
+	tokenAsBytes, _ = json.Marshal(token)
+	err = ctx.GetStub().PutState(symbol, tokenAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating total supply: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	err = addUTXO(ctx, address, amount, symbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burn token: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	response.Message = "succesfully burnt token"
+	logger.Info(response.Message)
+	response.Success = true
+	return response
+}
