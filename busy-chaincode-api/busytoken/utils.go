@@ -147,3 +147,8 @@ func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount
 	err := ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", ctx.GetStub().GetTxID(), address, symbol), utxoAsBytes)
 	return err
 }
+
+// last Message key
+func getLastMessageKey(userId string) string {
+	return fmt.Sprintf("lastmessage%s", userId)
+}
