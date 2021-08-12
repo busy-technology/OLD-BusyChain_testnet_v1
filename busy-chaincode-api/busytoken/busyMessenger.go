@@ -14,8 +14,13 @@ type LastMessage struct {
 	Recipient   string
 }
 
+// BusyMessenger contract
+type BusyMessenger struct {
+	contractapi.Contract
+}
+
 // CreateUser creates new user on busy blockchain
-func (bt *BusyToken) SendMessage(ctx contractapi.TransactionContextInterface, recipient string, token string) Response {
+func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface, recipient string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -68,7 +73,7 @@ func (bt *BusyToken) SendMessage(ctx contractapi.TransactionContextInterface, re
 		logger.Error(response.Message)
 		return response
 	}
-
-	resp := bt.Transfer(ctx, recipient, config.BusyCoins, token)
+	busyToken := new(BusyToken)
+	resp := busyToken.Transfer(ctx, recipient, config.BusyCoins, token)
 	return resp
 }
