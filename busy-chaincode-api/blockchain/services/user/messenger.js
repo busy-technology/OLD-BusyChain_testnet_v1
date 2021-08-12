@@ -16,7 +16,7 @@ exports.SendMessage = async (sender, recipient, userKey) => {
     const invokeChaincode = await message.FarbiceInvokeMessage(
         "busychannel",
         "busytoken",
-        "SendMessage",
+        "BusyMessenger:SendMessage",
         sender,
         recipient,
         userKey
