@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
@@ -31,9 +32,12 @@ func find(slice []string, val string) (int, bool) {
 	return -1, false
 }
 
-func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, token string) (float64, []string, error) {
+func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, token string) (*big.Int, []string, error) {
 	// Query all the records where owner is sender and
 	// token is specified token
+
+	var utxo UTXO
+	balance, _ := new(big.Int).SetString("0", 10)
 	var queryString string = fmt.Sprintf(`{
 		"selector": {
 		   "address": "%s",
@@ -42,11 +46,9 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 	}`, sender, token)
 	resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
 	if err != nil {
-		return 0, nil, err
+		return balance, nil, err
 	}
 	defer resultIterator.Close()
-	var utxo UTXO
-	var balance float64 = 0
 
 	// Loop through all the fetched records and
 	// Sum all of their amount delete all existing utxo records
@@ -57,14 +59,14 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 		// err := ctx.GetStub().DelState(data.Key)
 		utxoKeys = append(utxoKeys, data.Key)
 		if err != nil {
-			return 0, nil, err
+			return balance, nil, err
 		}
-		balance += utxo.Amount
+		balance = balance.Add(balance, utxo.Amount)
 	}
 	return balance, utxoKeys, nil
 }
 
-func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount float64, token string) error {
+func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string) error {
 	var txID string = ctx.GetStub().GetTxID()
 
 	// Prune exsting utxo if sender and count his balance
@@ -74,7 +76,8 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 	}
 
 	// Check if sender has enough balance
-	if amount > balance {
+
+	if amount.Cmp(balance) == 1 {
 		return fmt.Errorf("amount %f higher then your total balance %f", amount, balance)
 	}
 
@@ -83,7 +86,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		_ = ctx.GetStub().DelState(v)
 	}
 	// Deduct balance of sender
-	balance -= amount
+	balance = balance.Sub(balance, amount)
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: sender,
@@ -108,17 +111,19 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 	return nil
 }
 
-func getBalanceHelper(ctx contractapi.TransactionContextInterface, address string, token string) (float64, error) {
+func getBalanceHelper(ctx contractapi.TransactionContextInterface, address string, token string) (*big.Int, error) {
+	bigZero, _ := new(big.Int).SetString("0", 10)
+
 	walletAsBytes, err := ctx.GetStub().GetState(address)
 	if err != nil {
-		return 0, fmt.Errorf("error while fetching wallet: %s", err.Error())
+		return bigZero, fmt.Errorf("error while fetching wallet: %s", err.Error())
 	}
 	if walletAsBytes == nil {
-		return 0, fmt.Errorf("address %s not found", address)
+		return bigZero, fmt.Errorf("address %s not found", address)
 	}
 	balance, _, err := pruneUTXOs(ctx, address, token)
 	if err != nil {
-		return 0, fmt.Errorf("error while fetching balance: %s", err.Error())
+		return bigZero, fmt.Errorf("error while fetching balance: %s", err.Error())
 	}
 	return balance, nil
 }
@@ -136,7 +141,7 @@ func getDefaultWalletAddress(ctx contractapi.TransactionContextInterface, common
 	return user.DefaultWallet, nil
 }
 
-func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount float64, symbol string) error {
+func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount *big.Int, symbol string) error {
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: address,

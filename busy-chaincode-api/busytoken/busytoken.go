@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"strconv"
 	"strings"
 
@@ -39,13 +40,14 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		return response
 	}
 
+	supply, _ := new(big.Int).SetString("255000000000000000000000000", 10)
 	token := Token{
 		DocType:     "token",
 		ID:          0,
 		TokenName:   "Busy",
 		TokenSymbol: "busy",
 		Admin:       commonName,
-		TotalSupply: 255_000000_000000_000000_000000,
+		TotalSupply: supply,
 	}
 	tokenAsBytes, _ := json.Marshal(token)
 	err := ctx.GetStub().PutState("busy", tokenAsBytes)
@@ -59,7 +61,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		DocType: "wallet",
 		UserID:  commonName,
 		Address: response.TxID,
-		Balance: 255_000000_000000_000000_000000,
+		Balance: supply,
 	}
 	walletAsBytes, _ := json.Marshal(wallet)
 	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
@@ -86,7 +88,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: wallet.Address,
-		Amount:  255_000000_000000_000000_000000,
+		Amount:  supply,
 		Token:   "busy",
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
@@ -182,14 +184,15 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-	var phase1StakingAmount float64 = 1000
+	phase1StakingAmount, _ := new(big.Int).SetString("1000", 10)
+	bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
 	stakingAddress := Wallet{
 		DocType: "stakingAddr",
 		UserID:  commonName,
 		Address: "staking-" + response.TxID,
-		Balance: 0.00,
+		Balance: bigZero,
 	}
 	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
 	if err != nil {
@@ -280,7 +283,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 	defer resultIterator.Close()
 
 	var wallet Wallet
-	var responseData = map[string]float64{}
+	var responseData = map[string]*big.Int{}
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
@@ -296,7 +299,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 }
 
 // IssueToken issue token in default wallet address of invoker
-func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount float64) Response {
+func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount *big.Int) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -305,7 +308,8 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 	}
 
 	commonName, _ := getCommonName(ctx)
-	var issueTokenFee float64 = 2500
+	issueTokenFee, _ := new(big.Int).SetString("2500", 10)
+	minusOne, _ := new(big.Int).SetString("-1", 10)
 	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while fetching user's default wallet: %s", err.Error())
@@ -318,13 +322,13 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		logger.Error(response.Message)
 		return response
 	}
-	if balance < issueTokenFee {
+	if balance.Cmp(issueTokenFee) == -1 {
 		response.Message = fmt.Sprintf("Your default wallet address %s must have %f busy coin to issue token", defaultWalletAddress, issueTokenFee)
 		logger.Error(response.Message)
 		return response
 	}
 
-	err = addUTXO(ctx, defaultWalletAddress, -issueTokenFee, "busy")
+	err = addUTXO(ctx, defaultWalletAddress, issueTokenFee.Mul(issueTokenFee, minusOne), "busy")
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning fees for issue token: %s", err.Error())
 		logger.Error(response.Message)
@@ -391,7 +395,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 			logger.Error(response.Message)
 			return response
 		}
-		token.TotalSupply = token.TotalSupply + amount
+		token.TotalSupply = token.TotalSupply.Add(token.TotalSupply, amount)
 		tokenAsBytes, _ = json.Marshal(token)
 		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
 		if err != nil {
@@ -450,7 +454,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 }
 
 // Transfer transfer given amount from invoker's identity to specified identity
-func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount float64, token string) Response {
+func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount *big.Int, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -549,7 +553,7 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 }
 
 // Burn reduct balance from user wallet and reduce total supply
-func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount float64, symbol string) Response {
+func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount *big.Int, symbol string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -584,7 +588,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 	}
 
 	_ = json.Unmarshal(tokenAsBytes, &token)
-	token.TotalSupply = token.TotalSupply - amount
+	token.TotalSupply = token.TotalSupply.Sub(token.TotalSupply, amount)
 	tokenAsBytes, _ = json.Marshal(token)
 	err = ctx.GetStub().PutState(symbol, tokenAsBytes)
 	if err != nil {
