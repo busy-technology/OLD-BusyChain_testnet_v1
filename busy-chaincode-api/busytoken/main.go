@@ -1,11 +1,14 @@
 package main
 
 import (
+	"math/big"
 	"os"
 
 	"github.com/hyperledger/fabric-chaincode-go/shim"
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
+
+var bigZero *big.Int = new(big.Int).SetUint64(0)
 
 func main() {
 	busyToken := new(BusyToken)

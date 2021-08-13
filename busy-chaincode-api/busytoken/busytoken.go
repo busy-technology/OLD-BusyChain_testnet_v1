@@ -47,7 +47,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		TokenName:   "Busy",
 		TokenSymbol: "busy",
 		Admin:       commonName,
-		TotalSupply: supply,
+		TotalSupply: supply.String(),
 	}
 	tokenAsBytes, _ := json.Marshal(token)
 	err := ctx.GetStub().PutState("busy", tokenAsBytes)
@@ -61,7 +61,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		DocType: "wallet",
 		UserID:  commonName,
 		Address: response.TxID,
-		Balance: supply,
+		Balance: supply.String(),
 	}
 	walletAsBytes, _ := json.Marshal(wallet)
 	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
@@ -88,7 +88,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: wallet.Address,
-		Amount:  supply,
+		Amount:  supply.String(),
 		Token:   "busy",
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
@@ -185,14 +185,14 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	// 	return response
 	// }
 	phase1StakingAmount, _ := new(big.Int).SetString("1000", 10)
-	bigZero, _ := new(big.Int).SetString("0", 10)
+	// bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
 	stakingAddress := Wallet{
 		DocType: "stakingAddr",
 		UserID:  commonName,
 		Address: "staking-" + response.TxID,
-		Balance: bigZero,
+		Balance: bigZero.String(),
 	}
 	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
 	if err != nil {
@@ -299,7 +299,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 }
 
 // IssueToken issue token in default wallet address of invoker
-func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount *big.Int) Response {
+func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -307,6 +307,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		Data:    nil,
 	}
 
+	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	commonName, _ := getCommonName(ctx)
 	issueTokenFee, _ := new(big.Int).SetString("2500", 10)
 	minusOne, _ := new(big.Int).SetString("-1", 10)
@@ -378,7 +379,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 			TokenName:   tokenName,
 			TokenSymbol: symbol,
 			Admin:       commonName,
-			TotalSupply: amount,
+			TotalSupply: bigAmount.String(),
 		}
 		tokenAsBytes, _ = json.Marshal(token)
 		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
@@ -395,7 +396,8 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 			logger.Error(response.Message)
 			return response
 		}
-		token.TotalSupply = token.TotalSupply.Add(token.TotalSupply, amount)
+		bigTotalSupply, _ := new(big.Int).SetString(token.TotalSupply, 10)
+		token.TotalSupply = bigTotalSupply.Add(bigTotalSupply, bigAmount).String()
 		tokenAsBytes, _ = json.Marshal(token)
 		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
 		if err != nil {
@@ -421,7 +423,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 	defer resultIterator.Close()
 
 	issuerAddress, _ := getDefaultWalletAddress(ctx, commonName)
-	err = addUTXO(ctx, issuerAddress, amount, symbol)
+	err = addUTXO(ctx, issuerAddress, bigAmount, symbol)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while generating utxo for new token: %s", err.Error())
 		logger.Error(response.Message)
@@ -454,7 +456,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 }
 
 // Transfer transfer given amount from invoker's identity to specified identity
-func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount *big.Int, token string) Response {
+func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -462,6 +464,7 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		Data:    nil,
 	}
 
+	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	if token == "" {
 		token = "busy"
 	}
@@ -512,7 +515,7 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		}
 	}
 
-	err = transferHelper(ctx, user.DefaultWallet, recipiant, amount, token)
+	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
@@ -553,7 +556,7 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 }
 
 // Burn reduct balance from user wallet and reduce total supply
-func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount *big.Int, symbol string) Response {
+func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount string, symbol string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -561,6 +564,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 		Data:    nil,
 	}
 
+	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
 		response.Message = "You are not allowed to issue busy coin"
@@ -588,7 +592,8 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 	}
 
 	_ = json.Unmarshal(tokenAsBytes, &token)
-	token.TotalSupply = token.TotalSupply.Sub(token.TotalSupply, amount)
+	bigTotalSupply, _ := new(big.Int).SetString(token.TotalSupply, 10)
+	token.TotalSupply = bigTotalSupply.Sub(bigTotalSupply, bigAmount).String()
 	tokenAsBytes, _ = json.Marshal(token)
 	err = ctx.GetStub().PutState(symbol, tokenAsBytes)
 	if err != nil {
@@ -597,7 +602,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 		return response
 	}
 
-	err = addUTXO(ctx, address, amount, symbol)
+	err = addUTXO(ctx, address, bigAmount, symbol)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burn token: %s", err.Error())
 		logger.Error(response.Message)

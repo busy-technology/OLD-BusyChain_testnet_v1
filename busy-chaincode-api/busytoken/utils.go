@@ -61,7 +61,8 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 		if err != nil {
 			return balance, nil, err
 		}
-		balance = balance.Add(balance, utxo.Amount)
+		bigAmount, _ := new(big.Int).SetString(utxo.Amount, 10)
+		balance = balance.Add(balance, bigAmount)
 	}
 	return balance, utxoKeys, nil
 }
@@ -90,7 +91,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: sender,
-		Amount:  balance,
+		Amount:  balance.String(),
 		Token:   token,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
@@ -100,7 +101,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 	utxo = UTXO{
 		DocType: "utxo",
 		Address: recipiant,
-		Amount:  amount,
+		Amount:  amount.String(),
 		Token:   token,
 	}
 	utxoAsBytes, _ = json.Marshal(utxo)
@@ -112,7 +113,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 }
 
 func getBalanceHelper(ctx contractapi.TransactionContextInterface, address string, token string) (*big.Int, error) {
-	bigZero, _ := new(big.Int).SetString("0", 10)
+	// bigZero, _ := new(big.Int).SetString("0", 10)
 
 	walletAsBytes, err := ctx.GetStub().GetState(address)
 	if err != nil {
@@ -145,10 +146,17 @@ func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: address,
-		Amount:  amount,
+		Amount:  amount.String(),
 		Token:   symbol,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
 	err := ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", ctx.GetStub().GetTxID(), address, symbol), utxoAsBytes)
 	return err
+}
+
+func calculatePercentage(amount *big.Int, numerator uint64, denominator uint64) *big.Int {
+	bigNumerator := new(big.Int).SetUint64(numerator)
+	bigDenominator := new(big.Int).SetUint64(denominator)
+	amount = amount.Mul(amount, bigNumerator)
+	return amount.Div(amount, bigDenominator)
 }

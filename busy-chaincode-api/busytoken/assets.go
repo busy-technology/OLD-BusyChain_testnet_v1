@@ -1,7 +1,5 @@
 package main
 
-import "math/big"
-
 // User user on busy blockchain
 type User struct {
 	DocType       string `json:"docType"`
@@ -10,27 +8,27 @@ type User struct {
 }
 
 type Wallet struct {
-	DocType string   `json:"docType"`
-	UserID  string   `json:"userId"`
-	Address string   `json:"address"`
-	Balance *big.Int `json:"balance"`
+	DocType string `json:"docType"`
+	UserID  string `json:"userId"`
+	Address string `json:"address"`
+	Balance string `json:"balance"`
 }
 
 // UTXO unspent transaction output
 type UTXO struct {
-	DocType string   `json:"docType"`
-	Address string   `json:"address"`
-	Amount  *big.Int `json:"amount"`
-	Token   string   `json:"token"`
+	DocType string `json:"docType"`
+	Address string `json:"address"`
+	Amount  string `json:"amount"`
+	Token   string `json:"token"`
 }
 
 type Token struct {
-	DocType     string   `json:"docType"`
-	ID          uint64   `json:"id"`
-	TokenName   string   `json:"tokenName"`
-	TokenSymbol string   `json:"tokenSymbol"`
-	Admin       string   `json:"admin"`
-	TotalSupply *big.Int `json:"totalSupply"`
+	DocType     string `json:"docType"`
+	ID          uint64 `json:"id"`
+	TokenName   string `json:"tokenName"`
+	TokenSymbol string `json:"tokenSymbol"`
+	Admin       string `json:"admin"`
+	TotalSupply string `json:"totalSupply"`
 }
 
 // Response response will be returned in this format
@@ -39,4 +37,13 @@ type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
+}
+
+// LockedTokens locked tokens
+type LockedTokens struct {
+	DocType        string `json:"docType"`
+	TotalAmount    string `json:"totalAmount"`
+	ReleasedAmount string `json:"releasedAmount"`
+	StartedAt      uint64 `json:"startedAt"`
+	ReleaseAt      uint64 `json:"releaseAt"`
 }
