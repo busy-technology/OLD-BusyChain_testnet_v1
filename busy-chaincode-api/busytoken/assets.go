@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // User user on busy blockchain
 type User struct {
 	DocType       string `json:"docType"`
@@ -37,4 +39,11 @@ type Response struct {
 	Success bool        `json:"success"`
 	Message string      `json:"message"`
 	Data    interface{} `json:"data"`
+}
+
+// MessageConfig to set intial configuration for BusyCoins
+type MessageConfig struct {
+	// BusyCoins to deduct
+	BusyCoins       float64       `json:"busyCoins"`
+	MessageInterval time.Duration `json:"messageInterval"`
 }
