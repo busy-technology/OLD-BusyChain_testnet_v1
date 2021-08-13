@@ -160,3 +160,8 @@ func calculatePercentage(amount *big.Int, numerator uint64, denominator uint64) 
 	amount = amount.Mul(amount, bigNumerator)
 	return amount.Div(amount, bigDenominator)
 }
+
+// last Message key
+func getLastMessageKey(userId string) string {
+	return fmt.Sprintf("lastmessage%s", userId)
+}

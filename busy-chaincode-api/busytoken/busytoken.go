@@ -6,6 +6,7 @@ import (
 	"math/big"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 	"github.com/hyperledger/fabric/common/flogging"
@@ -39,6 +40,18 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		logger.Error(response.Message)
 		return response
 	}
+	// setting Message Config
+	config := MessageConfig{
+		BusyCoins:       1,
+		MessageInterval: 5 * time.Second,
+	}
+	configAsBytes, _ := json.Marshal(config)
+	err := ctx.GetStub().PutState("MessageConfig", configAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 
 	supply, _ := new(big.Int).SetString("255000000000000000000000000", 10)
 	token := Token{
@@ -50,7 +63,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		TotalSupply: supply.String(),
 	}
 	tokenAsBytes, _ := json.Marshal(token)
-	err := ctx.GetStub().PutState("busy", tokenAsBytes)
+	err = ctx.GetStub().PutState("busy", tokenAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
 		logger.Error(response.Message)
