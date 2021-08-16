@@ -5,6 +5,8 @@ const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 const enrollAdmin = require("./blockchain/sdk/enrollAdmin");
 const enrollOrdererAdmin = require("./blockchain/sdk/enrollOrdererAdmin");
+const AdminDb = require("./blockchain/sdk/saveAdmin");
+const OrdererAdminDb = require("./blockchain/sdk/saveOrdererAdmin");
 const restify = require("restify"),
   server = restify.createServer({
     name: "Busy chaincode API",
@@ -38,8 +40,10 @@ server.listen(config.PORT, async () => {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
-  //await enrollAdmin.FabricAdminEnroll();
-  //await enrollOrdererAdmin.FabricAdminEnroll();
+  await enrollAdmin.FabricAdminEnroll();
+  await enrollOrdererAdmin.FabricAdminEnroll();
+  await AdminDb.saveAdmin();
+  await OrdererAdminDb.saveOrdererAdmin();
 });
 
 const db = mongoose.connection;

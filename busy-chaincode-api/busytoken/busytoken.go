@@ -42,7 +42,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 	}
 	// setting Message Config
 	config := MessageConfig{
-		BusyCoins:       1,
+		BusyCoins:       "1",
 		MessageInterval: 5 * time.Second,
 	}
 	configAsBytes, _ := json.Marshal(config)

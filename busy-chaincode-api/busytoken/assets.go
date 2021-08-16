@@ -53,6 +53,6 @@ type LockedTokens struct {
 // MessageConfig to set intial configuration for BusyCoins
 type MessageConfig struct {
 	// BusyCoins to deduct
-	BusyCoins       float64       `json:"busyCoins"`
+	BusyCoins       string       `json:"busyCoins"`
 	MessageInterval time.Duration `json:"messageInterval"`
 }

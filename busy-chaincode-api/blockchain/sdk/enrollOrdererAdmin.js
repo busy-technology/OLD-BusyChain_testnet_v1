@@ -40,7 +40,7 @@ exports.FabricAdminEnroll = async () => {
     const identity = await wallet.get(adminUserId);
     if (identity) {
       console.log(
-        'An identity for the admin user "admin" already exists in the wallet'
+        'An identity for the admin user "Orderer admin" already exists in the wallet'
       );
       // return {
       //   msg: 'An identity for the admin user "admin" already exists in the wallet',
