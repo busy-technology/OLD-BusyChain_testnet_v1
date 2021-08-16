@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
@@ -75,7 +74,6 @@ func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface
 		return response
 	}
 	busyToken := new(BusyToken)
-	amount := strconv.FormatFloat(config.BusyCoins, 'f', -1, 64)
-	resp := busyToken.Transfer(ctx, recipient, amount, token)
+	resp := busyToken.Transfer(ctx, recipient, config.BusyCoins, token)
 	return resp
 }
