@@ -116,6 +116,31 @@ exports.totalSupply = async (walletDetails, userId, userKey) => {
   }
 };
 
+exports.burnTokens = async (walletDetails, userId, userKey) => {
+  try {
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "Burn",
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF ISSUE TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
 exports.transferToken = async (walletDetails, userId, userKey) => {
   try {
     await enrollOrdererAdmin.FabricAdminEnroll();

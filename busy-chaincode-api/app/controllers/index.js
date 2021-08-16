@@ -9,6 +9,7 @@ module.exports = {
     transfer: require("./users/transferToken"),
     issue: require("./users/issueTokens"),
     totalSupply: require("./users/totalSupply"),
+    burn: require("./users/burnToken"),
     queryWallet: require("./users/queryWallet"),
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),

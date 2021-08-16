@@ -25,6 +25,8 @@ module.exports = (server) => {
    * @author Raj
    */
 
+  //auth
+
   server.post(
     "/register",
     middleware.utility.required(["userId", "password", "confirmPassword"]),
@@ -91,12 +93,22 @@ module.exports = (server) => {
     controller.users.issue
   );
 
+  //middleware.auth.generateToken,
+  //controller.auth.apiKey,
+
   server.post(
     "/getTotalSupply",
     middleware.utility.required(["symbol"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.totalSupply
+  );
+
+  server.post(
+    "/burnTokens",
+    middleware.utility.required(["address", "amount", "token"]),
+    auth,
+    controller.users.burn
   );
 
   server.post(
