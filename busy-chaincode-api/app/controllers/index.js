@@ -16,6 +16,7 @@ module.exports = {
     recoverUser: require("./users/recoverUser"),
     addAdmin: require("./users/addAdmin"),
     userWallets: require("./users/userWallets"),
+    sendMessage: require("./users/sendMessage"),
   },
 
   auth: {

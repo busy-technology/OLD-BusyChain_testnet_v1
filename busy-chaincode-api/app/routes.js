@@ -114,7 +114,7 @@ module.exports = (server) => {
   server.post(
     "/queryWallet",
     middleware.utility.required(["userId", "credentials"]),
-    auth,
+    // auth,
     controller.users.queryWallet
   );
 
@@ -162,5 +162,11 @@ module.exports = (server) => {
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.userWallets
+  );
+  server.post(
+    "/sendMessage",
+    middleware.utility.required(["sender", "recipient"]),
+    controller.auth.apiKey,
+    controller.users.sendMessage
   );
 };
