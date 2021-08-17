@@ -708,7 +708,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 }
 
 // multibeneficiaryVestingV2 vesting v2
-func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInterface, address string, amount string, startAt uint64, releaseAt uint64) Response {
+func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInterface, recipient string, amount string, startAt uint64, releaseAt uint64) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -716,5 +716,68 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		Data:    nil,
 	}
 
+	now, _ := ctx.GetStub().GetTxTimestamp()
+	mspid, _ := ctx.GetClientIdentity().GetMSPID()
+	if mspid != "BusyMSP" {
+		response.Message = "You are not allowed to add vesting schedule"
+		logger.Error(response.Message)
+		return response
+	}
+	commonName, _ := getCommonName(ctx)
+	if commonName != "ordererAdmin" {
+		response.Message = "You are not allowed to add vesting schedule"
+		logger.Error(response.Message)
+		return response
+	}
+	bigAmount, _ := new(big.Int).SetString(amount, 10)
+	if bigAmount.Cmp(bigZero) == 0 {
+		response.Message = "Amount should not be equal to zero"
+		logger.Error(response.Message)
+		return response
+	}
+	adminAddress, _ := getDefaultWalletAddress(ctx, commonName)
+	balance, _ := getBalanceHelper(ctx, adminAddress, "busy")
+	if balance.Cmp(bigAmount) == -1 {
+		response.Message = "Not enough balance"
+		logger.Error(response.Message)
+		return response
+	}
+	if releaseAt < startAt {
+		response.Message = "Release time must be greater then start time"
+		logger.Error(response.Message)
+		return response
+	}
+
+	lockedTokenAsBytes, _ := ctx.GetStub().GetState(fmt.Sprintf("vesting~%s", recipient))
+	if lockedTokenAsBytes != nil {
+		response.Message = fmt.Sprintf("Vesting entry for address %s already exists", recipient)
+		logger.Error(response.Message)
+		return response
+	}
+	if releaseAt < uint64(now.Seconds) {
+		response.Message = "release time must be in future"
+		logger.Error(response.Message)
+		return response
+	}
+
+	totalAmount := new(big.Int).Set(bigAmount)
+	lockedToken := LockedTokens{
+		DocType:        "lockedToken",
+		TotalAmount:    totalAmount.String(),
+		ReleasedAmount: "0",
+		StartedAt:      uint64(now.Seconds),
+		ReleaseAt:      releaseAt,
+	}
+	lockedTokenAsBytes, _ = json.Marshal(lockedToken)
+	err := ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", recipient), lockedTokenAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while adding vesting schedule: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	response.Message = "succesfully added vesting schedule"
+	logger.Info(response.Message)
+	response.Success = true
 	return response
 }
