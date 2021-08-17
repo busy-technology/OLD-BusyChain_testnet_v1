@@ -577,6 +577,14 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 		Data:    nil,
 	}
 
+	// check if wallet already exists
+	_, err := ctx.GetStub().GetState(address)
+	if err != nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", address)
+		logger.Error(response.Message)
+		return response
+	}
+
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
@@ -637,6 +645,14 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 		Data:    nil,
 	}
 
+	// check if wallet already exists
+	_, err := ctx.GetStub().GetState(recipient)
+	if err != nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", recipient)
+		logger.Error(response.Message)
+		return response
+	}
+
 	now, _ := ctx.GetStub().GetTxTimestamp()
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
@@ -679,7 +695,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 	totalAmount := new(big.Int).Set(bigAmount)
 	currentVesting := calculatePercentage(bigAmount, numerator, denominator)
 
-	err := transferHelper(ctx, adminAddress, recipient, currentVesting, "busy")
+	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy")
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
@@ -714,6 +730,14 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	// check if wallet already exists
+	_, err := ctx.GetStub().GetState(recipient)
+	if err != nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", recipient)
+		logger.Error(response.Message)
+		return response
 	}
 
 	now, _ := ctx.GetStub().GetTxTimestamp()
@@ -769,7 +793,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		ReleaseAt:      releaseAt,
 	}
 	lockedTokenAsBytes, _ = json.Marshal(lockedToken)
-	err := ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", recipient), lockedTokenAsBytes)
+	err = ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", recipient), lockedTokenAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while adding vesting schedule: %s", err.Error())
 		logger.Error(response.Message)
