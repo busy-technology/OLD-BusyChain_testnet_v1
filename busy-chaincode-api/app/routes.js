@@ -111,6 +111,40 @@ module.exports = (server) => {
     controller.users.burn
   );
 
+  //auth,
+
+  server.post(
+    "/vestingV1",
+    middleware.utility.required([
+      "recipient",
+      "amount",
+      "numerator",
+      "denominator",
+      "releaseAt",
+    ]),
+    auth,
+    controller.users.vesting1
+  );
+
+  server.post(
+    "/vestingV2",
+    middleware.utility.required([
+      "recipient",
+      "amount",
+      "startAt",
+      "releaseAt",
+    ]),
+    auth,
+    controller.users.vesting2
+  );
+
+  server.post(
+    "/lockedTokensInfo",
+    middleware.utility.required(["address"]),
+    auth,
+    controller.users.lockedTokensInfo
+  );
+
   server.post(
     "/queryWallet",
     middleware.utility.required(["userId", "credentials"]),
@@ -166,6 +200,7 @@ module.exports = (server) => {
   server.post(
     "/sendMessage",
     middleware.utility.required(["sender", "recipient"]),
+    middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.sendMessage
   );

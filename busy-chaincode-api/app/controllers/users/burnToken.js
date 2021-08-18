@@ -9,8 +9,7 @@ module.exports = async (req, res, next) => {
       amount = req.body.amount,
       adminId = "ordererAdmin",
       userId = "sample";
-
-    try {
+      
       console.log("IN USER");
       const adminData = await Admin.findOne({ userId: adminId });
       console.log("ADMIN", adminData);
@@ -75,9 +74,6 @@ module.exports = async (req, res, next) => {
           chaincodeResponse: response,
         });
       }
-    } catch (err) {
-      console.log("ERROR", err);
-    }
   } catch (exception) {
     console.log(exception);
     return res.send(404, {

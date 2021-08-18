@@ -766,6 +766,13 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		logger.Error(response.Message)
 		return response
 	}
+
+	if startAt < uint64(now.Seconds) {
+		response.Message = "start time must be greater than current time."
+		logger.Error(response.Message)
+		return response
+	}
+
 	if releaseAt < startAt {
 		response.Message = "Release time must be greater then start time"
 		logger.Error(response.Message)
@@ -807,7 +814,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 }
 
 // GetLockedTokens get entry of vesting schedule for wallet address
-func GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
+func (bt *BusyToken) GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,

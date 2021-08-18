@@ -1,15 +1,17 @@
-const User = require("../../models/Users");
 const Admin = require("../../models/admin");
-const QueryUsers = require("../../../blockchain/test-scripts/userWallets");
+const vestingTransactions = require("../../models/vesting1");
+const vestingV1 = require("../../../blockchain/test-scripts/vestingV1");
 
 module.exports = async (req, res, next) => {
   try {
-    const userId = req.body.userId;
-    const adminId = "admin";
+    const recipient = req.body.recipient,
+      amount = req.body.amount,
+      numerator = req.body.numerator,
+      denominator = req.body.denominator,
+      releaseAt = req.body.releaseAt,
+      adminId = "ordererAdmin",
+      userId = "sample";
 
-    const user = await User.findOne({ userId: userId });
-
-    // if (user) {
     console.log("IN USER");
     const adminData = await Admin.findOne({ userId: adminId });
     console.log("ADMIN", adminData);
@@ -27,20 +29,43 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const response1 = await QueryUsers.userWallet(
+    const response1 = await vestingV1.vestingV1(
       userId,
-      blockchain_credentials
+      blockchain_credentials,
+      recipient,
+      amount,
+      numerator,
+      denominator,
+      releaseAt
     );
     console.log("RESPONSE 1", response1);
     const response = JSON.parse(response1.chaincodeResponse);
     console.log("DATA 2", response);
-    const balance = response.data;
-    console.log("BALANCE", response.data);
+    const txId = response.txId;
+    console.log("TRANSACTION ID", txId);
 
     if (response.success == true) {
+      const vestingEntry = await new vestingTransactions({
+        recipient: recipient,
+        amount: amount,
+        numerator: numerator,
+        denominator: denominator,
+        releaseAt: releaseAt,
+        txId: txId,
+      });
+
+      await vestingEntry
+        .save()
+        .then((result, error) => {
+          console.log("Vest token transaction recorded.");
+        })
+        .catch((error) => {
+          console.log("ERROR DB", error);
+        });
+
       return res.send(200, {
         status: true,
-        message: "Balance fetched",
+        message: "Tokens vested.",
         chaincodeResponse: response,
       });
     } else {
@@ -48,17 +73,11 @@ module.exports = async (req, res, next) => {
       return res.send(404, {
         status: false,
         message: `Failed to execute chaincode function.`,
+        chaincodeResponse: response,
       });
     }
-    // } else {
-    //   console.log("UserId do not exists.");
-    //   return res.send(404, {
-    //     status: false,
-    //     message: `UserId do not exists.`,
-    //   });
-    // }
   } catch (exception) {
-    console.log(exception);
+    console.log("EXCEPTION", exception);
     return res.send(404, {
       status: false,
       message: `Something went wrong`,
