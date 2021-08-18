@@ -805,3 +805,45 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 	response.Success = true
 	return response
 }
+
+// GetLockedTokens get entry of vesting schedule for wallet address
+func GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	lockedTokenAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("vesting~%s", address))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting vesting entry: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if lockedTokenAsBytes == nil {
+		response.Message = fmt.Sprintf("Vesting entry doesn't exists for address %s", address)
+		logger.Error(response.Message)
+		return response
+	}
+	var lockedToken LockedTokens
+	_ = json.Unmarshal(lockedTokenAsBytes, &lockedToken)
+
+	response.Message = "succesfully feteched vesting entry"
+	logger.Info(response.Message)
+	response.Data = lockedToken
+	response.Success = true
+	return response
+}
+
+// AttemptUnlock
+func AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	return response
+}
