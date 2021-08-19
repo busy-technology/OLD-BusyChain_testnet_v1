@@ -766,13 +766,6 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		logger.Error(response.Message)
 		return response
 	}
-
-	if startAt < uint64(now.Seconds) {
-		response.Message = "start time must be greater than current time."
-		logger.Error(response.Message)
-		return response
-	}
-
 	if releaseAt < startAt {
 		response.Message = "Release time must be greater then start time"
 		logger.Error(response.Message)
@@ -796,7 +789,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		DocType:        "lockedToken",
 		TotalAmount:    totalAmount.String(),
 		ReleasedAmount: "0",
-		StartedAt:      startAt,
+		StartedAt:      uint64(now.Seconds),
 		ReleaseAt:      releaseAt,
 	}
 	lockedTokenAsBytes, _ = json.Marshal(lockedToken)
@@ -814,7 +807,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 }
 
 // GetLockedTokens get entry of vesting schedule for wallet address
-func (bt *BusyToken) GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
+func GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -852,5 +845,93 @@ func AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
 		Data:    nil,
 	}
 
+	commonName, _ := getCommonName(ctx)
+	now, _ := ctx.GetStub().GetTxTimestamp()
+	walletAddress, err := getDefaultWalletAddress(ctx, commonName)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	lockedTokenAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("vesting~%s", walletAddress))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting vesting entry: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if lockedTokenAsBytes == nil {
+		response.Message = fmt.Sprintf("Vesting entry doesn't exists for address %s", walletAddress)
+		logger.Error(response.Message)
+		return response
+	}
+	var lockedToken LockedTokens
+	_ = json.Unmarshal(lockedTokenAsBytes, &lockedToken)
+	bigTotalAmount, _ := new(big.Int).SetString(lockedToken.TotalAmount, 10)
+	bigReleasedAmount, _ := new(big.Int).SetString(lockedToken.ReleasedAmount, 10)
+	bigStartedAt := new(big.Int).SetUint64(lockedToken.StartedAt)
+	bigReleasedAt := new(big.Int).SetUint64(lockedToken.ReleaseAt)
+	bigNow := new(big.Int).SetUint64(uint64(now.Seconds))
+
+	if lockedToken.StartedAt > uint64(now.Seconds) {
+		response.Message = fmt.Sprintf("Vesting period not yet started for address %s", walletAddress)
+		logger.Error(response.Message)
+		return response
+	}
+	if lockedToken.ReleaseAt <= uint64(now.Seconds) {
+		if lockedToken.TotalAmount == lockedToken.ReleasedAmount {
+			response.Message = fmt.Sprintf("All tokens are unlocked for address %s", walletAddress)
+			logger.Error(response.Message)
+			return response
+		}
+		amountToReleaseNow := bigTotalAmount.Sub(bigReleasedAmount, bigTotalAmount)
+		lockedToken.ReleasedAmount = lockedToken.TotalAmount
+		err = addUTXO(ctx, walletAddress, amountToReleaseNow, "busy")
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while claim: %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		lockedTokenAsBytes, _ := json.Marshal(lockedToken)
+		err = ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", walletAddress), lockedTokenAsBytes)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while updating vesting entry: %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		response.Message = fmt.Sprintf("All tokens are unlocked for address %s", walletAddress)
+		logger.Error(response.Message)
+		return response
+	}
+	releasableAmount := bigTotalAmount.Mul(bigNow.Sub(bigNow, bigStartedAt), bigTotalAmount).Div(bigTotalAmount, bigReleasedAt.Sub(bigReleasedAt, bigStartedAt))
+	if releasableAmount.String() == "0" {
+		response.Message = "Nothing to release at this time"
+		logger.Error(response.Message)
+		return response
+	}
+	if releasableAmount.Cmp(bigTotalAmount) == 1 {
+		response.Message = "Nothing to release at this time"
+		logger.Error(response.Message)
+		return response
+	}
+	releasableAmount = releasableAmount.Sub(releasableAmount, bigReleasedAmount)
+	addUTXO(ctx, walletAddress, releasableAmount, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while claim: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	bigReleasedAmount = bigReleasedAmount.Add(bigReleasedAmount, releasableAmount)
+	lockedToken.ReleasedAmount = bigReleasedAmount.String()
+	lockedTokenAsBytes, _ = json.Marshal(lockedToken)
+	err = ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", walletAddress), lockedTokenAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating vesting entry: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	response.Message = fmt.Sprintf("Tokens are unlocked for address %s", walletAddress)
+	response.Success = true
+	logger.Error(response.Message)
 	return response
 }
