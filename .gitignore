@@ -12,4 +12,3 @@ build
 *.block
 *.json
 vendor
-connection-profile

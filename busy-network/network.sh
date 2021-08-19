@@ -33,3 +33,6 @@ infoln "Generating CCP for Busy org"
 
 infoln "Deploying busy chaincode"
 ./scripts/chaincode.sh busyv1 1
+
+infoln "Coping CCP to application"
+cp organizations/peerOrganizations/busy.technology/connection-busy.json ../busy-chaincode-api/blockchain/sdk/connection-profile/
