@@ -141,7 +141,8 @@ module.exports = (server) => {
   server.post(
     "/lockedTokensInfo",
     middleware.utility.required(["address"]),
-    auth,
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.lockedTokensInfo
   );
 

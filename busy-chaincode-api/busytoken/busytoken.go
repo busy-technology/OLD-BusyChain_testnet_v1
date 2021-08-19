@@ -796,7 +796,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 		DocType:        "lockedToken",
 		TotalAmount:    totalAmount.String(),
 		ReleasedAmount: "0",
-		StartedAt:      uint64(now.Seconds),
+		StartedAt:      startAt,
 		ReleaseAt:      releaseAt,
 	}
 	lockedTokenAsBytes, _ = json.Marshal(lockedToken)
