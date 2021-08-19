@@ -586,6 +586,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 	}
 
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
+	negetiveBigAmount, _ := new(big.Int).SetString("-"+amount, 10)
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
 		response.Message = "You are not allowed to issue busy coin"
@@ -623,7 +624,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 		return response
 	}
 
-	err = addUTXO(ctx, address, bigAmount, symbol)
+	err = addUTXO(ctx, address, negetiveBigAmount, symbol)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burn token: %s", err.Error())
 		logger.Error(response.Message)
