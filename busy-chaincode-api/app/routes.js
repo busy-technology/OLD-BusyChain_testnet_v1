@@ -38,6 +38,7 @@ module.exports = (server) => {
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     middleware.utility.isEmail(["email"]),
+    auth,
     controller.users.register
   );
 
@@ -60,6 +61,7 @@ module.exports = (server) => {
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
+    auth,
     controller.users.buy
   );
 
@@ -97,12 +99,16 @@ module.exports = (server) => {
   server.post(
     "/getTotalSupply",
     middleware.utility.required(["symbol"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.totalSupply
   );
 
   server.post(
     "/burnTokens",
     middleware.utility.required(["address", "amount", "token"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.burn
   );
 
@@ -117,6 +123,7 @@ module.exports = (server) => {
       "denominator",
       "releaseAt",
     ]),
+    auth,
     controller.users.vesting1
   );
 
@@ -128,6 +135,7 @@ module.exports = (server) => {
       "startAt",
       "releaseAt",
     ]),
+    auth,
     controller.users.vesting2
   );
 
@@ -137,13 +145,15 @@ module.exports = (server) => {
   server.post(
     "/lockedTokensInfo",
     middleware.utility.required(["address"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.lockedTokensInfo
   );
 
   server.post(
     "/queryWallet",
     middleware.utility.required(["userId", "credentials"]),
-    // auth,
+    auth,
     controller.users.queryWallet
   );
 
@@ -153,6 +163,8 @@ module.exports = (server) => {
   server.post(
     "/queryWalletBalances",
     middleware.utility.required(["walletId"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.queryWalletAdmin
   );
 
@@ -186,6 +198,8 @@ module.exports = (server) => {
   server.post(
     "/userWallets",
     middleware.utility.required(["userId"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
     controller.users.userWallets
   );
   server.post(
