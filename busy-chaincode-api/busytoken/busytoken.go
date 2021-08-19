@@ -647,9 +647,14 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 	}
 
 	// check if wallet already exists
-	_, err := ctx.GetStub().GetState(recipient)
+	walletAsBytes, err := ctx.GetStub().GetState(recipient)
 	if err != nil {
-		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", recipient)
+		response.Message = fmt.Sprintf("Error while fetching wallet %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if walletAsBytes == nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn't exists", recipient)
 		logger.Error(response.Message)
 		return response
 	}
@@ -734,9 +739,14 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 	}
 
 	// check if wallet already exists
-	_, err := ctx.GetStub().GetState(recipient)
+	walletAsBytes, err := ctx.GetStub().GetState(recipient)
 	if err != nil {
-		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", recipient)
+		response.Message = fmt.Sprintf("Error while fetching wallet %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if walletAsBytes == nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn't exists", recipient)
 		logger.Error(response.Message)
 		return response
 	}
