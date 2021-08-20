@@ -578,14 +578,31 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 	}
 
 	// check if wallet already exists
-	_, err := ctx.GetStub().GetState(address)
+	walletAsBytes, err := ctx.GetStub().GetState(address)
 	if err != nil {
-		response.Message = fmt.Sprintf("Wallet with address %s doesn;t exists", address)
+		response.Message = fmt.Sprintf("Error while fetching wallet %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if walletAsBytes == nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn't exists", address)
 		logger.Error(response.Message)
 		return response
 	}
 
+	balance, err := getBalanceHelper(ctx, address, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching balance %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
+	if balance.Cmp(bigAmount) == -1 {
+		response.Message = fmt.Sprintf("Not enough balance %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	negetiveBigAmount, _ := new(big.Int).SetString("-"+amount, 10)
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
