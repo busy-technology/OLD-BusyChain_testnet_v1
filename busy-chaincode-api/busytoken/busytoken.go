@@ -496,6 +496,11 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 	var user User
 	_ = json.Unmarshal(userAsBytes, &user)
 
+	if user.DefaultWallet == recipiant {
+		response.Message = "can't transfet to same address"
+		logger.Error(response.Message)
+		return response
+	}
 	isStakingAddress := strings.HasPrefix(recipiant, "staking-")
 	if isStakingAddress {
 		var wallet Wallet
