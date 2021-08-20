@@ -835,7 +835,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 }
 
 // GetLockedTokens get entry of vesting schedule for wallet address
-func GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
+func (bt *BusyToken) GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -865,7 +865,7 @@ func GetLockedTokens(ctx contractapi.TransactionContextInterface, address string
 }
 
 // AttemptUnlock
-func AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
+func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
