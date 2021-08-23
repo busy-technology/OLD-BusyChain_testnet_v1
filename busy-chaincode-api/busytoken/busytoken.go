@@ -1014,3 +1014,25 @@ func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) 
 	logger.Error(response.Message)
 	return response
 }
+
+func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterface, newTransferFee string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	err := ctx.GetStub().PutState("transferFee", []byte(newTransferFee))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating transfer fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	response.Message = "transfer fee updated successfully"
+	response.Success = true
+	response.Data = newTransferFee
+	logger.Error(response.Message)
+	return response
+}
