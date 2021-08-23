@@ -477,6 +477,19 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		Data:    nil,
 	}
 
+	// check if wallet already exists
+	walletAsBytes, err := ctx.GetStub().GetState(recipiant)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching wallet %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if walletAsBytes == nil {
+		response.Message = fmt.Sprintf("Wallet with address %s doesn't exists", recipiant)
+		logger.Error(response.Message)
+		return response
+	}
+
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	if token == "" {
 		token = "busy"
