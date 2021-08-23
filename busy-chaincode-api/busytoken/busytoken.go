@@ -19,6 +19,8 @@ type BusyToken struct {
 
 var logger = flogging.MustGetLogger("busy")
 
+const TRANSFER_FEE string = "1000000000000000"
+
 // Init Initialise chaincocode while deployment
 func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
@@ -108,6 +110,13 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 	err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", response.TxID, wallet.Address, token.TokenSymbol), utxoAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	err = ctx.GetStub().PutState("transferFees", []byte(TRANSFER_FEE))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while configuring transfer fee: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -496,7 +505,17 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		return response
 	}
 
+	// Fetch current transfer fee
+	transferFeesAsBytes, err := ctx.GetStub().GetState("transferFees")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching transfer fee %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	bigTransferFee, _ := new(big.Int).SetString(string(transferFeesAsBytes), 10)
+
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
+	bigAmountWithTransferFee := bigAmount.Add(bigAmount, bigTransferFee)
 	if token == "" {
 		token = "busy"
 	}
@@ -552,12 +571,20 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		}
 	}
 
-	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token)
+	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmountWithTransferFee, token)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
+	minusOne, _ := new(big.Int).SetString("-1", 10)
+	err = updateTotalSupply(ctx, "busy", bigTransferFee.Mul(bigTransferFee, minusOne))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	response.Message = "succesfully transfered"
 	logger.Info(response.Message)
 	response.Success = true
