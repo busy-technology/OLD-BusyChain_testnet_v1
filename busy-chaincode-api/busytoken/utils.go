@@ -165,3 +165,25 @@ func calculatePercentage(amount *big.Int, numerator uint64, denominator uint64) 
 func getLastMessageKey(userId string) string {
 	return fmt.Sprintf("lastmessage%s", userId)
 }
+
+// updateTotalSupply adds or remove amount from totalSupply
+func updateTotalSupply(ctx contractapi.TransactionContextInterface, tokenSymbol string, amount *big.Int) error {
+	var token Token
+	tokenAsBytes, err := ctx.GetStub().GetState(tokenSymbol)
+	if tokenAsBytes == nil {
+		return fmt.Errorf("Token %s doesn't exists", tokenSymbol)
+	}
+	if err != nil {
+		return err
+	}
+
+	_ = json.Unmarshal(tokenAsBytes, &token)
+	bigTotalSupply, _ := new(big.Int).SetString(token.TotalSupply, 10)
+	token.TotalSupply = bigTotalSupply.Sub(bigTotalSupply, amount).String()
+	tokenAsBytes, _ = json.Marshal(token)
+	err = ctx.GetStub().PutState(tokenSymbol, tokenAsBytes)
+	if err != nil {
+		return err
+	}
+	return nil
+}

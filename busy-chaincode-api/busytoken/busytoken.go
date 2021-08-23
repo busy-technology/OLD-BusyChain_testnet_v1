@@ -348,6 +348,12 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		logger.Error(response.Message)
 		return response
 	}
+	err = updateTotalSupply(ctx, "busy", issueTokenFee.Mul(issueTokenFee, minusOne))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning issue token fee from total supply: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 
 	var token Token
 	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
