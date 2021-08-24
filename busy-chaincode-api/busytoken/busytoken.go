@@ -216,7 +216,7 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 		Address: "staking-" + response.TxID,
 		Balance: bigZero.String(),
 	}
-	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy")
+	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy", bigZero)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
 		logger.Error(response.Message)
@@ -515,7 +515,7 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 	bigTransferFee, _ := new(big.Int).SetString(string(transferFeesAsBytes), 10)
 
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
-	bigAmountWithTransferFee := bigAmount.Add(bigAmount, bigTransferFee)
+	// bigAmountWithTransferFee := bigAmount.Add(bigAmount, bigTransferFee)
 	if token == "" {
 		token = "busy"
 	}
@@ -571,7 +571,7 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		}
 	}
 
-	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmountWithTransferFee, token)
+	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token, bigTransferFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
@@ -769,7 +769,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 	totalAmount := new(big.Int).Set(bigAmount)
 	currentVesting := calculatePercentage(bigAmount, numerator, denominator)
 
-	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy")
+	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy", bigZero)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)

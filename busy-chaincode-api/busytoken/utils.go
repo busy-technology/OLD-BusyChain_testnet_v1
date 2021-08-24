@@ -67,7 +67,7 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 	return balance, utxoKeys, nil
 }
 
-func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string) error {
+func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string, fee *big.Int) error {
 	var txID string = ctx.GetStub().GetTxID()
 
 	// Prune exsting utxo if sender and count his balance
@@ -76,9 +76,10 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
 	}
 
-	// Check if sender has enough balance
+	bigAmountWithTransferFee := amount.Add(amount, fee)
 
-	if amount.Cmp(balance) == 1 {
+	// Check if sender has enough balance
+	if bigAmountWithTransferFee.Cmp(balance) == 1 {
 		return fmt.Errorf("amount %f higher then your total balance %f", amount, balance)
 	}
 
@@ -87,7 +88,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		_ = ctx.GetStub().DelState(v)
 	}
 	// Deduct balance of sender
-	balance = balance.Sub(balance, amount)
+	balance = balance.Sub(balance, bigAmountWithTransferFee)
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: sender,
