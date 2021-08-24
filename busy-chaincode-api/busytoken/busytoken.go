@@ -1023,7 +1023,20 @@ func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterfa
 		Data:    nil,
 	}
 
-	err := ctx.GetStub().PutState("transferFee", []byte(newTransferFee))
+	mspid, _ := ctx.GetClientIdentity().GetMSPID()
+	if mspid != "BusyMSP" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+	commonName, _ := getCommonName(ctx)
+	if commonName != "ordererAdmin" {
+		response.Message = "You are not allowed to issue busy coin"
+		logger.Error(response.Message)
+		return response
+	}
+
+	err := ctx.GetStub().PutState("transferFees", []byte(newTransferFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating transfer fee: %s", err.Error())
 		logger.Error(response.Message)
