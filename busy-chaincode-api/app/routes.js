@@ -58,6 +58,15 @@ module.exports = (server) => {
     controller.users.wallet
   );
 
+  //auth
+
+  server.post(
+    "/attemptUnlock",
+    middleware.utility.required(["userId", "credentials"]),
+    auth,
+    controller.users.attemptUnlock
+  );
+
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
@@ -104,11 +113,19 @@ module.exports = (server) => {
     controller.users.totalSupply
   );
 
+  //auth
+
+  server.post(
+    "/updateTransferFees",
+    middleware.utility.required(["newTransferFee"]),
+    auth,
+    controller.users.transferFee
+  );
+
   server.post(
     "/burnTokens",
     middleware.utility.required(["address", "amount", "token"]),
-    middleware.auth.generateToken,
-    controller.auth.apiKey,
+    auth,
     controller.users.burn
   );
 
@@ -153,7 +170,6 @@ module.exports = (server) => {
   server.post(
     "/queryWallet",
     middleware.utility.required(["userId", "credentials"]),
-    auth,
     controller.users.queryWallet
   );
 

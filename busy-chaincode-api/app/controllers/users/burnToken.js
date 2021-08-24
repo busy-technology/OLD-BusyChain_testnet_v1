@@ -9,76 +9,77 @@ module.exports = async (req, res, next) => {
       amount = req.body.amount,
       adminId = "ordererAdmin",
       userId = "sample";
-      
-      console.log("IN USER");
-      const adminData = await Admin.findOne({ userId: adminId });
-      console.log("ADMIN", adminData);
 
-      const credentials = {
-        certificate: adminData.certificate.credentials.certificate,
-        privateKey: adminData.certificate.credentials.privateKey,
-      };
+    console.log("IN USER");
+    const adminData = await Admin.findOne({ userId: adminId });
+    console.log("ADMIN", adminData);
 
-      const blockchain_credentials = {
-        credentials: credentials,
-        mspId: adminData.certificate.mspId,
-        type: adminData.certificate.type,
-      };
+    const credentials = {
+      certificate: adminData.certificate.credentials.certificate,
+      privateKey: adminData.certificate.credentials.privateKey,
+    };
 
-      console.log("BLOCK", blockchain_credentials);
+    const blockchain_credentials = {
+      credentials: credentials,
+      mspId: adminData.certificate.mspId,
+      type: adminData.certificate.type,
+    };
 
-      const response1 = await burn.burnTokens(
-        userId,
-        blockchain_credentials,
-        address,
-        amount,
-        token
-      );
-      console.log("RESPONSE 1", response1);
-      const response = JSON.parse(response1.chaincodeResponse);
-      console.log("DATA 2", response);
-      const txId = response.txId;
-      console.log("TRANSACTION ID", txId);
+    console.log("BLOCK", blockchain_credentials);
 
-      if (response.success == true) {
-        const tokenEntry = await new tokenTransactions({
-          tokenName: token,
-          amount: amount,
-          function: "Burn Tokens",
-          txId: txId,
-          sender: adminId,
-          receiver: address,
-          description:
-            adminId + " burned " + amount + " " + token + " of " + address,
+    const response1 = await burn.burnTokens(
+      userId,
+      blockchain_credentials,
+      address,
+      amount,
+      token
+    );
+    console.log("RESPONSE 1", response1);
+    const response = JSON.parse(response1.chaincodeResponse);
+    console.log("DATA 2", response);
+    const txId = response.txId;
+    console.log("TRANSACTION ID", txId);
+
+    if (response.success == true) {
+      const tokenEntry = await new tokenTransactions({
+        tokenName: token,
+        amount: amount,
+        function: "Burn Tokens",
+        txId: txId,
+        sender: adminId,
+        receiver: address,
+        description:
+          adminId + " burned " + amount + " " + token + " of " + address,
+      });
+
+      await tokenEntry
+        .save()
+        .then((result, error) => {
+          console.log("Burn Token transaction recorded.");
+        })
+        .catch((error) => {
+          console.log("ERROR DB", error);
         });
 
-        await tokenEntry
-          .save()
-          .then((result, error) => {
-            console.log("Burn Token transaction recorded.");
-          })
-          .catch((error) => {
-            console.log("ERROR DB", error);
-          });
-
-        return res.send(200, {
-          status: true,
-          message: "Tokens burned.",
-          chaincodeResponse: response,
-        });
-      } else {
-        console.log("Failed to execute chaincode function");
-        return res.send(404, {
-          status: false,
-          message: `Failed to execute chaincode function.`,
-          chaincodeResponse: response,
-        });
-      }
+      return res.send(200, {
+        status: true,
+        message: "Tokens burned.",
+        chaincodeResponse: response,
+      });
+    } else {
+      console.log("Failed to execute chaincode function");
+      return res.send(404, {
+        status: false,
+        message: `Failed to execute chaincode function.`,
+        chaincodeResponse: response,
+      });
+    }
   } catch (exception) {
     console.log(exception);
     return res.send(404, {
       status: false,
       message: `Something went wrong`,
+      Error: exception.message,
     });
   }
 };

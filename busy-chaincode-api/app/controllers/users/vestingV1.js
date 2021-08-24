@@ -81,6 +81,7 @@ module.exports = async (req, res, next) => {
     return res.send(404, {
       status: false,
       message: `Something went wrong`,
+      Error: exception.message,
     });
   }
 };

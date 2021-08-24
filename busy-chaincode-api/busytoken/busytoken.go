@@ -963,7 +963,7 @@ func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) 
 			logger.Error(response.Message)
 			return response
 		}
-		amountToReleaseNow := bigTotalAmount.Sub(bigReleasedAmount, bigTotalAmount)
+		amountToReleaseNow := bigTotalAmount.Sub(bigTotalAmount, bigReleasedAmount)
 		lockedToken.ReleasedAmount = lockedToken.TotalAmount
 		err = addUTXO(ctx, walletAddress, amountToReleaseNow, "busy")
 		if err != nil {
@@ -1025,13 +1025,13 @@ func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterfa
 
 	mspid, _ := ctx.GetClientIdentity().GetMSPID()
 	if mspid != "BusyMSP" {
-		response.Message = "You are not allowed to issue busy coin"
+		response.Message = "You are not allowed to set the transaction fees."
 		logger.Error(response.Message)
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
 	if commonName != "ordererAdmin" {
-		response.Message = "You are not allowed to issue busy coin"
+		response.Message = "You are not allowed to set the transaction fees."
 		logger.Error(response.Message)
 		return response
 	}

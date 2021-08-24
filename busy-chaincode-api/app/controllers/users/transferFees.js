@@ -1,15 +1,12 @@
+const User = require("../../models/Users");
 const Admin = require("../../models/admin");
-const vestingTransactions = require("../../models/vesting2");
-const vestingV2 = require("../../../blockchain/test-scripts/vestingV2");
+const transactionFeeService = require("../../../blockchain/test-scripts/transactionsFees");
 
 module.exports = async (req, res, next) => {
   try {
-    const recipient = req.body.recipient,
-      amount = req.body.amount,
-      startAt = req.body.startAt,
-      releaseAt = req.body.releaseAt,
-      adminId = "ordererAdmin",
-      userId = "sample";
+    const newTransferFee = req.body.newTransferFee;
+    const adminId = "ordererAdmin";
+    const userId = "sample";
 
     console.log("IN USER");
     const adminData = await Admin.findOne({ userId: adminId });
@@ -28,41 +25,21 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const response1 = await vestingV2.vestingV2(
+    const response1 = await transactionFeeService.transactionFees(
       userId,
       blockchain_credentials,
-      recipient,
-      amount,
-      startAt,
-      releaseAt
+      newTransferFee
     );
     console.log("RESPONSE 1", response1);
     const response = JSON.parse(response1.chaincodeResponse);
     console.log("DATA 2", response);
-    const txId = response.txId;
-    console.log("TRANSACTION ID", txId);
+    const balance = response.data;
+    console.log("BALANCE", response.data);
 
     if (response.success == true) {
-      const vestingEntry = await new vestingTransactions({
-        recipient: recipient,
-        amount: amount,
-        startAt: startAt,
-        releaseAt: releaseAt,
-        txId: txId,
-      });
-
-      await vestingEntry
-        .save()
-        .then((result, error) => {
-          console.log("Vest token transaction recorded.");
-        })
-        .catch((error) => {
-          console.log("ERROR DB", error);
-        });
-
       return res.send(200, {
         status: true,
-        message: "Tokens vested.",
+        message: "Total supply fetched.",
         chaincodeResponse: response,
       });
     } else {
@@ -74,7 +51,7 @@ module.exports = async (req, res, next) => {
       });
     }
   } catch (exception) {
-    console.log("EXCEPTION", exception);
+    console.log(exception);
     return res.send(404, {
       status: false,
       message: `Something went wrong`,

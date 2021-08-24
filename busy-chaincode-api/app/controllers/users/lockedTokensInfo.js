@@ -48,6 +48,7 @@ module.exports = async (req, res, next) => {
       return res.send(404, {
         status: false,
         message: `Failed to execute chaincode function.`,
+        chaincodeResponse: response,
       });
     }
   } catch (exception) {
@@ -55,6 +56,7 @@ module.exports = async (req, res, next) => {
     return res.send(404, {
       status: false,
       message: `Something went wrong`,
+      Error: exception.message,
     });
   }
 };

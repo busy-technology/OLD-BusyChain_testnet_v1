@@ -66,6 +66,31 @@ exports.CreateWallet = async (userId, userKey) => {
   }
 };
 
+exports.attemptUnlock = async (userId, userKey) => {
+  try {
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "AttemptUnlock",
+        "",
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF ISSUE TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
 exports.issueToken = async (walletDetails, userId, userKey) => {
   try {
     const invokeFabricChaincodeWithCertificate =
@@ -98,6 +123,31 @@ exports.totalSupply = async (walletDetails, userId, userKey) => {
         "busychannel",
         "busytoken",
         "GetTotalSupply",
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF ISSUE TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
+exports.transactionFees = async (walletDetails, userId, userKey) => {
+  try {
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "UpdateTransferFee",
         walletDetails,
         userId,
         userKey

@@ -76,7 +76,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
 	}
 
-	bigAmountWithTransferFee := amount.Add(amount, fee)
+	bigAmountWithTransferFee := fee.Add(fee, amount)
 
 	// Check if sender has enough balance
 	if bigAmountWithTransferFee.Cmp(balance) == 1 {
