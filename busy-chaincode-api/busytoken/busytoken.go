@@ -216,7 +216,14 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 		Address: "staking-" + response.TxID,
 		Balance: bigZero.String(),
 	}
-	err := transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy", bigZero)
+	txFee, err := getCurrentTxFee(ctx)
+	bigTxFee, _ := new(big.Int).SetString(txFee, 10)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting tx fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy", bigTxFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
 		logger.Error(response.Message)
@@ -699,6 +706,19 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 		return response
 	}
 
+	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	burnTxFee(ctx, defaultWalletAddress, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	response.Message = "succesfully burnt token"
 	logger.Info(response.Message)
 	response.Success = true
@@ -769,7 +789,14 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 	totalAmount := new(big.Int).Set(bigAmount)
 	currentVesting := calculatePercentage(bigAmount, numerator, denominator)
 
-	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy", bigZero)
+	txFee, err := getCurrentTxFee(ctx)
+	bigTxFee, _ := new(big.Int).SetString(txFee, 10)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting tx fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy", bigTxFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
@@ -875,6 +902,19 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 	err = ctx.GetStub().PutState(fmt.Sprintf("vesting~%s", recipient), lockedTokenAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while adding vesting schedule: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	sender, _ := getCommonName(ctx)
+	defaultWalletAddress, err := getDefaultWalletAddress(ctx, sender)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	burnTxFee(ctx, defaultWalletAddress, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -1009,6 +1049,14 @@ func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) 
 		logger.Error(response.Message)
 		return response
 	}
+
+	err = burnTxFee(ctx, walletAddress, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	response.Message = fmt.Sprintf("Tokens are unlocked for address %s", walletAddress)
 	response.Success = true
 	logger.Error(response.Message)
@@ -1039,6 +1087,20 @@ func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterfa
 	err := ctx.GetStub().PutState("transferFees", []byte(newTransferFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating transfer fee: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	sender, _ := getCommonName(ctx)
+	defaultWalletAddress, err := getDefaultWalletAddress(ctx, sender)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	burnTxFee(ctx, defaultWalletAddress, "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}

@@ -188,3 +188,44 @@ func updateTotalSupply(ctx contractapi.TransactionContextInterface, tokenSymbol 
 	}
 	return nil
 }
+
+// burnTxFee burn tx fee from user and reduce total supply accordingly
+func burnTxFee(ctx contractapi.TransactionContextInterface, address string, token string) error {
+	txFee, err := getCurrentTxFee(ctx)
+	if err != nil {
+		return err
+	}
+	bigTxFee, _ := new(big.Int).SetString("-"+txFee, 10)
+	err = updateTotalSupply(ctx, token, bigTxFee)
+	if err != nil {
+		return err
+	}
+	// err = addUTXO(ctx, address, bigTxFee, token)
+	// if err != nil {
+	// 	return err
+	// }
+	utxo := UTXO{
+		DocType: "utxo",
+		Address: address,
+		Amount:  bigTxFee.String(),
+		Token:   "busy",
+	}
+	utxoAsBytes, _ := json.Marshal(utxo)
+	err = ctx.GetStub().PutState(fmt.Sprintf("burnTxFee~%s~%s~%s", ctx.GetStub().GetTxID(), address, "busy"), utxoAsBytes)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// getCurrentTxFee get current tx fee from blockchain
+func getCurrentTxFee(ctx contractapi.TransactionContextInterface) (string, error) {
+	transferFeesAsBytes, err := ctx.GetStub().GetState("transferFees")
+	if err != nil {
+		return "", fmt.Errorf("error while fetching transfer fee")
+	}
+	if transferFeesAsBytes == nil {
+		return "", fmt.Errorf("can't fetch transfer fee you might not have initialise chaincode")
+	}
+	return string(transferFeesAsBytes), nil
+}
