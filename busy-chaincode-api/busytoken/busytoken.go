@@ -266,7 +266,7 @@ func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, add
 
 	response.Message = fmt.Sprintf("Successfully fetched balance for address %s", address)
 	response.Success = true
-	response.Data = balance
+	response.Data = balance.String()
 	logger.Info(response.Message)
 	return response
 }
@@ -312,12 +312,12 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 	defer resultIterator.Close()
 
 	var wallet Wallet
-	var responseData = map[string]*big.Int{}
+	var responseData = map[string]string{}
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
 		balance, _ := getBalanceHelper(ctx, wallet.Address, "busy")
-		responseData[wallet.Address] = balance
+		responseData[wallet.Address] = balance.String()
 	}
 
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
@@ -578,14 +578,14 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		}
 	}
 
-	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token, bigTransferFee)
+	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token, new(big.Int).Set(bigTransferFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	minusOne, _ := new(big.Int).SetString("-1", 10)
-	err = updateTotalSupply(ctx, "busy", bigTransferFee.Mul(bigTransferFee, minusOne))
+	// minusOne, _ := new(big.Int).SetString("-1", 10)
+	err = updateTotalSupply(ctx, "busy", bigTransferFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
