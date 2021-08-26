@@ -20,6 +20,7 @@ type BusyToken struct {
 var logger = flogging.MustGetLogger("busy")
 
 const TRANSFER_FEE string = "1000000000000000"
+const ISSUE_TOKEN_FEE string = "2500000000000000000000"
 
 // Init Initialise chaincocode while deployment
 func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response {
@@ -338,7 +339,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	commonName, _ := getCommonName(ctx)
-	issueTokenFee, _ := new(big.Int).SetString("2500", 10)
+	issueTokenFee, _ := new(big.Int).SetString(ISSUE_TOKEN_FEE, 10)
 	minusOne, _ := new(big.Int).SetString("-1", 10)
 	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
@@ -358,13 +359,13 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		return response
 	}
 
-	err = addUTXO(ctx, defaultWalletAddress, issueTokenFee.Mul(issueTokenFee, minusOne), "busy")
+	err = addUTXO(ctx, defaultWalletAddress, new(big.Int).Set(issueTokenFee).Mul(issueTokenFee, minusOne), "busy")
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning fees for issue token: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	err = updateTotalSupply(ctx, "busy", issueTokenFee.Mul(issueTokenFee, minusOne))
+	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(issueTokenFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning issue token fee from total supply: %s", err.Error())
 		logger.Error(response.Message)
@@ -443,19 +444,19 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		response.Data = token
 	}
 
-	var queryString string = fmt.Sprintf(`{
-		"selector": {
-			"userId": "%s",
-			"docType": "wallet"
-		 } 
-	}`, commonName)
-	resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
-	if err != nil {
-		response.Message = fmt.Sprintf("Error while fetching admin wallet: %s", err.Error())
-		logger.Error(response.Message)
-		return response
-	}
-	defer resultIterator.Close()
+	// var queryString string = fmt.Sprintf(`{
+	// 	"selector": {
+	// 		"userId": "%s",
+	// 		"docType": "wallet"
+	// 	 }
+	// }`, commonName)
+	// resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while fetching admin wallet: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+	// defer resultIterator.Close()
 
 	issuerAddress, _ := getDefaultWalletAddress(ctx, commonName)
 	err = addUTXO(ctx, issuerAddress, bigAmount, symbol)
