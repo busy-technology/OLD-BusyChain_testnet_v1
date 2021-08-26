@@ -195,7 +195,8 @@ func burnTxFee(ctx contractapi.TransactionContextInterface, address string, toke
 	if err != nil {
 		return err
 	}
-	bigTxFee, _ := new(big.Int).SetString("-"+txFee, 10)
+	minusOne, _ := new(big.Int).SetString("-1", 10)
+	bigTxFee, _ := new(big.Int).SetString(txFee, 10)
 	err = updateTotalSupply(ctx, token, bigTxFee)
 	if err != nil {
 		return err
@@ -207,7 +208,7 @@ func burnTxFee(ctx contractapi.TransactionContextInterface, address string, toke
 	utxo := UTXO{
 		DocType: "utxo",
 		Address: address,
-		Amount:  bigTxFee.String(),
+		Amount:  bigTxFee.Mul(bigTxFee, minusOne).String(),
 		Token:   "busy",
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
