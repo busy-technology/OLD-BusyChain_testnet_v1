@@ -21,6 +21,7 @@ var logger = flogging.MustGetLogger("busy")
 
 const TRANSFER_FEE string = "1000000000000000"
 const ISSUE_TOKEN_FEE string = "2500000000000000000000"
+const PHASE1_STAKING_AMOUNT = "1000000000000000000000"
 
 // Init Initialise chaincocode while deployment
 func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response {
@@ -207,7 +208,7 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-	phase1StakingAmount, _ := new(big.Int).SetString("1000", 10)
+	phase1StakingAmount, _ := new(big.Int).SetString(PHASE1_STAKING_AMOUNT, 10)
 	// bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
@@ -227,6 +228,12 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy", new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(bigTxFee))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -800,6 +807,12 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy", new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(bigTxFee))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
