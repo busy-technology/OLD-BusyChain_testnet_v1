@@ -293,6 +293,17 @@ func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, add
 	if token == "" {
 		token = "busy"
 	}
+	exists, err := ifTokenExists(ctx, token)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if !exists {
+		response.Message = fmt.Sprintf("Token %s doesn't exists", token)
+		logger.Error(response.Message)
+		return response
+	}
 
 	balance, err := getBalanceHelper(ctx, address, token)
 	if err != nil {
@@ -536,6 +547,19 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 		Data:    nil,
 	}
 
+	// check if token exists
+	exists, err := ifTokenExists(ctx, token)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if !exists {
+		response.Message = fmt.Sprintf("Token %s doesn't exists", token)
+		logger.Error(response.Message)
+		return response
+	}
+
 	// check if wallet already exists
 	walletAsBytes, err := ctx.GetStub().GetState(recipiant)
 	if err != nil {
@@ -651,6 +675,11 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if tokenAsBytes == nil {
+		response.Message = fmt.Sprintf("Token %s doesn't exists", symbol)
 		logger.Error(response.Message)
 		return response
 	}

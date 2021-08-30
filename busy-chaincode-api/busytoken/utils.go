@@ -276,3 +276,14 @@ func getPhaseConfig(ctx contractapi.TransactionContextInterface) (*PhaseConfig, 
 	_ = json.Unmarshal(phaseConfigAsBytes, &phaseConfig)
 	return &phaseConfig, nil
 }
+
+func ifTokenExists(ctx contractapi.TransactionContextInterface, tokenSymbol string) (bool, error) {
+	tokenAsBytes, err := ctx.GetStub().GetState(tokenSymbol)
+	if err != nil {
+		return false, err
+	}
+	if tokenAsBytes == nil {
+		return false, nil
+	}
+	return true, nil
+}
