@@ -8,6 +8,9 @@ import (
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
 )
 
+var bigOne *big.Int = new(big.Int).SetUint64(1)
+var bigTwo *big.Int = new(big.Int).SetUint64(2)
+
 // UnknownTransactionHandler returns a shim error
 // with details of a bad transaction request
 func UnknownTransactionHandler(ctx contractapi.TransactionContextInterface) error {
@@ -229,4 +232,46 @@ func getCurrentTxFee(ctx contractapi.TransactionContextInterface) (string, error
 		return "", fmt.Errorf("can't fetch transfer fee you might not have initialise chaincode")
 	}
 	return string(transferFeesAsBytes), nil
+}
+
+func updatePhase(ctx contractapi.TransactionContextInterface) (*PhaseConfig, error) {
+	phaseConfigAsBytes, err := ctx.GetStub().GetState("phaseConfig")
+	if err != nil {
+		return nil, err
+	}
+	if phaseConfigAsBytes == nil {
+		return nil, fmt.Errorf("initialize chaincode first")
+	}
+
+	var phaseConfig PhaseConfig
+	_ = json.Unmarshal(phaseConfigAsBytes, &phaseConfig)
+	bigCurrentStakingAddr, _ := new(big.Int).SetString(phaseConfig.TotalStakingAddr, 10)
+	bigCurrentStakingAddr = bigCurrentStakingAddr.Add(bigCurrentStakingAddr, bigOne)
+	if bigCurrentStakingAddr.String() == phaseConfig.NextStakingAddrTarget {
+		phaseConfig.CurrentPhase += 1
+
+		bigNextStakingAddrTarget, _ := new(big.Int).SetString(phaseConfig.NextStakingAddrTarget, 10)
+		bigNextStakingAddrTarget = bigNextStakingAddrTarget.Mul(bigNextStakingAddrTarget, bigTwo)
+		phaseConfig.NextStakingAddrTarget = bigNextStakingAddrTarget.String()
+
+		bigCurrentStakingLimit, _ := new(big.Int).SetString(phaseConfig.CurrentStakingLimit, 10)
+		bigCurrentStakingLimit = bigCurrentStakingLimit.Div(bigCurrentStakingLimit, bigTwo)
+		phaseConfig.CurrentStakingLimit = bigCurrentStakingLimit.String()
+	}
+	phaseConfigAsBytes, _ = json.Marshal(phaseConfig)
+	err = ctx.GetStub().PutState("phaseConfig", phaseConfigAsBytes)
+	return &phaseConfig, err
+}
+
+func getPhaseConfig(ctx contractapi.TransactionContextInterface) (*PhaseConfig, error) {
+	phaseConfigAsBytes, err := ctx.GetStub().GetState("phaseConfig")
+	if err != nil {
+		return nil, err
+	}
+	if phaseConfigAsBytes == nil {
+		return nil, fmt.Errorf("initialize chaincode first")
+	}
+	var phaseConfig PhaseConfig
+	_ = json.Unmarshal(phaseConfigAsBytes, &phaseConfig)
+	return &phaseConfig, nil
 }

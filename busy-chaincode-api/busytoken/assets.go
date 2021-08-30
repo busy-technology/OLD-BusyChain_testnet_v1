@@ -53,6 +53,14 @@ type LockedTokens struct {
 // MessageConfig to set intial configuration for BusyCoins
 type MessageConfig struct {
 	// BusyCoins to deduct
-	BusyCoins       string       `json:"busyCoins"`
+	BusyCoins       string        `json:"busyCoins"`
 	MessageInterval time.Duration `json:"messageInterval"`
+}
+
+// PhaseConfig to store phase config
+type PhaseConfig struct {
+	CurrentPhase          uint64 `json:"currentPhase"`
+	TotalStakingAddr      string `json:"totalStakingAddr"`
+	NextStakingAddrTarget string `json:"nextStakingAddrTarget"`
+	CurrentStakingLimit   string `json:"CurrentStakingLimit"`
 }

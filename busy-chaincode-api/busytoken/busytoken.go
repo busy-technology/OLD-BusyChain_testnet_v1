@@ -123,6 +123,21 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		return response
 	}
 
+	currentStakingLimit, _ := new(big.Int).SetString(PHASE1_STAKING_AMOUNT, 10)
+	phaseConfig := PhaseConfig{
+		CurrentPhase:          1,
+		TotalStakingAddr:      bigZero.String(),
+		NextStakingAddrTarget: "10",
+		CurrentStakingLimit:   currentStakingLimit.String(),
+	}
+	phaseConfigAsBytes, _ := json.Marshal(phaseConfig)
+	err = ctx.GetStub().PutState("phaseConfig", phaseConfigAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while initialising phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	response.Message = fmt.Sprintf("Successfully issued token %s", "busy")
 	response.Success = true
 	response.Data = token
@@ -208,7 +223,14 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-	phase1StakingAmount, _ := new(big.Int).SetString(PHASE1_STAKING_AMOUNT, 10)
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingAmount, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	// bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
@@ -225,7 +247,7 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 		logger.Error(response.Message)
 		return response
 	}
-	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, phase1StakingAmount, "busy", new(big.Int).Set(bigTxFee))
+	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, stakingAmount, "busy", new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from default wallet to staking address: %s", err.Error())
 		logger.Error(response.Message)
@@ -241,6 +263,13 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 	err = ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	_, err = updatePhase(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating phase: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
