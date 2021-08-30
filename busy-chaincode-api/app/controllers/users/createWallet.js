@@ -10,32 +10,32 @@ module.exports = async (req, res, next) => {
       type = req.body.type;
     console.log("TYPE", type);
 
-    const commanName = Certificate.fromPEM(
-      Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
-    ).subject.commonName;
-    console.log("CN", commanName);
-
-    if (userId != commanName) {
-      return res.send(404, {
-        status: false,
-        message: `This certificate is not valid.`,
-      });
-    }
-
-    if (type == "online" || type == "offline") {
-      if (
-        blockchain_credentials.type != "X.509" ||
-        blockchain_credentials.mspId != "BusyMSP"
-      ) {
-        console.log("type of certificate incorrect.");
+    const user = await User.findOne({ userId: userId });
+    console.log("User", user);
+    if (user) {
+      const commanName = Certificate.fromPEM(
+        Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
+      ).subject.commonName;
+      console.log("CN", commanName);
+      if (userId != commanName) {
         return res.send(404, {
           status: false,
-          message: `Incorrect type or MSPID.`,
+          message: `401: This certificate is not valid.`,
         });
       }
-      const user = await User.findOne({ userId: userId });
-      console.log("User", user);
-      if (user) {
+
+      if (type == "online" || type == "offline") {
+        if (
+          blockchain_credentials.type != "X.509" ||
+          blockchain_credentials.mspId != "BusyMSP"
+        ) {
+          console.log("type of certificate incorrect.");
+          return res.send(404, {
+            status: false,
+            message: `Incorrect type or MSPID.`,
+          });
+        }
+
         const response1 = await WalletScript.WalletCreation(
           userId,
           blockchain_credentials
@@ -80,17 +80,17 @@ module.exports = async (req, res, next) => {
           });
         }
       } else {
-        console.log("UserId do not exists.");
+        console.log("Incorrect type of wallet.");
         return res.send(404, {
           status: false,
-          message: `UserId do not exists.`,
+          message: `Incorrect type of wallet.`,
         });
       }
     } else {
-      console.log("Incorrect type of wallet.");
+      console.log("UserId do not exists.");
       return res.send(404, {
         status: false,
-        message: `Incorrect type of wallet.`,
+        message: `UserId do not exists.`,
       });
     }
   } catch (exception) {

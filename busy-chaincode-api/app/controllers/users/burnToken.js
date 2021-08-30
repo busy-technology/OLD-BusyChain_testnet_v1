@@ -4,7 +4,7 @@ const burn = require("../../../blockchain/test-scripts/burnTokens");
 
 module.exports = async (req, res, next) => {
   try {
-    const address = req.body.address,
+    const address = req.body.walletId,
       token = req.body.token,
       amount = req.body.amount,
       adminId = "ordererAdmin",
