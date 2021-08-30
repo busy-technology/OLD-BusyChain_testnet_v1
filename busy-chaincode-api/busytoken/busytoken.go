@@ -314,7 +314,7 @@ func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, add
 
 	response.Message = fmt.Sprintf("Successfully fetched balance for address %s", address)
 	response.Success = true
-	response.Data = balance.String()
+	response.Data = fmt.Sprintf("%s %s", balance.String(), token)
 	logger.Info(response.Message)
 	return response
 }
@@ -365,7 +365,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
 		balance, _ := getBalanceHelper(ctx, wallet.Address, "busy")
-		responseData[wallet.Address] = balance.String()
+		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), "busy")
 	}
 
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
@@ -687,7 +687,7 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 
 	response.Message = "succesfully fetched total supply"
 	logger.Info(response.Message)
-	response.Data = token.TotalSupply
+	response.Data = fmt.Sprintf("%s %s", token.TotalSupply, symbol)
 	response.Success = true
 	return response
 }

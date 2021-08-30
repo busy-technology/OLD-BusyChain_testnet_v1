@@ -83,7 +83,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 
 	// Check if sender has enough balance
 	if bigAmountWithTransferFee.Cmp(balance) == 1 {
-		return fmt.Errorf("amount %f higher then your total balance %f", amount, balance)
+		return fmt.Errorf("amount %s higher then your total balance %s", amount.String(), balance.String())
 	}
 
 	// Delete existing utxos
