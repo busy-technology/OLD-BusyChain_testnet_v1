@@ -247,6 +247,7 @@ func updatePhase(ctx contractapi.TransactionContextInterface) (*PhaseConfig, err
 	_ = json.Unmarshal(phaseConfigAsBytes, &phaseConfig)
 	bigCurrentStakingAddr, _ := new(big.Int).SetString(phaseConfig.TotalStakingAddr, 10)
 	bigCurrentStakingAddr = bigCurrentStakingAddr.Add(bigCurrentStakingAddr, bigOne)
+	phaseConfig.TotalStakingAddr = bigCurrentStakingAddr.String()
 	if bigCurrentStakingAddr.String() == phaseConfig.NextStakingAddrTarget {
 		phaseConfig.CurrentPhase += 1
 
