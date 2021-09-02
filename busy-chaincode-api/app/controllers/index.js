@@ -18,6 +18,7 @@ module.exports = {
     queryWallet: require("./users/queryWallet"),
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
+    stakingAddresses: require("./users/getDefaultWallets"),
     recoverUser: require("./users/recoverUser"),
     addAdmin: require("./users/addAdmin"),
     userWallets: require("./users/userWallets"),
@@ -26,6 +27,7 @@ module.exports = {
 
   auth: {
     generateToken: require("./auth/generate-token"),
+    generateTokenAdmin: require("./auth/generate-token-admin"),
     apiKey: require("./auth/apiKey"),
   },
 };

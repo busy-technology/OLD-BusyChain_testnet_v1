@@ -4,34 +4,34 @@ const attemptUnlockScript = require("../../../blockchain/test-scripts/attemptUnl
 
 module.exports = async (req, res, next) => {
   try {
-    const userId = req.body.userId,
+    const userId = req.body.walletId,
       blockchain_credentials = req.body.credentials;
 
-    const commanName = Certificate.fromPEM(
-      Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
-    ).subject.commonName;
-    console.log("CN", commanName);
-
-    if (userId != commanName) {
-      return res.send(404, {
-        status: false,
-        message: `This certificate is not valid.`,
-      });
-    }
-
-    if (
-      blockchain_credentials.type != "X.509" ||
-      blockchain_credentials.mspId != "BusyMSP"
-    ) {
-      console.log("type of certificate incorrect.");
-      return res.send(404, {
-        status: false,
-        message: `Incorrect type or MSPID.`,
-      });
-    }
-    const user = await User.findOne({ userId: userId });
+    const user = await User.findOne({ walletId: userId });
     console.log("User", user);
     if (user) {
+      const commanName = Certificate.fromPEM(
+        Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
+      ).subject.commonName;
+      console.log("CN", commanName);
+      if (userId != commanName) {
+        return res.send(404, {
+          status: false,
+          message: `This certificate is not valid.`,
+        });
+      }
+
+      if (
+        blockchain_credentials.type != "X.509" ||
+        blockchain_credentials.mspId != "BusyMSP"
+      ) {
+        console.log("type of certificate incorrect.");
+        return res.send(404, {
+          status: false,
+          message: `Incorrect type or MSPID.`,
+        });
+      }
+
       const response1 = await attemptUnlockScript.AttemptUnlock(
         userId,
         blockchain_credentials

@@ -1,5 +1,5 @@
 const verifyToken = require("../helpers/verify-token"),
-  repository = require("../repositories/domain/find-domain-by-name-and-key"),
+  repository = require("../repositories/domain/find-admin-domain-and-key"),
   getOrigin = require("../helpers/get-domain-origin");
 
 module.exports = async (req, res, next) => {
@@ -14,8 +14,8 @@ module.exports = async (req, res, next) => {
     });
 
   if (
-    req.headers.origin == "busy.technology" &&
-    req.headers.apikey == "a1b2c33d4e5f6g7h8i9jakblc"
+    req.headers.origin == "busy.admins" &&
+    req.headers.apikey == "hckch874867487njkbjvw89797"
   ) {
     try {
       token = verifyToken(req.headers.authorization);
@@ -47,7 +47,7 @@ module.exports = async (req, res, next) => {
     console.log("IN ELSE");
     return res.send(403, {
       status: false,
-      message: "Domain incorrect for User access.",
+      message: "Domain incorrect for admin access.",
     });
   }
 };

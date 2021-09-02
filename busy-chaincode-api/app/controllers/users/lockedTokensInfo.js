@@ -3,7 +3,7 @@ const lockedTokensInfo = require("../../../blockchain/test-scripts/getLockedToke
 
 module.exports = async (req, res, next) => {
   try {
-    const address = req.body.address;
+    const address = req.body.walletId;
     // const addressString = address.toString();
     // console.log("address", addressString);
     const adminId = "admin";

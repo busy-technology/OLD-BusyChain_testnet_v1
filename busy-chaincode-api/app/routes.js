@@ -2,7 +2,8 @@ const errors = require("restify-errors"),
   trim_req = require("./libs/request/trim"),
   controller = require("./controllers"),
   middleware = require("./middlewares"),
-  auth = require("./middlewares/auth");
+  auth = require("./middlewares/auth"),
+  adminAuth = require("./middlewares/adminAuth");
 
 /**
  * List of routes
@@ -14,9 +15,15 @@ module.exports = (server) => {
   server.use(trim_req);
 
   server.post(
-    "/auth/generate-token",
+    "/auth/generate-token-user",
     middleware.auth.generateToken,
     controller.auth.generateToken
+  );
+
+  server.post(
+    "/auth/generate-token-admin",
+    middleware.auth.generateToken,
+    controller.auth.generateTokenAdmin
   );
 
   /**
@@ -70,7 +77,8 @@ module.exports = (server) => {
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
-    auth,
+    middleware.utility.isAmount(["amount"]),
+    adminAuth,
     controller.users.buy
   );
 
@@ -83,6 +91,7 @@ module.exports = (server) => {
       "amount",
       "token",
     ]),
+    middleware.utility.isAmount(["amount"]),
     auth,
     controller.users.transfer
   );
@@ -98,6 +107,7 @@ module.exports = (server) => {
       "symbol",
       "amount",
     ]),
+    middleware.utility.isAmount(["amount"]),
     auth,
     controller.users.issue
   );
@@ -118,14 +128,15 @@ module.exports = (server) => {
   server.post(
     "/updateTransferFees",
     middleware.utility.required(["newTransferFee"]),
-    auth,
+    adminAuth,
     controller.users.transferFee
   );
 
   server.post(
     "/burnTokens",
-    middleware.utility.required(["address", "amount", "token"]),
-    auth,
+    middleware.utility.required(["walletId", "amount", "token"]),
+    middleware.utility.isAmount(["amount"]),
+    adminAuth,
     controller.users.burn
   );
 
@@ -140,7 +151,10 @@ module.exports = (server) => {
       "denominator",
       "releaseAt",
     ]),
-    auth,
+    middleware.utility.isAmount(["amount"]),
+    middleware.utility.isAmount(["numerator"]),
+    middleware.utility.isAmount(["denominator"]),
+    adminAuth,
     controller.users.vesting1
   );
 
@@ -152,7 +166,8 @@ module.exports = (server) => {
       "startAt",
       "releaseAt",
     ]),
-    auth,
+    middleware.utility.isAmount(["amount"]),
+    adminAuth,
     controller.users.vesting2
   );
 
@@ -161,17 +176,17 @@ module.exports = (server) => {
 
   server.post(
     "/lockedTokensInfo",
-    middleware.utility.required(["address"]),
+    middleware.utility.required(["walletId"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.lockedTokensInfo
   );
 
-  server.post(
-    "/queryWallet",
-    middleware.utility.required(["userId", "credentials"]),
-    controller.users.queryWallet
-  );
+  // server.post(
+  //   "/queryWallet",
+  //   middleware.utility.required(["userId", "credentials"]),
+  //   controller.users.queryWallet
+  // );
 
   // middleware.auth.generateToken,
   // controller.auth.apiKey,
@@ -185,10 +200,17 @@ module.exports = (server) => {
   );
 
   server.get(
-    "/wallets",
+    "/stakingAddresses",
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.fetchWallets
+  );
+
+  server.get(
+    "/defaultWallets",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.stakingAddresses
   );
 
   //auth,
@@ -200,11 +222,11 @@ module.exports = (server) => {
     controller.users.recoverUser
   );
 
-  server.post(
-    "/addAdmin",
-    middleware.utility.required(["credentials"]),
-    controller.users.addAdmin
-  );
+  // server.post(
+  //   "/addAdmin",
+  //   middleware.utility.required(["credentials"]),
+  //   controller.users.addAdmin
+  // );
 
   // Add in user wallets
 

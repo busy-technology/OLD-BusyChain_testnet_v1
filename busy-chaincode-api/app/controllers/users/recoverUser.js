@@ -27,8 +27,7 @@ module.exports = async (req, res, next) => {
         console.log("exception in User exists", exception);
         return res.send(404, {
           status: false,
-          message: `Something went wrong`,
-          Error: exception,
+          message: `Seed phase is not correct.`,
         });
       }
     } else {
@@ -42,8 +41,7 @@ module.exports = async (req, res, next) => {
     console.log(exception);
     return res.send(404, {
       status: false,
-      message: `Something went wrong`,
-      Error: exception.message,
+      message: `Something went wrong.`,
     });
   }
 };

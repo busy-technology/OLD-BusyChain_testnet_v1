@@ -7,6 +7,7 @@ module.exports = {
     isPassword: require("./utility/is-password"),
     isCountry: require("./utility/is-country"),
     isName: require("./utility/is-name"),
+    isAmount: require("./utility/is-amount"),
   },
   auth: {
     generateToken: require("./auth/generate-token"),
