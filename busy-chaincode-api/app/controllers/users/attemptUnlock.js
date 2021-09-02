@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
         Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
       ).subject.commonName;
       console.log("CN", commanName);
-      if (userId != commanName) {
+      if (user.userId != commanName) {
         return res.send(404, {
           status: false,
           message: `This certificate is not valid.`,
@@ -58,10 +58,10 @@ module.exports = async (req, res, next) => {
         });
       }
     } else {
-      console.log("UserId do not exists.");
+      console.log("WalletId do not exists.");
       return res.send(404, {
         status: false,
-        message: `UserId do not exists.`,
+        message: `WalletId do not exists.`,
       });
     }
   } catch (exception) {
