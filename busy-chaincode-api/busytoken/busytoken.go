@@ -65,6 +65,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 		TokenSymbol: "busy",
 		Admin:       commonName,
 		TotalSupply: supply.String(),
+		Decimals:    18,
 	}
 	tokenAsBytes, _ := json.Marshal(token)
 	err = ctx.GetStub().PutState("busy", tokenAsBytes)
@@ -376,7 +377,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 }
 
 // IssueToken issue token in default wallet address of invoker
-func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount string) Response {
+func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount string, decimals uint64) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -463,6 +464,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 			TokenSymbol: symbol,
 			Admin:       commonName,
 			TotalSupply: bigAmount.String(),
+			Decimals:    decimals,
 		}
 		tokenAsBytes, _ = json.Marshal(token)
 		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
@@ -1181,5 +1183,34 @@ func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterfa
 	response.Success = true
 	response.Data = newTransferFee
 	logger.Error(response.Message)
+	return response
+}
+
+func (bt *BusyToken) GetTokenDetails(ctx contractapi.TransactionContextInterface, tokenSymbol string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	tokenAsBytes, err := ctx.GetStub().GetState(tokenSymbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if tokenAsBytes == nil {
+		response.Message = fmt.Sprintf("Token with symbol %s not found", tokenSymbol)
+		logger.Error(response.Message)
+		return response
+	}
+	var token Token
+	_ = json.Unmarshal(tokenAsBytes, &token)
+
+	response.Message = "successfully fetched token"
+	response.Success = true
+	response.Data = token
+	logger.Info(response.Message)
 	return response
 }

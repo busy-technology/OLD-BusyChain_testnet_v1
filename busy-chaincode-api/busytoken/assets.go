@@ -31,6 +31,7 @@ type Token struct {
 	TokenSymbol string `json:"tokenSymbol"`
 	Admin       string `json:"admin"`
 	TotalSupply string `json:"totalSupply"`
+	Decimals    uint64 `json:"decimals"`
 }
 
 // Response response will be returned in this format
