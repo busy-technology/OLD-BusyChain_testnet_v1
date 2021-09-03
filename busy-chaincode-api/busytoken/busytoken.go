@@ -171,11 +171,11 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 	wallet := Wallet{
 		DocType: "wallet",
 		UserID:  commonName,
-		Address: response.TxID,
+		Address: "B-" + response.TxID,
 		// Balance: 0.00,
 	}
 	walletAsBytes, _ := json.Marshal(wallet)
-	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
+	err = ctx.GetStub().PutState("B-"+response.TxID, walletAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
 		logger.Error(response.Message)
