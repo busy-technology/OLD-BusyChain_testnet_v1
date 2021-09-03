@@ -1,4 +1,4 @@
-module busytoken
+module busy
 
 go 1.14
 

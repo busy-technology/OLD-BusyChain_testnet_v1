@@ -12,8 +12,8 @@ import (
 	"github.com/hyperledger/fabric/common/flogging"
 )
 
-// BusyToken chaincode
-type BusyToken struct {
+// Busy chaincode
+type Busy struct {
 	contractapi.Contract
 }
 
@@ -24,7 +24,7 @@ const ISSUE_TOKEN_FEE string = "2500000000000000000000"
 const PHASE1_STAKING_AMOUNT = "1000000000000000000000"
 
 // Init Initialise chaincocode while deployment
-func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response {
+func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -147,7 +147,7 @@ func (bt *BusyToken) Init(ctx contractapi.TransactionContextInterface) Response 
 }
 
 // CreateUser creates new user on busy blockchain
-func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Response {
+func (bt *Busy) CreateUser(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -204,7 +204,7 @@ func (bt *BusyToken) CreateUser(ctx contractapi.TransactionContextInterface) Res
 }
 
 // CreateStakingAddress create new staking address for user
-func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInterface) Response {
+func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -283,7 +283,7 @@ func (bt *BusyToken) CreateStakingAddress(ctx contractapi.TransactionContextInte
 }
 
 // GetBalance of specified wallet address
-func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, address string, token string) Response {
+func (bt *Busy) GetBalance(ctx contractapi.TransactionContextInterface, address string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -321,7 +321,7 @@ func (bt *BusyToken) GetBalance(ctx contractapi.TransactionContextInterface, add
 }
 
 // GetUser all the wallet and staking address of user with it's balance
-func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID string) Response {
+func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -377,7 +377,7 @@ func (bt *BusyToken) GetUser(ctx contractapi.TransactionContextInterface, userID
 }
 
 // IssueToken issue token in default wallet address of invoker
-func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount string, decimals uint64) Response {
+func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenName string, symbol string, amount string, decimals uint64) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -544,7 +544,7 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 }
 
 // Transfer transfer given amount from invoker's identity to specified identity
-func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount string, token string) Response {
+func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant string, amount string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -665,7 +665,7 @@ func (bt *BusyToken) Transfer(ctx contractapi.TransactionContextInterface, recip
 }
 
 // GetTotalSupply get total supply of specified token
-func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface, symbol string) Response {
+func (bt *Busy) GetTotalSupply(ctx contractapi.TransactionContextInterface, symbol string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -698,7 +698,7 @@ func (bt *BusyToken) GetTotalSupply(ctx contractapi.TransactionContextInterface,
 }
 
 // Burn reduct balance from user wallet and reduce total supply
-func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address string, amount string, symbol string) Response {
+func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string, amount string, symbol string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -797,7 +797,7 @@ func (bt *BusyToken) Burn(ctx contractapi.TransactionContextInterface, address s
 }
 
 // multibeneficiaryVestingV1 vesting v1
-func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInterface, recipient string, amount string, numerator uint64, denominator uint64, releaseAt uint64) Response {
+func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInterface, recipient string, amount string, numerator uint64, denominator uint64, releaseAt uint64) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -902,7 +902,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV1(ctx contractapi.TransactionContex
 }
 
 // multibeneficiaryVestingV2 vesting v2
-func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInterface, recipient string, amount string, startAt uint64, releaseAt uint64) Response {
+func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInterface, recipient string, amount string, startAt uint64, releaseAt uint64) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -1003,7 +1003,7 @@ func (bt *BusyToken) MultibeneficiaryVestingV2(ctx contractapi.TransactionContex
 }
 
 // GetLockedTokens get entry of vesting schedule for wallet address
-func (bt *BusyToken) GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
+func (bt *Busy) GetLockedTokens(ctx contractapi.TransactionContextInterface, address string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -1033,7 +1033,7 @@ func (bt *BusyToken) GetLockedTokens(ctx contractapi.TransactionContextInterface
 }
 
 // AttemptUnlock
-func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
+func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -1140,7 +1140,7 @@ func (bt *BusyToken) AttemptUnlock(ctx contractapi.TransactionContextInterface) 
 	return response
 }
 
-func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterface, newTransferFee string) Response {
+func (bt *Busy) UpdateTransferFee(ctx contractapi.TransactionContextInterface, newTransferFee string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -1189,7 +1189,7 @@ func (bt *BusyToken) UpdateTransferFee(ctx contractapi.TransactionContextInterfa
 	return response
 }
 
-func (bt *BusyToken) GetTokenDetails(ctx contractapi.TransactionContextInterface, tokenSymbol string) Response {
+func (bt *Busy) GetTokenDetails(ctx contractapi.TransactionContextInterface, tokenSymbol string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,

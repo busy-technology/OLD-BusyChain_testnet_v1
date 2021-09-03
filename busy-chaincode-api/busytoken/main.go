@@ -11,16 +11,16 @@ import (
 var bigZero *big.Int = new(big.Int).SetUint64(0)
 
 func main() {
-	busyToken := new(BusyToken)
-	busyToken.UnknownTransaction = UnknownTransactionHandler
-	busyToken.Name = "BusyToken"
+	busy := new(Busy)
+	busy.UnknownTransaction = UnknownTransactionHandler
+	busy.Name = "Busy"
 
 	busyMessenger := new(BusyMessenger)
 	busyMessenger.UnknownTransaction = UnknownTransactionHandler
 	busyMessenger.Name = "BusyMessenger"
 
-	cc, err := contractapi.NewChaincode(busyToken, busyMessenger)
-	cc.DefaultContract = busyToken.GetName()
+	cc, err := contractapi.NewChaincode(busy, busyMessenger)
+	cc.DefaultContract = busy.GetName()
 
 	if err != nil {
 		panic(err.Error())
