@@ -32,5 +32,5 @@ cp ${PWD}/organizations/peerOrganizations/busy.technology/peers/${PEER}.busy.tec
 
 sed -i "s/peer2/${PEER}/g" docker-compose-add-peer.yaml
 docker-compose -f docker-compose-add-peer.yaml --env-file add-peer-env up -d
-sed -i "s/peer3/${PEER}/g" docker-compose-add-peer.yaml
+sed -i "s/${PEER}/peer2/g" docker-compose-add-peer.yaml
 
