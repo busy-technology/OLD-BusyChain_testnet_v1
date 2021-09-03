@@ -69,7 +69,7 @@ module.exports = (server) => {
 
   server.post(
     "/attemptUnlock",
-    middleware.utility.required(["userId", "credentials"]),
+    middleware.utility.required(["walletId", "credentials"]),
     auth,
     controller.users.attemptUnlock
   );
@@ -92,7 +92,6 @@ module.exports = (server) => {
       "token",
     ]),
     middleware.utility.isAmount(["amount"]),
-    auth,
     controller.users.transfer
   );
 
@@ -106,9 +105,10 @@ module.exports = (server) => {
       "tokenName",
       "symbol",
       "amount",
+      "decimals",
     ]),
     middleware.utility.isAmount(["amount"]),
-    auth,
+    middleware.utility.isAmount(["decimals"]),
     controller.users.issue
   );
 

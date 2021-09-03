@@ -2,13 +2,21 @@ const UserServices = require("../services/user/users");
 
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.issueToken = async (userId, userKey, tokenName, symbol, amount) => {
+exports.issueToken = async (
+  userId,
+  userKey,
+  tokenName,
+  symbol,
+  amount,
+  decimals
+) => {
   try {
     console.log("USER KEY", userKey);
     const walletDetails = {
       tokenName: tokenName,
       symbol: symbol,
       amount: amount,
+      decimals: decimals,
     };
     const data = await UserServices.issueToken(walletDetails, userId, userKey);
 

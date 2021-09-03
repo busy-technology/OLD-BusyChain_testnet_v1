@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
     if (response.success == true) {
       return res.send(200, {
         status: true,
-        message: "Total supply fetched.",
+        message: "Transaction fees updated.",
         chaincodeResponse: response,
       });
     } else {

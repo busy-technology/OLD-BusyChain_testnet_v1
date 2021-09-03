@@ -104,6 +104,7 @@ exports.FabricChaincodeInvokeWithCertificate = async (
 
     //let userKeyJson = JSON.parse(userKey);
     await wallet.put(userId, userKey);
+    //console.log("Wallets addded.");
 
     const identity = await wallet.get(userId);
     if (!identity) {
@@ -129,19 +130,20 @@ exports.FabricChaincodeInvokeWithCertificate = async (
     // Get the contract from the network.
     // const contract = network.getContract('akcess');
     const contract = network.getContract(contractName);
-
+    //console.log("arrayOfArgs", ...arrayOfArgs);
     const result = await contract.submitTransaction(
       functionName,
       ...arrayOfArgs
     );
     console.log("Transaction has been submitted");
+    //console.log("RESULT", result);
     console.log("result: ", result.toString());
     // Disconnect from the gateway.
     await gateway.disconnect();
     return result.toString();
   } catch (exception) {
     //logger.error(exception.errors);
-    console.log("IN CATCH");
+    console.log("IN CATCH", exception.message);
     return exception;
   }
 };

@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
         });
       }
 
-      if (type == "online" || type == "offline") {
+      if (type == "online" || type == "offline" || type == "staking") {
         if (
           blockchain_credentials.type != "X.509" ||
           blockchain_credentials.mspId != "BusyMSP"
