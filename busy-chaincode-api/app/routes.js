@@ -92,6 +92,7 @@ module.exports = (server) => {
       "token",
     ]),
     middleware.utility.isAmount(["amount"]),
+    auth,
     controller.users.transfer
   );
 
@@ -109,6 +110,7 @@ module.exports = (server) => {
     ]),
     middleware.utility.isAmount(["amount"]),
     middleware.utility.isAmount(["decimals"]),
+    auth,
     controller.users.issue
   );
 
