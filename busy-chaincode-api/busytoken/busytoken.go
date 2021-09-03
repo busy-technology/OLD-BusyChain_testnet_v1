@@ -475,22 +475,25 @@ func (bt *BusyToken) IssueToken(ctx contractapi.TransactionContextInterface, tok
 		}
 		response.Data = token
 	} else {
-		_ = json.Unmarshal(tokenAsBytes, &token)
-		if token.TokenName != tokenName {
-			response.Message = fmt.Sprintf("You must issue token with same name as before: %s", token.TokenName)
-			logger.Error(response.Message)
-			return response
-		}
-		bigTotalSupply, _ := new(big.Int).SetString(token.TotalSupply, 10)
-		token.TotalSupply = bigTotalSupply.Add(bigTotalSupply, bigAmount).String()
-		tokenAsBytes, _ = json.Marshal(token)
-		err = ctx.GetStub().PutState(symbol, tokenAsBytes)
-		if err != nil {
-			response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
-			logger.Error(response.Message)
-			return response
-		}
-		response.Data = token
+		// _ = json.Unmarshal(tokenAsBytes, &token)
+		// if token.TokenName != tokenName {
+		// 	response.Message = fmt.Sprintf("You must issue token with same name as before: %s", token.TokenName)
+		// 	logger.Error(response.Message)
+		// 	return response
+		// }
+		// bigTotalSupply, _ := new(big.Int).SetString(token.TotalSupply, 10)
+		// token.TotalSupply = bigTotalSupply.Add(bigTotalSupply, bigAmount).String()
+		// tokenAsBytes, _ = json.Marshal(token)
+		// err = ctx.GetStub().PutState(symbol, tokenAsBytes)
+		// if err != nil {
+		// 	response.Message = fmt.Sprintf("Error while updating token on blockchain : %s", err.Error())
+		// 	logger.Error(response.Message)
+		// 	return response
+		// }
+		// response.Data = token
+		response.Message = fmt.Sprintf("Token with symbol %s already issued", token.TokenSymbol)
+		logger.Error(response.Message)
+		return response
 	}
 
 	// var queryString string = fmt.Sprintf(`{
