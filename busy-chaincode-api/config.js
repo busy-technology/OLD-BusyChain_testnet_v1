@@ -4,7 +4,7 @@ module.exports = {
   URL: process.env.BASE_URL || "http://localhost:3000",
   MONGODB_URI:
     process.env.MONGODB_URI ||
-    "mongodb+srv://raj:406ecjar@cluster0-jkggb.mongodb.net/shop?retryWrites=true&w=majority",
+    "mongodb://127.0.0.1:27017/busy?authSource=admin",
   EXPIRY_TIME: process.env.EXPIRY_TIME || "60",
   JWT_SECRET: process.env.JWT_SECRET || "BUSY SOLUIONS ARE ALWAYS PROTECTED",
 };

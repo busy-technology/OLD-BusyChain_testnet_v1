@@ -19,6 +19,10 @@ module.exports = async (req, res, next) => {
         const resp = JSON.parse(response.chaincodeResponse);
         if (resp.success == true) {
            console.log("Message Sent Successfully")
+
+           // Storing the data from the blockchain
+           await User.updateOne({userId: sender}, {messageCoins: resp.data.Sender})
+           await User.updateOne({userId: sender}, {messageCoins: resp.data.Recipient})
            return res.send(200, {
              status: true,
              message: "Message Sent",

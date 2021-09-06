@@ -45,6 +45,9 @@ module.exports = async (req, res, next) => {
           password: hash,
           country: country,
           txId: data.chaincodeResponse.txId,
+          messageCoins: {
+            "totalCoins": 0
+          },
         });
 
         await users
