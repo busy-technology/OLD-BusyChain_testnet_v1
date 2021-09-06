@@ -44,6 +44,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  messageCoins: {
+   type: Object,
+   required: true
+  }
 });
 
 UserSchema.plugin(timeStamp);

@@ -57,6 +57,21 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 
+	// setting Voting Config
+	votingConfig := VotingConfig{
+		MinimumCoins:    "10000000",
+		PoolFee:         "166666",
+		VotingPeriod:    9 * 24 * time.Hour, // 7 days + 2 days
+		VotingStartTime: 2 * 24 * time.Hour,
+	}
+	votingConfigAsBytes, _ := json.Marshal(votingConfig)
+	err = ctx.GetStub().PutState("VotingConfig", votingConfigAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	supply, _ := new(big.Int).SetString("255000000000000000000000000", 10)
 	token := Token{
 		DocType:     "token",
@@ -187,6 +202,9 @@ func (bt *Busy) CreateUser(ctx contractapi.TransactionContextInterface) Response
 		DocType:       "user",
 		UserID:        commonName,
 		DefaultWallet: wallet.Address,
+		MessageCoins: map[string]int{
+			"totalCoins": 0,
+		},
 	}
 	userAsBytes, _ = json.Marshal(user)
 	err = ctx.GetStub().PutState(commonName, userAsBytes)
@@ -341,6 +359,13 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 		return response
 	}
 
+	userDetails := User{}
+	if err := json.Unmarshal(userAsBytes, &userDetails); err != nil {
+		response.Message = fmt.Sprintf("Error while retrieving the sender details %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	var queryString string = fmt.Sprintf(`{
 		"selector": {
 			"userId": "%s",
@@ -361,7 +386,7 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 	defer resultIterator.Close()
 
 	var wallet Wallet
-	var responseData = map[string]string{}
+	responseData := map[string]interface{}{}
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
@@ -369,6 +394,7 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), "busy")
 	}
 
+	responseData["messageCoins"] = userDetails.MessageCoins
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
 	response.Success = true
 	response.Data = responseData
@@ -734,7 +760,7 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 	}
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	if balance.Cmp(bigAmount) == -1 {
-		response.Message = fmt.Sprintf("Not enough balance %s", err.Error())
+		response.Message = fmt.Sprintf("Not enough balance in the wallet")
 		logger.Error(response.Message)
 		return response
 	}
