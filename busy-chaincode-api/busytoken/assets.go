@@ -4,9 +4,10 @@ import "time"
 
 // User user on busy blockchain
 type User struct {
-	DocType       string `json:"docType"`
-	UserID        string `json:"userId"`
-	DefaultWallet string `json:"defaultWallet"`
+	DocType       string         `json:"docType"`
+	UserID        string         `json:"userId"`
+	DefaultWallet string         `json:"defaultWallet"`
+	MessageCoins  map[string]int `json:"messageCoins"`
 }
 
 type Wallet struct {

@@ -202,6 +202,9 @@ func (bt *Busy) CreateUser(ctx contractapi.TransactionContextInterface) Response
 		DocType:       "user",
 		UserID:        commonName,
 		DefaultWallet: wallet.Address,
+		MessageCoins: map[string]int{
+			"totalCoins": 0,
+		},
 	}
 	userAsBytes, _ = json.Marshal(user)
 	err = ctx.GetStub().PutState(commonName, userAsBytes)
@@ -356,6 +359,13 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 		return response
 	}
 
+	userDetails := User{}
+	if err := json.Unmarshal(userAsBytes, &userDetails); err != nil {
+		response.Message = fmt.Sprintf("Error while retrieving the sender details %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	var queryString string = fmt.Sprintf(`{
 		"selector": {
 			"userId": "%s",
@@ -376,7 +386,7 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 	defer resultIterator.Close()
 
 	var wallet Wallet
-	var responseData = map[string]string{}
+	responseData := map[string]interface{}{}
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
@@ -384,6 +394,7 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), "busy")
 	}
 
+	responseData["messageCoins"] = userDetails.MessageCoins
 	response.Message = fmt.Sprintf("Successfully fetched balance for user %s", userID)
 	response.Success = true
 	response.Data = responseData

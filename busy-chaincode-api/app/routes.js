@@ -286,6 +286,7 @@ module.exports = (server) => {
   server.post(
     "/destroyPool",
     middleware.auth.generateToken,
+    adminAuth,
     controller.auth.apiKey,
     controller.users.destroyPool
   );
