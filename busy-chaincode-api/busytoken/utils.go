@@ -141,7 +141,6 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		for _, v := range busyUtxoKeys {
 			_ = ctx.GetStub().DelState(v)
 		}
-
 		// Deduct balance of sender
 		tokenBalance = tokenBalance.Sub(tokenBalance, amount)
 		utxo := UTXO{
@@ -166,11 +165,12 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			return fmt.Errorf("error while put state in ledger: %s", err.Error())
 		}
 
+		busyBalance = busyBalance.Sub(busyBalance, fee)
 		// deduct tx fee from sender
 		utxo = UTXO{
 			DocType: "utxo",
 			Address: sender,
-			Amount:  "-" + fee.String(),
+			Amount:  busyBalance.String(),
 			Token:   "busy",
 		}
 		utxoAsBytes, _ = json.Marshal(utxo)
