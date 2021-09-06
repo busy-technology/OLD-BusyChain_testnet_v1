@@ -131,7 +131,6 @@ module.exports = (server) => {
     "/updateTransferFees",
     middleware.utility.required(["newTransferFee"]),
     middleware.utility.isAmount(["newTransferFee"]),
-    adminAuth,
     controller.users.transferFee
   );
 
@@ -243,11 +242,51 @@ module.exports = (server) => {
     controller.auth.apiKey,
     controller.users.userWallets
   );
+
   server.post(
     "/sendMessage",
     middleware.utility.required(["sender", "recipient"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.sendMessage
+  );
+
+  // endpoint for creating pool
+  server.post(
+    "/createPool",
+    middleware.utility.required(["userId", "votingInfo"]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.createPool
+  );
+
+  // endpoint for creating pool
+  server.get(
+    "/queryPool",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.queryPool
+  );
+
+  // endpoint for creating vote
+  server.post(
+    "/createVote",
+    middleware.utility.required([
+      "userId",
+      "votingAddress",
+      "amount",
+      "voteType",
+    ]),
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.createVote
+  );
+
+  // endpoint for destroying the pool
+  server.post(
+    "/destroyPool",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.destroyPool
   );
 };

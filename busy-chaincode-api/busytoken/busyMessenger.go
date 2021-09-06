@@ -73,7 +73,8 @@ func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface
 		logger.Error(response.Message)
 		return response
 	}
-	busy := new(Busy)
-	resp := busy.Transfer(ctx, recipient, config.BusyCoins, token)
+	busyToken := new(Busy)
+	resp := busyToken.Transfer(ctx, recipient, config.BusyCoins, token)
+	response.Message = "Message Processed Successfully"
 	return resp
 }

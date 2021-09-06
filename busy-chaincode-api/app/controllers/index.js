@@ -23,6 +23,10 @@ module.exports = {
     addAdmin: require("./users/addAdmin"),
     userWallets: require("./users/userWallets"),
     sendMessage: require("./users/sendMessage"),
+    createPool: require("./users/createPool"),
+    createVote: require("./users/createVote"),
+    destroyPool: require("./users/destroyPool"),
+    queryPool: require("./users/queryPool"),
   },
 
   auth: {
