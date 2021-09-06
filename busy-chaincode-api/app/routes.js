@@ -242,6 +242,8 @@ module.exports = (server) => {
     controller.auth.apiKey,
     controller.users.userWallets
   );
+
+
   server.post(
     "/sendMessage",
     middleware.utility.required(["sender", "recipient"]),
@@ -285,3 +287,4 @@ module.exports = (server) => {
     controller.users.destroyPool
   );
 };
+

@@ -226,7 +226,8 @@ func (bv *BusyVoting) DestroyPool(ctx contractapi.TransactionContextInterface) R
 		return response
 	}
 
-	//  Checking if pool Already Exists
+
+	//  Checking if pool doesnot Exists
 	poolAsBytes, err := ctx.GetStub().GetState("PoolData")
 
 	if poolAsBytes == nil || err != nil {
