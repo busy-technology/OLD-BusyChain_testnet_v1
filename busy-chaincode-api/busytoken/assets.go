@@ -79,8 +79,9 @@ type Vote struct {
 // MessageConfig to set intial configuration for BusyCoins
 type MessageConfig struct {
 	// BusyCoins to deduct
-	BusyCoins       string        `json:"busyCoins"`
+	BigBusyCoins    string        `json:"bigBusyCoins"`
 	MessageInterval time.Duration `json:"messageInterval"`
+	BusyCoin        int           `json:"busyCoin"`
 }
 
 // PhaseConfig to store phase config

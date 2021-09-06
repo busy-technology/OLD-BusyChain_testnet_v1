@@ -46,7 +46,8 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	}
 	// setting Message Config
 	config := MessageConfig{
-		BusyCoins:       "1",
+		BigBusyCoins:    "1000000000000000000",
+		BusyCoin:        1,
 		MessageInterval: 5 * time.Second,
 	}
 	configAsBytes, _ := json.Marshal(config)
@@ -59,10 +60,10 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 
 	// setting Voting Config
 	votingConfig := VotingConfig{
-		MinimumCoins:    "10000000",
-		PoolFee:         "166666",
-		VotingPeriod:    9 * 24 * time.Hour, // 7 days + 2 days
-		VotingStartTime: 2 * 24 * time.Hour,
+		MinimumCoins:    "10000000000000000000000000",
+		PoolFee:         "166666000000000000000000",
+		VotingPeriod:    20 * time.Minute, // 7 days + 2 days
+		VotingStartTime: 5 * time.Minute,
 	}
 	votingConfigAsBytes, _ := json.Marshal(votingConfig)
 	err = ctx.GetStub().PutState("VotingConfig", votingConfigAsBytes)
