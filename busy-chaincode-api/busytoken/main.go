@@ -19,9 +19,12 @@ func main() {
 	busyMessenger.UnknownTransaction = UnknownTransactionHandler
 	busyMessenger.Name = "BusyMessenger"
 
-	cc, err := contractapi.NewChaincode(busy, busyMessenger)
-	cc.DefaultContract = busy.GetName()
+	busyVoting := new(BusyVoting)
+	busyVoting.UnknownTransaction = UnknownTransactionHandler
+	busyVoting.Name = "BusyVoting"
 
+	cc, err := contractapi.NewChaincode(busy, busyMessenger, busyVoting)
+	cc.DefaultContract = busy.GetName()
 	if err != nil {
 		panic(err.Error())
 	}
