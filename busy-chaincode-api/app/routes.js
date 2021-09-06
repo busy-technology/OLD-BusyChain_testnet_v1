@@ -130,6 +130,7 @@ module.exports = (server) => {
   server.post(
     "/updateTransferFees",
     middleware.utility.required(["newTransferFee"]),
+    middleware.utility.isAmount(["newTransferFee"]),
     adminAuth,
     controller.users.transferFee
   );
