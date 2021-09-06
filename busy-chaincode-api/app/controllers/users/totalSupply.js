@@ -1,5 +1,5 @@
-const User = require("../../models/Users");
 const Admin = require("../../models/admin");
+const IssuetokenTransactions = require("../../models/isssued-tokens");
 const totalSupply = require("../../../blockchain/test-scripts/totalSupply");
 
 module.exports = async (req, res, next) => {
@@ -25,29 +25,45 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const response1 = await totalSupply.totalSupply(
-      userId,
-      blockchain_credentials,
-      symbol
-    );
-    console.log("RESPONSE 1", response1);
-    const response = JSON.parse(response1.chaincodeResponse);
-    console.log("DATA 2", response);
-    const balance = response.data;
-    console.log("BALANCE", response.data);
+    // const lowerToken = symbol.toLowerCase();
+    // console.log("LOWER TOKEN", lowerToken);
 
-    if (response.success == true) {
-      return res.send(200, {
-        status: true,
-        message: "Total supply fetched.",
-        chaincodeResponse: response,
-      });
+    const coinSymbol = await IssuetokenTransactions.findOne({
+      tokenSymbol: symbol,
+    });
+    console.log("COIN", coinSymbol);
+
+    if (coinSymbol || symbol == "busy") {
+      const response1 = await totalSupply.totalSupply(
+        userId,
+        blockchain_credentials,
+        symbol
+      );
+      console.log("RESPONSE 1", response1);
+      const response = JSON.parse(response1.chaincodeResponse);
+      console.log("DATA 2", response);
+      const balance = response.data;
+      console.log("BALANCE", response.data);
+
+      if (response.success == true) {
+        return res.send(200, {
+          status: true,
+          message: "Total supply fetched.",
+          chaincodeResponse: response,
+        });
+      } else {
+        console.log("Failed to execute chaincode function");
+        return res.send(404, {
+          status: false,
+          message: `Failed to execute chaincode function.`,
+          chaincodeResponse: response,
+        });
+      }
     } else {
-      console.log("Failed to execute chaincode function");
+      console.log("symbol do not exists.");
       return res.send(404, {
         status: false,
-        message: `Failed to execute chaincode function.`,
-        chaincodeResponse: response,
+        message: `symbol do not exists`,
       });
     }
   } catch (exception) {

@@ -1,6 +1,6 @@
 const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
-const tokenTransactions = require("../../models/token-transactions");
+const IssuetokenTransactions = require("../../models/isssued-tokens");
 const IssueToken = require("../../../blockchain/test-scripts/issueTokens");
 
 module.exports = async (req, res, next) => {
@@ -11,6 +11,9 @@ module.exports = async (req, res, next) => {
       symbol = req.body.symbol,
       amount = req.body.amount,
       decimals = req.body.decimals;
+
+    console.log("TokenName", tokenName);
+    console.log("Symbol", symbol);
 
     const user = await User.findOne({ walletId: walletId });
     console.log("User", user);
@@ -38,60 +41,93 @@ module.exports = async (req, res, next) => {
           message: `Incorrect type or MSPID.`,
         });
       }
-
-      const response1 = await IssueToken.issueToken(
-        walletId,
-        blockchain_credentials,
-        tokenName,
-        symbol,
-        amount,
-        decimals
-      );
-      console.log("RESPONSE 1", response1);
-      const response = JSON.parse(response1.chaincodeResponse);
-      console.log("CHECK", response);
-      console.log("DATA 2", response);
-      const txId = response.txId;
-      console.log("TRANSACTION ID", txId);
-
-      if (response.success == true) {
-        const tokenEntry = await new tokenTransactions({
-          tokenName: tokenName,
-          amount: amount,
-          function: "Issue Tokens",
-          txId: txId,
-          sender: "Busy network",
-          receiver: user.userId + " with address " + walletId,
-          description:
-            user.userId +
-            " issued " +
-            amount +
-            " " +
-            tokenName +
-            " with symbol " +
+      const lowerTokenName = tokenName.toLowerCase();
+      console.log("lowerTokenName", lowerTokenName);
+      const lowerToken = symbol.toLowerCase();
+      console.log("LOWER TOKEN", lowerToken);
+      const coinSymbol = await IssuetokenTransactions.findOne({
+        symbol: lowerToken,
+      });
+      console.log("COIN", coinSymbol);
+      const coinName = await IssuetokenTransactions.findOne({
+        name: lowerTokenName,
+      });
+      console.log("COIN", coinName);
+      if (!coinName) {
+        if (!coinSymbol) {
+          const response1 = await IssueToken.issueToken(
+            walletId,
+            blockchain_credentials,
+            tokenName,
             symbol,
-        });
+            amount,
+            decimals
+          );
+          console.log("RESPONSE 1", response1);
+          const response = JSON.parse(response1.chaincodeResponse);
+          console.log("CHECK", response);
+          console.log("DATA 2", response);
+          const txId = response.txId;
+          console.log("TRANSACTION ID", txId);
 
-        await tokenEntry
-          .save()
-          .then((result, error) => {
-            console.log("Issue Tokens transaction recorded.");
-          })
-          .catch((error) => {
-            console.log("ERROR DB", error);
+          if (response.success == true) {
+            const tokenEntry = await new IssuetokenTransactions({
+              tokenName: tokenName,
+              name: response.data.tokenName,
+              amount: amount,
+              tokenSymbol: response.data.tokenSymbol,
+              symbol: response.data.tokenSymbol,
+              tokenAdmin: response.data.admin,
+              tokenSupply: response.data.totalSupply,
+              tokendeciamls: response.data.decimals,
+              function: "Issue Tokens",
+              txId: txId,
+              sender: "Busy network",
+              receiver: user.userId + " with address " + walletId,
+              description:
+                user.userId +
+                " issued " +
+                amount +
+                " " +
+                tokenName +
+                " with symbol " +
+                symbol,
+            });
+
+            await tokenEntry
+              .save()
+              .then((result, error) => {
+                console.log("Issue Tokens transaction recorded.");
+              })
+              .catch((error) => {
+                console.log("ERROR DB", error);
+              });
+
+            return res.send(200, {
+              status: true,
+              message: "Tokens issued.",
+              chaincodeResponse: response,
+            });
+          } else {
+            console.log("Failed to execute chaincode function");
+            return res.send(404, {
+              status: false,
+              message: `Failed to execute chaincode function.`,
+              chaincodeResponse: response,
+            });
+          }
+        } else {
+          console.log("Coin symbol already taken.");
+          return res.send(404, {
+            status: false,
+            message: `Coin symbol already exists.`,
           });
-
-        return res.send(200, {
-          status: true,
-          message: "Tokens issued.",
-          chaincodeResponse: response,
-        });
+        }
       } else {
-        console.log("Failed to execute chaincode function");
+        console.log("Coin Name already taken.");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
-          chaincodeResponse: response,
+          message: `Coin Name already taken.`,
         });
       }
     } else {
