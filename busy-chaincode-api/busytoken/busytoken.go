@@ -434,19 +434,6 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		return response
 	}
 
-	err = addUTXO(ctx, defaultWalletAddress, new(big.Int).Set(issueTokenFee).Mul(issueTokenFee, minusOne), "busy")
-	if err != nil {
-		response.Message = fmt.Sprintf("Error while burning fees for issue token: %s", err.Error())
-		logger.Error(response.Message)
-		return response
-	}
-	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(issueTokenFee))
-	if err != nil {
-		response.Message = fmt.Sprintf("Error while burning issue token fee from total supply: %s", err.Error())
-		logger.Error(response.Message)
-		return response
-	}
-
 	var token Token
 	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
 	if err != nil {
@@ -544,6 +531,20 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		logger.Error(response.Message)
 		return response
 	}
+
+	err = addUTXO(ctx, defaultWalletAddress, new(big.Int).Set(issueTokenFee).Mul(issueTokenFee, minusOne), "busy")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning fees for issue token: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(issueTokenFee))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while burning issue token fee from total supply: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	// var wallet Wallet
 	// if resultIterator.HasNext() {
 	// 	data, _ := resultIterator.Next()
@@ -733,6 +734,12 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 		Data:    nil,
 	}
 
+	if amount == "0" {
+		response.Message = "can't burn zero amount"
+		logger.Error(response.Message)
+		return response
+	}
+
 	// check if wallet already exists
 	walletAsBytes, err := ctx.GetStub().GetState(address)
 	if err != nil {
@@ -746,7 +753,7 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 		return response
 	}
 
-	balance, err := getBalanceHelper(ctx, address, "busy")
+	balance, err := getBalanceHelper(ctx, address, symbol)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while fetching balance %s", err.Error())
 		logger.Error(response.Message)

@@ -73,46 +73,114 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string, fee *big.Int) error {
 	var txID string = ctx.GetStub().GetTxID()
 
-	// Prune exsting utxo if sender and count his balance
-	balance, utxoKeys, err := pruneUTXOs(ctx, sender, token)
-	if err != nil {
-		return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
+	if token == "busy" {
+		// Prune exsting utxo if sender and count his balance
+		balance, utxoKeys, err := pruneUTXOs(ctx, sender, token)
+		if err != nil {
+			return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
+		}
+
+		bigAmountWithTransferFee := fee.Add(fee, amount)
+
+		// Check if sender has enough balance
+		if bigAmountWithTransferFee.Cmp(balance) == 1 {
+			return fmt.Errorf("amount %s higher then your total balance %s", amount.String(), balance.String())
+		}
+
+		// Delete existing utxos
+		for _, v := range utxoKeys {
+			_ = ctx.GetStub().DelState(v)
+		}
+		// Deduct balance of sender
+		balance = balance.Sub(balance, bigAmountWithTransferFee)
+		utxo := UTXO{
+			DocType: "utxo",
+			Address: sender,
+			Amount:  balance.String(),
+			Token:   token,
+		}
+		utxoAsBytes, _ := json.Marshal(utxo)
+		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, sender, token), utxoAsBytes)
+
+		// Create new utxo for recipiant
+		utxo = UTXO{
+			DocType: "utxo",
+			Address: recipiant,
+			Amount:  amount.String(),
+			Token:   token,
+		}
+		utxoAsBytes, _ = json.Marshal(utxo)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, token), utxoAsBytes)
+		if err != nil {
+			return fmt.Errorf("error while put state in ledger: %s", err.Error())
+		}
+		return nil
+	} else {
+		// Prune exsting utxo of sender and count his balance
+		tokenBalance, tokenUtxoKeys, err := pruneUTXOs(ctx, sender, token)
+		if err != nil {
+			return fmt.Errorf("error while pruning token UTXOs: %s", err.Error())
+		}
+		busyBalance, busyUtxoKeys, err := pruneUTXOs(ctx, sender, "busy")
+		if err != nil {
+			return fmt.Errorf("error while pruning busy UTXOs: %s", err.Error())
+		}
+
+		// Check if sender has enough balance
+		if fee.Cmp(busyBalance) == 1 {
+			return fmt.Errorf("amount %s higher then your total balance %s", fee.String(), busyBalance.String())
+		}
+		if amount.Cmp(tokenBalance) == 1 {
+			return fmt.Errorf("amount %s higher then your total balance %s", amount.String(), tokenBalance.String())
+		}
+
+		// Delete existing utxos
+		for _, v := range tokenUtxoKeys {
+			_ = ctx.GetStub().DelState(v)
+		}
+		for _, v := range busyUtxoKeys {
+			_ = ctx.GetStub().DelState(v)
+		}
+		// Deduct balance of sender
+		tokenBalance = tokenBalance.Sub(tokenBalance, amount)
+		utxo := UTXO{
+			DocType: "utxo",
+			Address: sender,
+			Amount:  tokenBalance.String(),
+			Token:   token,
+		}
+		utxoAsBytes, _ := json.Marshal(utxo)
+		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, sender, token), utxoAsBytes)
+
+		// Create new utxo for recipiant
+		utxo = UTXO{
+			DocType: "utxo",
+			Address: recipiant,
+			Amount:  amount.String(),
+			Token:   token,
+		}
+		utxoAsBytes, _ = json.Marshal(utxo)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, token), utxoAsBytes)
+		if err != nil {
+			return fmt.Errorf("error while put state in ledger: %s", err.Error())
+		}
+
+		busyBalance = busyBalance.Sub(busyBalance, fee)
+		// deduct tx fee from sender
+		utxo = UTXO{
+			DocType: "utxo",
+			Address: sender,
+			Amount:  busyBalance.String(),
+			Token:   "busy",
+		}
+		utxoAsBytes, _ = json.Marshal(utxo)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, "busy"), utxoAsBytes)
+		if err != nil {
+			return fmt.Errorf("error while put state in ledger: %s", err.Error())
+		}
+		return nil
 	}
 
-	bigAmountWithTransferFee := fee.Add(fee, amount)
-
-	// Check if sender has enough balance
-	if bigAmountWithTransferFee.Cmp(balance) == 1 {
-		return fmt.Errorf("amount %s higher then your total balance %s", amount.String(), balance.String())
-	}
-
-	// Delete existing utxos
-	for _, v := range utxoKeys {
-		_ = ctx.GetStub().DelState(v)
-	}
-	// Deduct balance of sender
-	balance = balance.Sub(balance, bigAmountWithTransferFee)
-	utxo := UTXO{
-		DocType: "utxo",
-		Address: sender,
-		Amount:  balance.String(),
-		Token:   token,
-	}
-	utxoAsBytes, _ := json.Marshal(utxo)
-	_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, sender, token), utxoAsBytes)
-
-	// Create new utxo for recipiant
-	utxo = UTXO{
-		DocType: "utxo",
-		Address: recipiant,
-		Amount:  amount.String(),
-		Token:   token,
-	}
-	utxoAsBytes, _ = json.Marshal(utxo)
-	err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, token), utxoAsBytes)
-	if err != nil {
-		return fmt.Errorf("error while put state in ledger: %s", err.Error())
-	}
 	return nil
 }
 
