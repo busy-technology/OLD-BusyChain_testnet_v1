@@ -427,6 +427,12 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		Data:    nil,
 	}
 
+	if amount == "0" {
+		response.Message = "can't issue zero amount"
+		logger.Error(response.Message)
+		return response
+	}
+
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
 	commonName, _ := getCommonName(ctx)
 	issueTokenFee, _ := new(big.Int).SetString(ISSUE_TOKEN_FEE, 10)
@@ -593,6 +599,12 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	if amount == "0" {
+		response.Message = "can't transfer zero amount"
+		logger.Error(response.Message)
+		return response
 	}
 
 	// check if token exists
@@ -854,6 +866,12 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 		Data:    nil,
 	}
 
+	if amount == "0" {
+		response.Message = "can't vest zero amount"
+		logger.Error(response.Message)
+		return response
+	}
+
 	// check if wallet already exists
 	walletAsBytes, err := ctx.GetStub().GetState(recipient)
 	if err != nil {
@@ -957,6 +975,12 @@ func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInte
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	if amount == "0" {
+		response.Message = "can't vest zero amount"
+		logger.Error(response.Message)
+		return response
 	}
 
 	// check if wallet already exists
