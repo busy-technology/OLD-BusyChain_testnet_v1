@@ -28,6 +28,10 @@ const issuedCoinsSchema = new Schema({
     type: String,
     required: true,
   },
+  tokenId: {
+    type: String,
+    required: true,
+  },
   tokenSupply: {
     type: String,
     required: true,
@@ -55,6 +59,17 @@ const issuedCoinsSchema = new Schema({
   description: {
     type: String,
     required: true,
+  },
+  logoPath: {
+    type: String,
+    required: false,
+  },
+  websiteUrl: {
+    type: String,
+    required: false,
+  },
+  socialMedia: {
+    type: Object,
   },
   createdDate: {
     type: Date,

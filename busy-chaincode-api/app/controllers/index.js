@@ -19,6 +19,8 @@ module.exports = {
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
     stakingAddresses: require("./users/getDefaultWallets"),
+    tokenTransactions: require("./users/tokenTransactions"),
+    issuedCoins: require("./users/issuedCoins"),
     recoverUser: require("./users/recoverUser"),
     addAdmin: require("./users/addAdmin"),
     userWallets: require("./users/userWallets"),

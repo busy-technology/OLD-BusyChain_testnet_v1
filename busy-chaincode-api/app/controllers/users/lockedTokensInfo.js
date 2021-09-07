@@ -1,4 +1,5 @@
 const Admin = require("../../models/admin");
+const User = require("../../models/Users");
 const lockedTokensInfo = require("../../../blockchain/test-scripts/getLockedTokens");
 
 module.exports = async (req, res, next) => {
@@ -26,29 +27,39 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const response1 = await lockedTokensInfo.getLockedTokens(
-      userId,
-      blockchain_credentials,
-      address
-    );
-    console.log("RESPONSE 1", response1);
-    const response = JSON.parse(response1.chaincodeResponse);
-    console.log("DATA 2", response);
-    const balance = response.data;
-    console.log("BALANCE", response.data);
+    const user = await User.findOne({ walletId: userId });
+    console.log("User", user);
+    if (user) {
+      const response1 = await lockedTokensInfo.getLockedTokens(
+        userId,
+        blockchain_credentials,
+        address
+      );
+      console.log("RESPONSE 1", response1);
+      const response = JSON.parse(response1.chaincodeResponse);
+      console.log("DATA 2", response);
+      const balance = response.data;
+      console.log("BALANCE", response.data);
 
-    if (response.success == true) {
-      return res.send(200, {
-        status: true,
-        message: "Locked tokens fetched.",
-        chaincodeResponse: response,
-      });
+      if (response.success == true) {
+        return res.send(200, {
+          status: true,
+          message: "Locked tokens fetched.",
+          chaincodeResponse: response,
+        });
+      } else {
+        console.log("Failed to execute chaincode function");
+        return res.send(404, {
+          status: false,
+          message: `Failed to execute chaincode function.`,
+          chaincodeResponse: response,
+        });
+      }
     } else {
-      console.log("Failed to execute chaincode function");
+      console.log("WalletId do not exists.");
       return res.send(404, {
         status: false,
-        message: `Failed to execute chaincode function.`,
-        chaincodeResponse: response,
+        message: `WalletId do not exists.`,
       });
     }
   } catch (exception) {

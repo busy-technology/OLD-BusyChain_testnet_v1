@@ -78,6 +78,7 @@ module.exports = async (req, res, next) => {
               tokenSymbol: response.data.tokenSymbol,
               symbol: response.data.tokenSymbol,
               tokenAdmin: response.data.admin,
+              tokenId: response.data.id,
               tokenSupply: response.data.totalSupply,
               tokendeciamls: response.data.decimals,
               function: "Issue Tokens",
@@ -92,6 +93,9 @@ module.exports = async (req, res, next) => {
                 tokenName +
                 " with symbol " +
                 symbol,
+              logoPath: "",
+              websiteUrl: "",
+              socialMedia: "",
             });
 
             await tokenEntry

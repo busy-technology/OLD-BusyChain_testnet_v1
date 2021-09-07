@@ -78,7 +78,7 @@ module.exports = (server) => {
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
     middleware.utility.isAmount(["amount"]),
-    adminAuth,
+    //adminAuth,
     controller.users.buy
   );
 
@@ -110,7 +110,7 @@ module.exports = (server) => {
     ]),
     middleware.utility.isAmount(["amount"]),
     middleware.utility.isAmount(["decimals"]),
-    auth,
+    //auth,
     controller.users.issue
   );
 
@@ -213,6 +213,20 @@ module.exports = (server) => {
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.stakingAddresses
+  );
+
+  server.get(
+    "/tokenTransactions",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.tokenTransactions
+  );
+
+  server.get(
+    "/issuedCoins",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.issuedCoins
   );
 
   //auth,
