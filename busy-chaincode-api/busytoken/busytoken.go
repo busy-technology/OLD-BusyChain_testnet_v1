@@ -46,7 +46,8 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	}
 	// setting Message Config
 	config := MessageConfig{
-		BusyCoins:       "1",
+		BigBusyCoins:    "1000000000000000000",
+		BusyCoin:        1,
 		MessageInterval: 5 * time.Second,
 	}
 	configAsBytes, _ := json.Marshal(config)
@@ -59,10 +60,10 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 
 	// setting Voting Config
 	votingConfig := VotingConfig{
-		MinimumCoins:    "10000000",
-		PoolFee:         "166666",
-		VotingPeriod:    9 * 24 * time.Hour, // 7 days + 2 days
-		VotingStartTime: 2 * 24 * time.Hour,
+		MinimumCoins:    "10000000000000000000000000",
+		PoolFee:         "166666000000000000000000",
+		VotingPeriod:    20 * time.Minute, // 7 days + 2 days
+		VotingStartTime: 5 * time.Minute,
 	}
 	votingConfigAsBytes, _ := json.Marshal(votingConfig)
 	err = ctx.GetStub().PutState("VotingConfig", votingConfigAsBytes)
@@ -248,6 +249,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		logger.Error(response.Message)
 		return response
 	}
+	now, _ := ctx.GetStub().GetTxTimestamp()
 
 	stakingAmount, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	// bigZero, _ := new(big.Int).SetString("0", 10)
@@ -282,6 +284,20 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	err = ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingInfo := StakingInfo{
+		DocType:        "stakingInfo",
+		StakingAddress: stakingAddress.Address,
+		Amount:         stakingAddress.Balance,
+		TimeStamp:      uint64(now.Seconds),
+	}
+	stakingInfoAsBytes, _ := json.Marshal(stakingInfo)
+	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddress.Address), stakingInfoAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating staking info in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -409,6 +425,12 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	if amount == "0" {
+		response.Message = "can't issue zero amount"
+		logger.Error(response.Message)
+		return response
 	}
 
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
@@ -577,6 +599,12 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	if amount == "0" {
+		response.Message = "can't transfer zero amount"
+		logger.Error(response.Message)
+		return response
 	}
 
 	// check if token exists
@@ -838,6 +866,12 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 		Data:    nil,
 	}
 
+	if amount == "0" {
+		response.Message = "can't vest zero amount"
+		logger.Error(response.Message)
+		return response
+	}
+
 	// check if wallet already exists
 	walletAsBytes, err := ctx.GetStub().GetState(recipient)
 	if err != nil {
@@ -941,6 +975,12 @@ func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInte
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	if amount == "0" {
+		response.Message = "can't vest zero amount"
+		logger.Error(response.Message)
+		return response
 	}
 
 	// check if wallet already exists
@@ -1247,6 +1287,35 @@ func (bt *Busy) GetTokenDetails(ctx contractapi.TransactionContextInterface, tok
 	response.Message = "successfully fetched token"
 	response.Success = true
 	response.Data = token
+	logger.Info(response.Message)
+	return response
+}
+
+func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, stakingAddr string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	stakingInfoAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("info~%s", stakingAddr))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching staking info: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if stakingInfoAsBytes == nil {
+		response.Message = fmt.Sprintf("Staking info for address %s not found", stakingAddr)
+		logger.Error(response.Message)
+		return response
+	}
+	var stakingInfo StakingInfo
+	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
+
+	response.Message = "successfully fetched token"
+	response.Success = true
+	response.Data = stakingInfo
 	logger.Info(response.Message)
 	return response
 }

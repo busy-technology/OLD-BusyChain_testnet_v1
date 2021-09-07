@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
-	"strconv"
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
@@ -83,6 +82,11 @@ func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface
 		return response
 	}
 
+	if sender == recipient {
+		response.Message = fmt.Sprintf("message cannot be sent to the same userId: %s", sender)
+		logger.Info(response.Message)
+		return response
+	}
 	senderAsBytes, err := ctx.GetStub().GetState(sender)
 	if senderAsBytes == nil {
 		response.Message = fmt.Sprintf("Sender with common name %s does not exists", sender)
@@ -124,17 +128,21 @@ func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface
 	val, ok := senderDetails.MessageCoins[recipientDetails.DefaultWallet]
 
 	var messagestore MessageStore
-	busyCoin, _ := strconv.Atoi(config.BusyCoins)
 	// using MessageStore
 	if ok && val > 0 {
 		logger.Info("Using the message store")
-		if err := AddCoins(ctx, recipientDetails.DefaultWallet, config.BusyCoins, token); err != nil {
+		if err := AddCoins(ctx, recipientDetails.DefaultWallet, config.BigBusyCoins, token); err != nil {
 			response.Message = fmt.Sprintf("Error while Adding coins to the recipient default wallet %s", err.Error())
 			logger.Error(response.Message)
 			return response
 		}
-		senderDetails.MessageCoins[recipientDetails.DefaultWallet] = val - busyCoin
-		senderDetails.MessageCoins["totalCoins"] -= busyCoin
+		if val == config.BusyCoin {
+			// deleting the key from map
+			delete(senderDetails.MessageCoins, recipientDetails.DefaultWallet)
+		} else {
+			senderDetails.MessageCoins[recipientDetails.DefaultWallet] = val - config.BusyCoin
+		}
+		senderDetails.MessageCoins["totalCoins"] -= config.BusyCoin
 		senderAsBytes, err = json.Marshal(senderDetails)
 		if err != nil {
 			response.Message = fmt.Sprintf("Error while Marshalling the senderdetails %s", err.Error())
@@ -153,24 +161,24 @@ func (bm *BusyMessenger) SendMessage(ctx contractapi.TransactionContextInterface
 		logger.Info("using default wallet")
 
 		balance, _ := getBalanceHelper(ctx, senderDetails.DefaultWallet, token)
-		amountInt, _ := new(big.Int).SetString(config.BusyCoins, 10)
+		amountInt, _ := new(big.Int).SetString(config.BigBusyCoins, 10)
 		if balance.Cmp(amountInt) == -1 {
 			response.Message = fmt.Sprintf("User: %s does not have enough coins to Send Message", sender)
 			logger.Error(response.Message)
 			return response
 		}
 
-		if err := RemoveCoins(ctx, senderDetails.DefaultWallet, config.BusyCoins, token); err != nil {
+		if err := RemoveCoins(ctx, senderDetails.DefaultWallet, config.BigBusyCoins, token); err != nil {
 			response.Message = fmt.Sprintf("Error while Adding coins to the recipient default wallet %s", err.Error())
 			logger.Error(response.Message)
 			return response
 		}
 		if val, ok := recipientDetails.MessageCoins[senderDetails.DefaultWallet]; ok {
-			recipientDetails.MessageCoins[senderDetails.DefaultWallet] = val + busyCoin
+			recipientDetails.MessageCoins[senderDetails.DefaultWallet] = val + config.BusyCoin
 		} else {
-			recipientDetails.MessageCoins[senderDetails.DefaultWallet] = busyCoin
+			recipientDetails.MessageCoins[senderDetails.DefaultWallet] = config.BusyCoin
 		}
-		recipientDetails.MessageCoins["totalCoins"] += busyCoin
+		recipientDetails.MessageCoins["totalCoins"] += config.BusyCoin
 
 		recipientAsBytes, err = json.Marshal(recipientDetails)
 		if err != nil {

@@ -79,8 +79,9 @@ type Vote struct {
 // MessageConfig to set intial configuration for BusyCoins
 type MessageConfig struct {
 	// BusyCoins to deduct
-	BusyCoins       string        `json:"busyCoins"`
+	BigBusyCoins    string        `json:"bigBusyCoins"`
 	MessageInterval time.Duration `json:"messageInterval"`
+	BusyCoin        int           `json:"busyCoin"`
 }
 
 // PhaseConfig to store phase config
@@ -97,4 +98,12 @@ type VotingConfig struct {
 	PoolFee         string        `json:"poolFee"`
 	VotingPeriod    time.Duration `json:"votingPeriod"`
 	VotingStartTime time.Duration `json:"votingStartTime"`
+}
+
+// StakingInfo store info regarding at which time staking was done
+type StakingInfo struct {
+	DocType        string `json:"docType"`
+	StakingAddress string `json:"stakingAddr"`
+	Amount         string `json:"amount"`
+	TimeStamp      uint64 `json:"timestamp"`
 }
