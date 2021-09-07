@@ -45,7 +45,7 @@ module.exports = (server) => {
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     middleware.utility.isEmail(["email"]),
-    auth,
+    //auth,
     controller.users.register
   );
 
@@ -61,7 +61,7 @@ module.exports = (server) => {
   server.post(
     "/createStakingAddress",
     middleware.utility.required(["userId", "credentials", "type"]),
-    auth,
+    //auth,
     controller.users.wallet
   );
 
@@ -227,6 +227,13 @@ module.exports = (server) => {
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.issuedCoins
+  );
+
+  server.post(
+    "/stakingInfo",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.stakingInfo
   );
 
   //auth,

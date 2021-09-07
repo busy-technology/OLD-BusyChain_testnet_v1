@@ -259,7 +259,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		DocType: "stakingAddr",
 		UserID:  commonName,
 		Address: "staking-" + response.TxID,
-		Balance: bigZero.String(),
+		Balance: stakingAmount.String(),
 	}
 	txFee, err := getCurrentTxFee(ctx)
 	bigTxFee, _ := new(big.Int).SetString(txFee, 10)

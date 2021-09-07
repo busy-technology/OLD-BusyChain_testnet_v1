@@ -21,6 +21,7 @@ module.exports = {
     stakingAddresses: require("./users/getDefaultWallets"),
     tokenTransactions: require("./users/tokenTransactions"),
     issuedCoins: require("./users/issuedCoins"),
+    stakingInfo: require("./users/stakingInfo"),
     recoverUser: require("./users/recoverUser"),
     addAdmin: require("./users/addAdmin"),
     userWallets: require("./users/userWallets"),
