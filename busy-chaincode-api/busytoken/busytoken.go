@@ -293,6 +293,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		StakingAddress: stakingAddress.Address,
 		Amount:         stakingAddress.Balance,
 		TimeStamp:      uint64(now.Seconds),
+		Phase:          currentPhaseConfig.CurrentPhase,
 	}
 	stakingInfoAsBytes, _ := json.Marshal(stakingInfo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddress.Address), stakingInfoAsBytes)

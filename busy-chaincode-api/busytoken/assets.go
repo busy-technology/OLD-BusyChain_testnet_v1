@@ -106,4 +106,5 @@ type StakingInfo struct {
 	StakingAddress string `json:"stakingAddr"`
 	Amount         string `json:"amount"`
 	TimeStamp      uint64 `json:"timestamp"`
+	Phase          uint64 `json:"phase"`
 }
