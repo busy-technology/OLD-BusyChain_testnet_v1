@@ -249,6 +249,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		logger.Error(response.Message)
 		return response
 	}
+	now, _ := ctx.GetStub().GetTxTimestamp()
 
 	stakingAmount, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	// bigZero, _ := new(big.Int).SetString("0", 10)
@@ -283,6 +284,20 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	err = ctx.GetStub().PutState("staking-"+response.TxID, stakingAddrAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingInfo := StakingInfo{
+		DocType:        "stakingInfo",
+		StakingAddress: stakingAddress.Address,
+		Amount:         stakingAddress.Balance,
+		TimeStamp:      uint64(now.Seconds),
+	}
+	stakingInfoAsBytes, _ := json.Marshal(stakingInfo)
+	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddress.Address), stakingInfoAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating staking info in blockchain: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -1248,6 +1263,35 @@ func (bt *Busy) GetTokenDetails(ctx contractapi.TransactionContextInterface, tok
 	response.Message = "successfully fetched token"
 	response.Success = true
 	response.Data = token
+	logger.Info(response.Message)
+	return response
+}
+
+func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, stakingAddr string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	stakingInfoAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("info~%s", stakingAddr))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching staking info: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if stakingInfoAsBytes == nil {
+		response.Message = fmt.Sprintf("Staking info for address %s not found", stakingAddr)
+		logger.Error(response.Message)
+		return response
+	}
+	var stakingInfo StakingInfo
+	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
+
+	response.Message = "successfully fetched token"
+	response.Success = true
+	response.Data = stakingInfo
 	logger.Info(response.Message)
 	return response
 }

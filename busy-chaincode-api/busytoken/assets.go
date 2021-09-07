@@ -99,3 +99,11 @@ type VotingConfig struct {
 	VotingPeriod    time.Duration `json:"votingPeriod"`
 	VotingStartTime time.Duration `json:"votingStartTime"`
 }
+
+// StakingInfo store info regarding at which time staking was done
+type StakingInfo struct {
+	DocType        string `json:"docType"`
+	StakingAddress string `json:"stakingAddr"`
+	Amount         string `json:"amount"`
+	TimeStamp      uint64 `json:"timestamp"`
+}
