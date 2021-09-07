@@ -244,6 +244,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	// 	return response
 	// }
 	currentPhaseConfig, err := getPhaseConfig(ctx)
+	fmt.Println(currentPhaseConfig)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
 		logger.Error(response.Message)
@@ -251,6 +252,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	}
 	now, _ := ctx.GetStub().GetTxTimestamp()
 
+	fmt.Println(currentPhaseConfig.CurrentStakingLimit)
 	stakingAmount, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	// bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)

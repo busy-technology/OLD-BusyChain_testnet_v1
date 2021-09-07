@@ -342,6 +342,7 @@ func getPhaseConfig(ctx contractapi.TransactionContextInterface) (*PhaseConfig, 
 	}
 	var phaseConfig PhaseConfig
 	_ = json.Unmarshal(phaseConfigAsBytes, &phaseConfig)
+	fmt.Println(phaseConfig)
 	return &phaseConfig, nil
 }
 
