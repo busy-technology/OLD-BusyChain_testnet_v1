@@ -148,7 +148,7 @@ exports.FarbiceInvokeVote = async (
 };
 
 
-exports.FarbiceInvokeDestroy = async (
+exports.FarbiceInvokewithcreds = async (
     channelName,
     contractName,
     functionName,

@@ -49,7 +49,7 @@ exports.CreateVote = async (userId, userKey, votingAddress, amount, voteType) =>
   exports.DestroyPool = async (userId, userKey) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
-      const invokeChaincode = await voting.FarbiceInvokeDestroy(
+      const invokeChaincode = await voting.FarbiceInvokewithcreds(
           "busychannel",
           "busytoken",
           "BusyVoting:DestroyPool",
@@ -71,10 +71,32 @@ exports.CreateVote = async (userId, userKey, votingAddress, amount, voteType) =>
   exports.QueryPool = async (userId, userKey) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
-      const invokeChaincode = await voting.FarbiceInvokeDestroy(
+      const invokeChaincode = await voting.FarbiceInvokewithcreds(
           "busychannel",
           "busytoken",
           "BusyVoting:QueryPool",
+          userId,
+          userKey,
+        );
+      if (invokeChaincode) {
+          return invokeChaincode;
+      } 
+      else {
+          return null
+      }
+    } catch (exception) {
+      return exception;
+    }
+  };
+
+
+  exports.PoolHistory = async (userId, userKey) => {
+    try {
+      await enrollAdmin.FabricAdminEnroll();
+      const invokeChaincode = await voting.FarbiceInvokewithcreds(
+          "busychannel",
+          "busytoken",
+          "BusyVoting:PoolHistory",
           userId,
           userKey,
         );

@@ -80,6 +80,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
 		}
 
+		logger.Info("amount ", amount, "fee ", fee)
 		bigAmountWithTransferFee := fee.Add(fee, amount)
 
 		// Check if sender has enough balance
@@ -180,8 +181,6 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		}
 		return nil
 	}
-
-	return nil
 }
 
 func getBalanceHelper(ctx contractapi.TransactionContextInterface, address string, token string) (*big.Int, error) {

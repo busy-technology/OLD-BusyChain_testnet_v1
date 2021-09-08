@@ -95,3 +95,26 @@ exports.CreateVote = async (userId, userKey, votingAddress, amount, voteType) =>
       console.log("exception", exception);
     }
   };
+
+  exports.PoolHistory = async (userId, userKey) => {
+    try {
+  
+  
+      const data = await voting.PoolHistory(userId, userKey);
+  
+  
+      if (data) {
+        console.log("RESPONSE FROM CHAINCODE", data);
+        const output = {
+          chaincodeResponse: data,
+        };
+        return output;
+      } else {
+        console.log("error");
+      }
+    } catch (exception) {
+      //logger.error(exception.errors);
+      //return sendResponse(res, false, 200, exception.errors);
+      console.log("exception", exception);
+    }
+  };

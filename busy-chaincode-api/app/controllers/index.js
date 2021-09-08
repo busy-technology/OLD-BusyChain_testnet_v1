@@ -30,6 +30,7 @@ module.exports = {
     createVote: require("./users/createVote"),
     destroyPool: require("./users/destroyPool"),
     queryPool: require("./users/queryPool"),
+    poolHistory: require("./users/poolHistory"),
   },
 
   auth: {
