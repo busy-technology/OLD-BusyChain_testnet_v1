@@ -423,7 +423,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 	var phaseCount uint64 = stakingInfo.Phase
 	bigPhaseAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
 	bigTwo := new(big.Int).SetUint64(2)
-	var reward *big.Int = bigZero
+	var reward *big.Int = new(big.Int).Set(bigZero)
 	logger.Infof("user created staking address in phase %d and current phase is %d means user is not claiming in same phase", stakingInfo.Phase, currentPhaseConfig.CurrentPhase)
 	for phaseCount == currentPhaseConfig.CurrentPhase {
 		logger.Infof("#################### loop starting with phase %d and current reward is %s ####################", phaseCount, reward.String())

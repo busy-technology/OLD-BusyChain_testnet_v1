@@ -1,10 +1,10 @@
 const Admin = require("../../models/admin");
-const Wallet = require("../../models/Wallets");
+const User = require("../../models/Users");
 const staking = require("../../../blockchain/test-scripts/staking-info");
 
 module.exports = async (req, res, next) => {
   try {
-    const stakingAddr = req.body.stakingAddr;
+    const userIdentity = req.body.userId;
     const adminId = "admin";
     const userId = "sample";
 
@@ -25,16 +25,16 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const address = await Wallet.findOne({
-      walletId: stakingAddr,
+    const id = await User.findOne({
+      userId: userIdentity,
     });
     console.log("ADDRESS", address);
 
-    if (address) {
+    if (id) {
       const response1 = await staking.stakingInfo(
         userId,
         blockchain_credentials,
-        stakingAddr
+        userIdentity
       );
       console.log("RESPONSE 1", response1);
       const response = JSON.parse(response1.chaincodeResponse);
@@ -57,10 +57,10 @@ module.exports = async (req, res, next) => {
         });
       }
     } else {
-      console.log("stakingAddr do not exists.");
+      console.log("userId do not exists.");
       return res.send(404, {
         status: false,
-        message: `stakingAddr do not exists`,
+        message: `userId do not exists`,
       });
     }
   } catch (exception) {

@@ -2,11 +2,11 @@ const UserServices = require("../services/user/users");
 
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.stakingInfo = async (userId, userKey, stakingAddr) => {
+exports.stakingInfo = async (userId, userKey, userIdentity) => {
   try {
     console.log("USER KEY", userKey);
     const walletDetails = {
-      stakingAddr: stakingAddr,
+      userId: userIdentity,
     };
     const data = await UserServices.stakingInfo(walletDetails, userId, userKey);
 

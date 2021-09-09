@@ -1510,6 +1510,7 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
 	// claimableAmount = claimableAmount.Add(claimableAmount, bigCurrentStakingLimit)
 	bigStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	fmt.Println(bigZero)
 	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, bigStakingAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
