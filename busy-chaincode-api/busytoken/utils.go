@@ -83,6 +83,10 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string, fee *big.Int) error {
 	var txID string = ctx.GetStub().GetTxID()
 
+	if amount.String() == "0" {
+		return nil
+	}
+
 	if token == "busy" {
 		// Prune exsting utxo if sender and count his balance
 		balance, utxoKeys, err := pruneUTXOs(ctx, sender, token)
