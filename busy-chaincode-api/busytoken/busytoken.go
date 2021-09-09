@@ -1432,7 +1432,7 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
 	logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
-	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, amounOtherThenStakingLimit, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
 		logger.Error(response.Message)
