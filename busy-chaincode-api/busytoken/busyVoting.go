@@ -66,13 +66,14 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, vo
 	poolData := Pool{
 		DocType:          "pool",
 		CreatedBy:        commonName,
+		PoolID:           response.TxID,
 		CreatedAt:        time.Now(),
 		VotingStartAt:    time.Now().Add(votingConfig.VotingStartTime),
 		VotingEndAt:      time.Now().Add(votingConfig.VotingPeriod),
-		VotingAddressYay: "Yes-" + response.TxID,
-		VotingAddressNay: "No-" + response.TxID,
-		VotingPowerYay:   bigZero.String(),
-		VotingPowerNay:   bigZero.String(),
+		VotingAddressYes: "Yes-" + response.TxID,
+		VotingAddressNo:  "No-" + response.TxID,
+		VotingPowerYes:   bigZero.String(),
+		VotingPowerNo:    bigZero.String(),
 		TokenType:        token,
 		VotingInfo:       votingInfo,
 	}
@@ -88,6 +89,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, vo
 
 	response.Success = true
 	response.Data = poolData
+	response.Message = "Pool Created Successfully"
 	return response
 }
 
@@ -120,7 +122,7 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, vo
 		return response
 	}
 
-	if PoolData.VotingAddressYay != fmt.Sprintf("Yes-%s", votingaddress) && PoolData.VotingAddressNay != fmt.Sprintf("No-%s", votingaddress) {
+	if PoolData.VotingAddressYes != fmt.Sprintf("Yes-%s", votingaddress) && PoolData.VotingAddressNo != fmt.Sprintf("No-%s", votingaddress) {
 		response.Message = fmt.Sprintf("Voting Address doesnot exists")
 		logger.Error(response.Message)
 		return response
@@ -165,13 +167,13 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, vo
 	}
 
 	if voteType == "Yes" {
-		votingPowerYay, _ := new(big.Int).SetString(PoolData.VotingPowerYay, 10)
+		votingPowerYay, _ := new(big.Int).SetString(PoolData.VotingPowerYes, 10)
 		votingPowerYay = new(big.Int).Add(amountInt, votingPowerYay)
-		PoolData.VotingPowerYay = votingPowerYay.String()
+		PoolData.VotingPowerYes = votingPowerYay.String()
 	} else {
-		VotingPowerNay, _ := new(big.Int).SetString(PoolData.VotingPowerNay, 10)
+		VotingPowerNay, _ := new(big.Int).SetString(PoolData.VotingPowerNo, 10)
 		VotingPowerNay = new(big.Int).Add(amountInt, VotingPowerNay)
-		PoolData.VotingPowerNay = VotingPowerNay.String()
+		PoolData.VotingPowerNo = VotingPowerNay.String()
 	}
 	PoolDataBytes, _ := json.Marshal(PoolData)
 	vote := Vote{
@@ -180,7 +182,6 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, vo
 		VoteAddress: votingaddress,
 		Tokens:      amount,
 		VoteType:    voteType,
-		// VotedBy:     commonName,
 	}
 
 	VoteListAsBytes, _ := ctx.GetStub().GetState(votingaddress)
@@ -209,6 +210,7 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, vo
 		return response
 	}
 	response.Success = true
+	response.Message = "Voted successfully"
 	return response
 }
 
@@ -225,7 +227,6 @@ func (bv *BusyVoting) DestroyPool(ctx contractapi.TransactionContextInterface) R
 		logger.Error(response.Message)
 		return response
 	}
-
 
 	//  Checking if pool doesnot Exists
 	poolAsBytes, err := ctx.GetStub().GetState("PoolData")
@@ -249,16 +250,16 @@ func (bv *BusyVoting) DestroyPool(ctx contractapi.TransactionContextInterface) R
 		return response
 	}
 
-	poolDataListAsBytes, _ := ctx.GetStub().GetState("PoolDataList")
+	poolDataListAsBytes, err := ctx.GetStub().GetState("PoolDataList")
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while retrieving the pool List: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
 	poolDataList := []Pool{}
-
 	_ = json.Unmarshal(poolDataListAsBytes, &poolDataList)
-
+	// appending the current pool data
+	poolDataList = append(poolDataList, PoolData)
 	poolAddrListAsBytes, _ := json.Marshal(poolDataList)
 	// storing the data at PoolDataList
 	err = ctx.GetStub().PutState("PoolDataList", poolAddrListAsBytes)
@@ -336,4 +337,28 @@ func burnCoins(ctx contractapi.TransactionContextInterface, address string, coin
 		return err
 	}
 	return nil
+}
+
+// Pool History to retrieve the List of pools created till date
+func (bv *BusyVoting) PoolHistory(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	poolDataListAsBytes, err := ctx.GetStub().GetState("PoolDataList")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while retrieving the pool List: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	poolDataList := []Pool{}
+	_ = json.Unmarshal(poolDataListAsBytes, &poolDataList)
+
+	response.Success = true
+	response.Data = poolDataList
+	response.Message = "Pool History Fetched successfully"
+	return response
 }

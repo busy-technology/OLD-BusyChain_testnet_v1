@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
 
     console.log("BLOCK", blockchain_credentials);
 
-    const user = await User.findOne({ walletId: userId });
+    const user = await User.findOne({ walletId: recipient });
     console.log("User", user);
     if (user) {
       const response1 = await vestingV2.vestingV2(

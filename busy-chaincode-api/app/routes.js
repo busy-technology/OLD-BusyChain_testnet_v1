@@ -77,7 +77,7 @@ module.exports = (server) => {
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
-    middleware.utility.isAmount(["amount"]),
+    // middleware.utility.isAmount(["amount"]),
     adminAuth,
     controller.users.buy
   );
@@ -287,6 +287,14 @@ module.exports = (server) => {
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.queryPool
+  );
+
+  // endpoint for creating pool
+  server.get(
+    "/poolHistory",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.poolHistory
   );
 
   // endpoint for creating vote

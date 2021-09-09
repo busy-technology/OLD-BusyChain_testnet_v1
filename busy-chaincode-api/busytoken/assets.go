@@ -55,14 +55,15 @@ type LockedTokens struct {
 // Pool represents the data of overall Governance Voting
 type Pool struct {
 	DocType          string    `json:"docType"`
+	PoolID           string    `json:"poolID"`
 	CreatedBy        string    `json:"createdBy"`
 	CreatedAt        time.Time `json:"createdAt"`
 	VotingStartAt    time.Time `json:"votingStartAt"`
 	VotingEndAt      time.Time `json:"votingEndAt"`
-	VotingAddressYay string    `json:"votingAddressYay"`
-	VotingAddressNay string    `json:"votingAddressNay"`
-	VotingPowerYay   string    `json:"votingPowerYay"`
-	VotingPowerNay   string    `json:"votingPowerNay"`
+	VotingAddressYes string    `json:"votingAddressYes"`
+	VotingAddressNo  string    `json:"votingAddressNo"`
+	VotingPowerYes   string    `json:"votingPowerYes"`
+	VotingPowerNo    string    `json:"votingPowerNo"`
 	TokenType        string    `json:"tokenType"`
 	VotingInfo       string    `json:"votingInfo"`
 }

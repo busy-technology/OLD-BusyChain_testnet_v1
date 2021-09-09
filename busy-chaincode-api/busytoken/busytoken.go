@@ -105,7 +105,6 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 	_ = ctx.GetStub().PutState("latestTokenId", []byte(strconv.Itoa(0)))
-
 	user := User{
 		DocType:       "user",
 		UserID:        commonName,
@@ -648,6 +647,12 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 	bigTransferFee, _ := new(big.Int).SetString(string(transferFeesAsBytes), 10)
 
 	bigAmount, _ := new(big.Int).SetString(amount, 10)
+
+	if bigAmount == nil {
+		response.Message = fmt.Sprintf("Invalid or empty amount provided, amount should be string")
+		logger.Error(response.Message)
+		return response
+	}
 	// bigAmountWithTransferFee := bigAmount.Add(bigAmount, bigTransferFee)
 	if token == "" {
 		token = "busy"
@@ -704,7 +709,7 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 		}
 	}
 
-	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token, new(big.Int).Set(bigTransferFee))
+	err = transferHelper(ctx, user.DefaultWallet, recipiant, bigAmount, token, bigTransferFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer: %s", err.Error())
 		logger.Error(response.Message)
