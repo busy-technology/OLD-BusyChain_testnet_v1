@@ -1507,9 +1507,12 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 
 	adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
 	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
+	logger.Infof("Amount %s already claimed by %s", bigClaimedAmount.String(), stakingAddr)
 	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
+	logger.Infof("claimable amount after dedcuting claimed amount %s from total reward %s is %s", bigClaimedAmount.String(), stakingReward.String(), claimableAmount.String())
 	// claimableAmount = claimableAmount.Add(claimableAmount, bigCurrentStakingLimit)
 	bigStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	logger.Infof("staking amount for staking address %s is %s it is fetched from staking info", stakingAddr, bigStakingAmount.String())
 	fmt.Println(bigZero)
 	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, bigStakingAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
