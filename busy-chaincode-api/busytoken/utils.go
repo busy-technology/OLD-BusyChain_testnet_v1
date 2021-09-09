@@ -18,6 +18,7 @@ const (
 	// Added two more zeros in REWARD_DENOMINATOR so we don't need devide again with 100
 	REWARD_DENOMINATOR = "100000000000000000000"
 	BUSY_COIN_SYMBOL   = "busy"
+	ADMIN_USER_ID      = "ordererAdmin"
 )
 
 // UnknownTransactionHandler returns a shim error
@@ -476,12 +477,12 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 		logger.Infof("#################### loop ended with phase %d and current reward is %s ####################", phaseCount, reward.String())
 	}
 	logger.Infof("After finishing all iteration of loop reward is %s", reward.String())
-	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
-	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
-	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
-	logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
-	reward.Add(reward, amounOtherThenStakingLimit)
-	logger.Infof("After adding amounOtherThenStakingLimit into reward reward is %s", reward.String())
+	// bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	// bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
+	// amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
+	// logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
+	// reward.Add(reward, amounOtherThenStakingLimit)
+	// logger.Infof("After adding amounOtherThenStakingLimit into reward reward is %s", reward.String())
 	return reward, err
 }
 

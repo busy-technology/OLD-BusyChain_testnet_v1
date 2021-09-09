@@ -1402,9 +1402,10 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	var stakingInfo StakingInfo
 	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
 
+	adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
 	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
 	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
-	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	err = transferHelper(ctx, adminWalletAddress, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
 		logger.Error(response.Message)
@@ -1420,6 +1421,23 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 		return response
 	}
 	stakingInfo.TotalReward = stakingReward.String()
+
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
+	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
+	logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
+	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 
 	err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
@@ -1479,20 +1497,28 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	var stakingInfo StakingInfo
 	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
 
-	phaseConfig, err := getPhaseConfig(ctx)
+	// phaseConfig, err := getPhaseConfig(ctx)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+	// bigCurrentStakingLimit, _ := new(big.Int).SetString(phaseConfig.CurrentStakingLimit, 10)
+
+	adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
+	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
+	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
+	// claimableAmount = claimableAmount.Add(claimableAmount, bigCurrentStakingLimit)
+	bigStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, bigStakingAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	bigCurrentStakingLimit, _ := new(big.Int).SetString(phaseConfig.CurrentStakingLimit, 10)
-
-	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
-	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
-	claimableAmount = claimableAmount.Add(claimableAmount, bigCurrentStakingLimit)
-	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	err = transferHelper(ctx, adminWalletAddress, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while transfer from admin to default wallet: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
