@@ -115,7 +115,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			Token:   token,
 		}
 		utxoAsBytes, _ := json.Marshal(utxo)
-		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, sender, token), utxoAsBytes)
+		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, sender, recipiant, token), utxoAsBytes)
 
 		// Create new utxo for recipiant
 		utxo = UTXO{
@@ -125,7 +125,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			Token:   token,
 		}
 		utxoAsBytes, _ = json.Marshal(utxo)
-		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, token), utxoAsBytes)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, recipiant, sender, token), utxoAsBytes)
 		if err != nil {
 			return fmt.Errorf("error while put state in ledger: %s", err.Error())
 		}
@@ -165,7 +165,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			Token:   token,
 		}
 		utxoAsBytes, _ := json.Marshal(utxo)
-		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, sender, token), utxoAsBytes)
+		_ = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, sender, recipiant, token), utxoAsBytes)
 
 		// Create new utxo for recipiant
 		utxo = UTXO{
@@ -175,7 +175,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			Token:   token,
 		}
 		utxoAsBytes, _ = json.Marshal(utxo)
-		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, token), utxoAsBytes)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, recipiant, sender, token), utxoAsBytes)
 		if err != nil {
 			return fmt.Errorf("error while put state in ledger: %s", err.Error())
 		}
@@ -189,7 +189,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			Token:   "busy",
 		}
 		utxoAsBytes, _ = json.Marshal(utxo)
-		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", txID, recipiant, "busy"), utxoAsBytes)
+		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, recipiant, sender, BUSY_COIN_SYMBOL), utxoAsBytes)
 		if err != nil {
 			return fmt.Errorf("error while put state in ledger: %s", err.Error())
 		}
