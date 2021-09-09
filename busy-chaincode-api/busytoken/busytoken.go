@@ -1417,6 +1417,13 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	var stakingInfo StakingInfo
 	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
 
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
 	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
 	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
@@ -1428,6 +1435,7 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	}
 	bigClaimedAmount = bigClaimedAmount.Add(bigClaimedAmount, claimableAmount)
 	stakingInfo.Claimed = bigClaimedAmount.String()
+	stakingInfo.Amount = currentPhaseConfig.CurrentStakingLimit
 	stakingInfoAsBytes, _ = json.Marshal(stakingInfo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddr), stakingInfoAsBytes)
 	if err != nil {
@@ -1437,12 +1445,6 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	}
 	stakingInfo.TotalReward = stakingReward.String()
 
-	currentPhaseConfig, err := getPhaseConfig(ctx)
-	if err != nil {
-		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
-		logger.Error(response.Message)
-		return response
-	}
 	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
 	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
@@ -1512,12 +1514,12 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	var stakingInfo StakingInfo
 	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
 
-	// phaseConfig, err := getPhaseConfig(ctx)
-	// if err != nil {
-	// 	response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
-	// 	logger.Error(response.Message)
-	// 	return response
-	// }
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 	// bigCurrentStakingLimit, _ := new(big.Int).SetString(phaseConfig.CurrentStakingLimit, 10)
 
 	adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
@@ -1543,6 +1545,7 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	}
 	bigClaimedAmount = bigClaimedAmount.Add(bigClaimedAmount, claimableAmount)
 	stakingInfo.Claimed = bigClaimedAmount.String()
+	stakingInfo.Amount = currentPhaseConfig.CurrentStakingLimit
 	stakingInfoAsBytes, _ = json.Marshal(stakingInfo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddr), stakingInfoAsBytes)
 	if err != nil {
