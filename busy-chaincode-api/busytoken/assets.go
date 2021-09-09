@@ -107,4 +107,7 @@ type StakingInfo struct {
 	Amount         string `json:"amount"`
 	TimeStamp      uint64 `json:"timestamp"`
 	Phase          uint64 `json:"phase"`
+	// TotalReward It will be zero in Blockchain state but while showign staking info we update and return in response
+	TotalReward string `json:"totalReward"`
+	Claimed     string `json:"claimed"`
 }
