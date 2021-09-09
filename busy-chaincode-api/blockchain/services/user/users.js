@@ -317,6 +317,58 @@ exports.transferToken = async (walletDetails, userId, userKey) => {
   }
 };
 
+exports.claimToken = async (walletDetails, userId, userKey) => {
+  try {
+    await enrollOrdererAdmin.FabricAdminEnroll();
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "Claim",
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF TRANSFER TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
+exports.unstakeToken = async (walletDetails, userId, userKey) => {
+  try {
+    await enrollOrdererAdmin.FabricAdminEnroll();
+    const invokeFabricChaincodeWithCertificate =
+      await invoke.FabricChaincodeInvokeWithCertificate(
+        "busychannel",
+        "busytoken",
+        "Unstake",
+        walletDetails,
+        userId,
+        userKey
+      );
+
+    if (invokeFabricChaincodeWithCertificate) {
+      // function to remove the user key
+
+      await invoke.removeKeyFromWallet(userId);
+      return invokeFabricChaincodeWithCertificate;
+    }
+  } catch (exception) {
+    console.log("IN CATCH OF TRANSFER TOKEN SERVICE.");
+    //return { error: exception };
+    return exception;
+  }
+};
+
 exports.WalletQuery = async (walletDetails, userId, userKey) => {
   try {
     //await enrollAdmin.FabricAdminEnroll();
