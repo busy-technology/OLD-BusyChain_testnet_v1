@@ -341,7 +341,7 @@ func updatePhase(ctx contractapi.TransactionContextInterface) (*PhaseConfig, err
 		return nil, err
 	}
 
-	var phaseUpdateTimeline map[uint64]uint64
+	phaseUpdateTimeline := map[uint64]uint64{}
 	phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
 	_ = json.Unmarshal(phaseUpdateTimelineAsBytes, &phaseUpdateTimeline)
 	now, _ := ctx.GetStub().GetTxTimestamp()
