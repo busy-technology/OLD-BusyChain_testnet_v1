@@ -81,21 +81,23 @@ func pruneUTXOs(ctx contractapi.TransactionContextInterface, sender string, toke
 }
 
 func transferHelper(ctx contractapi.TransactionContextInterface, sender string, recipiant string, amount *big.Int, token string, fee *big.Int) error {
+	logger.Infof("In transfer helper \n sender %s \n recipiant %s \n amount %s \n tokne %s \n fee %s \n ", sender, recipiant, amount.String(), token, fee.String())
 	var txID string = ctx.GetStub().GetTxID()
 
 	if amount.String() == "0" {
 		return nil
 	}
 
-	if token == "busy" {
+	if token == BUSY_COIN_SYMBOL {
 		// Prune exsting utxo if sender and count his balance
 		balance, utxoKeys, err := pruneUTXOs(ctx, sender, token)
 		if err != nil {
 			return fmt.Errorf("error while pruning UTXOs: %s", err.Error())
 		}
+		logger.Infof("balance of sender after prune utxo %s", balance.String())
 
-		logger.Info("amount ", amount, "fee ", fee)
 		bigAmountWithTransferFee := new(big.Int).Set(fee).Add(fee, amount)
+		logger.Infof("bigAmountWithTransferFee: %s", bigAmountWithTransferFee)
 
 		// Check if sender has enough balance
 		if bigAmountWithTransferFee.Cmp(balance) == 1 {
@@ -425,7 +427,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 	bigTwo := new(big.Int).SetUint64(2)
 	var reward *big.Int = new(big.Int).Set(bigZero)
 	logger.Infof("user created staking address in phase %d and current phase is %d means user is not claiming in same phase", stakingInfo.Phase, currentPhaseConfig.CurrentPhase)
-	for phaseCount == currentPhaseConfig.CurrentPhase {
+	for phaseCount != currentPhaseConfig.CurrentPhase+1 {
 		logger.Infof("#################### loop starting with phase %d and current reward is %s ####################", phaseCount, reward.String())
 		if phaseCount == stakingInfo.Phase {
 			logger.Info("##### couting reward for same phase in which user created staking address phase: %d", phaseCount)

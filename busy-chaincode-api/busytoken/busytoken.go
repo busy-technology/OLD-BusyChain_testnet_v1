@@ -143,13 +143,28 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	phaseConfig := PhaseConfig{
 		CurrentPhase:          1,
 		TotalStakingAddr:      bigZero.String(),
-		NextStakingAddrTarget: "10",
+		NextStakingAddrTarget: "1",
 		CurrentStakingLimit:   currentStakingLimit.String(),
 	}
 	phaseConfigAsBytes, _ := json.Marshal(phaseConfig)
 	err = ctx.GetStub().PutState("phaseConfig", phaseConfigAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while initialising phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	now, _ := ctx.GetStub().GetTxTimestamp()
+	phaseUpdateTimeline := map[uint64]uint64{
+		1: uint64(now.Seconds),
+	}
+	// phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
+	// _ = json.Unmarshal(phaseUpdateTimelineAsBytes, &phaseUpdateTimeline)
+	// phaseUpdateTimeline[phaseConfig.CurrentPhase] = uint64(now.Seconds)
+	phaseUpdateTimelineAsBytes, _ := json.Marshal(phaseUpdateTimeline)
+	err = ctx.GetStub().PutState(PHASE_UPDATE_TIMELINE, phaseUpdateTimelineAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while initialising phase timeline: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -1407,7 +1422,7 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
 	err = transferHelper(ctx, adminWalletAddress, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
+		response.Message = fmt.Sprintf("Error while transfer from admin to default wallet: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
