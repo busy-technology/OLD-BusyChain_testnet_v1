@@ -95,7 +95,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		}
 
 		logger.Info("amount ", amount, "fee ", fee)
-		bigAmountWithTransferFee := fee.Add(fee, amount)
+		bigAmountWithTransferFee := new(big.Int).Set(fee).Add(fee, amount)
 
 		// Check if sender has enough balance
 		if bigAmountWithTransferFee.Cmp(balance) == 1 {
