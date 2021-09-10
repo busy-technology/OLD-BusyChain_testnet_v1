@@ -1480,6 +1480,7 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	}
 	logger.Infof("staking reward before returning response ", stakingReward.String())
 	stakingInfo.TotalReward = stakingReward.String()
+	stakingInfo.Claimed = claimableAmount.String()
 
 	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
 	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
@@ -1618,6 +1619,7 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 		return response
 	}
 	stakingInfo.TotalReward = stakingReward.String()
+	stakingInfo.Claimed = claimableAmount.String()
 
 	err = ctx.GetStub().DelState(stakingAddr)
 	if err != nil {
