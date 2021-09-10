@@ -42,6 +42,7 @@ module.exports = async (req, res, next) => {
       console.log("RESPONSE 1", response1);
       const response = JSON.parse(response1.chaincodeResponse);
       console.log("DATA 2", response);
+      //console.log("DATA 2", response.chaincodeResponse);
       const balance = response.data;
       console.log("BALANCE", response.data);
 

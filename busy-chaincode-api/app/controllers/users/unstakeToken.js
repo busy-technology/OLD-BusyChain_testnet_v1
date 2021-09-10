@@ -54,6 +54,8 @@ module.exports = async (req, res, next) => {
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
+          await Wallet.deleteOne({ walletId: address.walletId });
+
           return res.send(200, {
             status: true,
             message: "Unstaking successful.",

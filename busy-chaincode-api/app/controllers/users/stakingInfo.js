@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
     const id = await User.findOne({
       userId: userIdentity,
     });
-    console.log("ADDRESS", address);
+    //console.log("ADDRESS", address);
 
     if (id) {
       const response1 = await staking.stakingInfo(
