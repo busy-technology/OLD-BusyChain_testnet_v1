@@ -1360,10 +1360,19 @@ func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, user
 	var stakingAddr Wallet
 	responseData := map[string]interface{}{}
 	for resultIterator.HasNext() {
+		tmpData := map[string]string{}
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &stakingAddr)
 		stakingInfo, _ := getStakingInfo(ctx, stakingAddr.Address)
-		responseData[stakingAddr.Address] = stakingInfo
+		tmpData["claimed"] = stakingInfo.Claimed
+		reward, err := countStakingReward(ctx, stakingInfo.StakingAddress)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while counting staking reward: %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		tmpData["totalReward"] = reward.String()
+		responseData[stakingAddr.Address] = tmpData
 	}
 
 	response.Message = fmt.Sprintf("Successfully fetched staking info for user %s", userID)
