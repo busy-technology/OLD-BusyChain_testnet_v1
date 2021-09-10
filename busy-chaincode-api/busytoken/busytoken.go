@@ -1382,9 +1382,17 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	}
 
 	commonName, _ := getCommonName(ctx)
+	fee, _ := getCurrentTxFee(ctx)
+	bigFee, _ := new(big.Int).SetString(fee, 10)
 	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	balance, _ := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	if bigFee.Cmp(balance) == 1 {
+		response.Message = "Not enough balance for tx fee"
 		logger.Error(response.Message)
 		return response
 	}
@@ -1443,8 +1451,6 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-	fee, _ := getCurrentTxFee(ctx)
-	bigFee, _ := new(big.Int).SetString(fee, 10)
 	claimableAmounAfterDeductingFee := new(big.Int).Set(claimableAmount).Sub(claimableAmount, bigFee)
 	logger.Infof("claimable amout after deducting fee %s is %s", bigFee.String(), claimableAmounAfterDeductingFee.String())
 	err = addUTXO(ctx, defaultWalletAddress, claimableAmounAfterDeductingFee, BUSY_COIN_SYMBOL)
@@ -1506,13 +1512,20 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	}
 
 	commonName, _ := getCommonName(ctx)
+	fee, _ := getCurrentTxFee(ctx)
+	bigFee, _ := new(big.Int).SetString(fee, 10)
 	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-
+	balance, _ := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	if bigFee.Cmp(balance) == 1 {
+		response.Message = "Not enough balance for tx fee"
+		logger.Error(response.Message)
+		return response
+	}
 	stakingAddrAsBytes, err := ctx.GetStub().GetState(stakingAddr)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while fetching staking address: %s", err.Error())
@@ -1577,8 +1590,6 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	// 	logger.Error(response.Message)
 	// 	return response
 	// }
-	fee, _ := getCurrentTxFee(ctx)
-	bigFee, _ := new(big.Int).SetString(fee, 10)
 	claimableAmounAfterDeductingFee := new(big.Int).Set(claimableAmount).Sub(claimableAmount, bigFee)
 	err = addUTXO(ctx, defaultWalletAddress, claimableAmounAfterDeductingFee, BUSY_COIN_SYMBOL)
 	if err != nil {
