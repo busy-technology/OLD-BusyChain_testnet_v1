@@ -11,6 +11,7 @@ import (
 
 var bigOne *big.Int = new(big.Int).SetUint64(1)
 var bigTwo *big.Int = new(big.Int).SetUint64(2)
+var minusOne *big.Int = new(big.Int).SetInt64(-1)
 
 const (
 	PHASE_UPDATE_TIMELINE = "phaseUpdateTimeline"
