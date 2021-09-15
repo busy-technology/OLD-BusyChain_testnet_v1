@@ -14,7 +14,7 @@ type BusyVoting struct {
 	contractapi.Contract
 }
 
-func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, votingInfo string, token string) Response {
+func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, walletid string, votingInfo string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -43,6 +43,12 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, vo
 	defaultAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error getting the default address for %s", commonName)
+		logger.Error(response.Message)
+		return response
+	}
+
+	if walletid != defaultAddress {
+		response.Message = fmt.Sprintf("Walletid in the request does not match with default wallet id for %s", commonName)
 		logger.Error(response.Message)
 		return response
 	}
@@ -93,7 +99,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, vo
 	return response
 }
 
-func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, votingaddress string, amount string, voteType string, token string) Response {
+func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, walletid string, votingaddress string, amount string, voteType string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -149,10 +155,28 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, vo
 		logger.Error(response.Message)
 		return response
 	}
+	if walletid != defaultAddress {
+		response.Message = fmt.Sprintf("Walletid in the request does not match with default wallet id for %s", commonName)
+		logger.Error(response.Message)
+		return response
+	}
 
 	balance, _ := getBalanceHelper(ctx, defaultAddress, "busy")
 
-	amountInt, _ := new(big.Int).SetString(amount, 10)
+	amountInt, isConverted := new(big.Int).SetString(amount, 10)
+
+	if !isConverted {
+		response.Message = fmt.Sprint("Invalid Amount provided in the request")
+		logger.Error(response.Message)
+		return response
+	}
+
+	if amountInt.Cmp(bigZero) <= 0 {
+		response.Message = fmt.Sprint("Amount to vote cannot be zero or negative")
+		logger.Error(response.Message)
+		return response
+	}
+
 	if balance.Cmp(amountInt) == -1 {
 		response.Message = fmt.Sprintf("User: %s does not have enough coins to vote", commonName)
 		logger.Error(response.Message)

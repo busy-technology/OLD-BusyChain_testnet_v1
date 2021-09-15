@@ -1,12 +1,13 @@
 const enrollAdmin = require("../../sdk/enrollAdmin");
 const voting = require("../../sdk/voting");
-exports.CreatePool = async (userId, userKey, votingInfo) => {
+exports.CreatePool = async (walletId, userId, userKey, votingInfo) => {
   try {
     await enrollAdmin.FabricAdminEnroll();
     const invokeChaincode = await voting.FarbiceInvokePool(
         "busychannel",
         "busytoken",
         "BusyVoting:CreatePool",
+         walletId,
          userId,
          userKey,
          votingInfo
@@ -22,14 +23,15 @@ exports.CreatePool = async (userId, userKey, votingInfo) => {
   }
 };
 
-exports.CreateVote = async (userId, userKey, votingAddress, amount, voteType) => {
+exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, voteType) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
       const invokeChaincode = await voting.FarbiceInvokeVote(
           "busychannel",
           "busytoken",
           "BusyVoting:CreateVote",
-          userId, 
+          walletId, 
+          userId,
           userKey, 
           votingAddress, 
           amount, 

@@ -275,7 +275,7 @@ module.exports = (server) => {
   // endpoint for creating pool
   server.post(
     "/createPool",
-    middleware.utility.required(["userId", "votingInfo"]),
+    middleware.utility.required(["walletId","credentials","votingInfo"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.createPool
@@ -301,7 +301,8 @@ module.exports = (server) => {
   server.post(
     "/createVote",
     middleware.utility.required([
-      "userId",
+      "walletId",
+      "credentials",
       "votingAddress",
       "amount",
       "voteType",

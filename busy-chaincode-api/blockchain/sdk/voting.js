@@ -6,6 +6,7 @@ exports.FarbiceInvokePool = async (
   channelName,
   contractName,
   functionName,
+  walletId,
   userId,
   userKey,
   votingInfo
@@ -61,7 +62,7 @@ exports.FarbiceInvokePool = async (
 
     // Submit the specified transaction.
     // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-    const result = await contract.submitTransaction(functionName,votingInfo, "busy");
+    const result = await contract.submitTransaction(functionName,walletId,votingInfo, "busy");
     console.log("Transaction has been submitted");
     console.log("result: ", result.toString());
     // Disconnect from the gateway.
@@ -77,6 +78,7 @@ exports.FarbiceInvokeVote = async (
   channelName,
   contractName,
   functionName,
+  walletId,
   userId,
   userKey,
   votingAddress,
@@ -135,7 +137,7 @@ exports.FarbiceInvokeVote = async (
 
     // Submit the specified transaction.
     // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-    const result = await contract.submitTransaction(functionName, votingAddress, amount, voteType, "busy");
+    const result = await contract.submitTransaction(functionName, walletId ,votingAddress, amount, voteType, "busy");
     console.log("Transaction has been submitted");
     console.log("result: ", result.toString());
     // Disconnect from the gateway.
