@@ -8,6 +8,8 @@ module.exports = {
     attemptUnlock: require("./users/attemptUnlock"),
     buy: require("./users/buyTokens"),
     transfer: require("./users/transferToken"),
+    claim: require("./users/claimToken.js"),
+    unstake: require("./users/unstakeToken.js"),
     issue: require("./users/issueTokens"),
     totalSupply: require("./users/totalSupply"),
     transferFee: require("./users/transferFees"),

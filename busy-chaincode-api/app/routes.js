@@ -77,7 +77,7 @@ module.exports = (server) => {
   server.post(
     "/buyTokens",
     middleware.utility.required(["recipiant", "amount", "token"]),
-    // middleware.utility.isAmount(["amount"]),
+    middleware.utility.isAmount(["amount"]),
     adminAuth,
     controller.users.buy
   );
@@ -94,6 +94,20 @@ module.exports = (server) => {
     middleware.utility.isAmount(["amount"]),
     auth,
     controller.users.transfer
+  );
+
+  server.post(
+    "/claim",
+    middleware.utility.required(["stakingAddr"]),
+    auth,
+    controller.users.claim
+  );
+
+  server.post(
+    "/unstake",
+    middleware.utility.required(["stakingAddr"]),
+    auth,
+    controller.users.unstake
   );
 
   //auth,

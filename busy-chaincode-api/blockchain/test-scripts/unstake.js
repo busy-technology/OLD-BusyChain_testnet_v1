@@ -2,13 +2,17 @@ const UserServices = require("../services/user/users");
 
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.stakingInfo = async (userId, userKey, userIdentity) => {
+exports.unstakeToken = async (userId, userKey, stakingAddr) => {
   try {
     console.log("USER KEY", userKey);
     const walletDetails = {
-      userId: userIdentity,
+      stakingAddr: stakingAddr,
     };
-    const data = await UserServices.stakingInfo(walletDetails, userId, userKey);
+    const data = await UserServices.unstakeToken(
+      walletDetails,
+      userId,
+      userKey
+    );
 
     console.log("DATA", data);
 
@@ -25,6 +29,7 @@ exports.stakingInfo = async (userId, userKey, userIdentity) => {
         chaincodeResponse: exception.message,
       };
       return output;
+      console.log("OUTPUT", exception.message);
     }
   } catch (exception) {
     //logger.error(exception.errors);

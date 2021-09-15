@@ -154,6 +154,21 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 
+	now, _ := ctx.GetStub().GetTxTimestamp()
+	phaseUpdateTimeline := map[uint64]uint64{
+		1: uint64(now.Seconds),
+	}
+	// phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
+	// _ = json.Unmarshal(phaseUpdateTimelineAsBytes, &phaseUpdateTimeline)
+	// phaseUpdateTimeline[phaseConfig.CurrentPhase] = uint64(now.Seconds)
+	phaseUpdateTimelineAsBytes, _ := json.Marshal(phaseUpdateTimeline)
+	err = ctx.GetStub().PutState(PHASE_UPDATE_TIMELINE, phaseUpdateTimelineAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while initialising phase timeline: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
 	response.Message = fmt.Sprintf("Successfully issued token %s", "busy")
 	response.Success = true
 	response.Data = token
@@ -295,6 +310,8 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		Amount:         stakingAddress.Balance,
 		TimeStamp:      uint64(now.Seconds),
 		Phase:          currentPhaseConfig.CurrentPhase,
+		TotalReward:    bigZero.String(),
+		Claimed:        bigZero.String(),
 	}
 	stakingInfoAsBytes, _ := json.Marshal(stakingInfo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddress.Address), stakingInfoAsBytes)
@@ -1299,12 +1316,250 @@ func (bt *Busy) GetTokenDetails(ctx contractapi.TransactionContextInterface, tok
 	return response
 }
 
-func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, stakingAddr string) Response {
+func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, userID string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
 		Message: "",
 		Data:    nil,
+	}
+
+	userAsBytes, err := ctx.GetStub().GetState(userID)
+	if userAsBytes == nil {
+		response.Message = fmt.Sprintf("User with common name %s doesn't exists", userID)
+		logger.Info(response.Message)
+		return response
+	}
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching user from blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	userDetails := User{}
+	if err := json.Unmarshal(userAsBytes, &userDetails); err != nil {
+		response.Message = fmt.Sprintf("Error while retrieving the sender details %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	var queryString string = fmt.Sprintf(`{
+		"selector": {
+			"userId": "%s",
+			"docType": "stakingAddr"
+		 } 
+	}`, userID)
+	resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching user wallets: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	defer resultIterator.Close()
+
+	var stakingAddr Wallet
+	responseData := map[string]interface{}{}
+	for resultIterator.HasNext() {
+		tmpData := map[string]string{}
+		data, _ := resultIterator.Next()
+		json.Unmarshal(data.Value, &stakingAddr)
+		stakingInfo, _ := getStakingInfo(ctx, stakingAddr.Address)
+		tmpData["claimed"] = stakingInfo.Claimed
+		reward, err := countStakingReward(ctx, stakingInfo.StakingAddress)
+		if err != nil {
+			response.Message = fmt.Sprintf("Error while counting staking reward: %s", err.Error())
+			logger.Error(response.Message)
+			return response
+		}
+		tmpData["totalReward"] = reward.String()
+		responseData[stakingAddr.Address] = tmpData
+	}
+
+	response.Message = fmt.Sprintf("Successfully fetched staking info for user %s", userID)
+	response.Success = true
+	response.Data = responseData
+	logger.Info(response.Message)
+	return response
+}
+
+func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	commonName, _ := getCommonName(ctx)
+	fee, _ := getCurrentTxFee(ctx)
+	bigFee, _ := new(big.Int).SetString(fee, 10)
+	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	balance, _ := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	if bigFee.Cmp(balance) == 1 {
+		response.Message = "Not enough balance for tx fee"
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingAddrAsBytes, err := ctx.GetStub().GetState(stakingAddr)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching staking address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if stakingAddrAsBytes == nil {
+		response.Message = fmt.Sprintf("Staking address %s not found", stakingAddr)
+		logger.Error(response.Message)
+		return response
+	}
+	var stAddr Wallet
+	json.Unmarshal(stakingAddrAsBytes, &stAddr)
+	if stAddr.UserID != commonName {
+		response.Message = "you're not owner of staking address"
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingReward, err := countStakingReward(ctx, stakingAddr)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while couting staking reward: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	logger.Infof("staking reward counted from countStakingReward func %s", stakingReward.String())
+
+	stakingInfoAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("info~%s", stakingAddr))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching staking info: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	var stakingInfo StakingInfo
+	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
+
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	// adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
+	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
+	logger.Info("Amout user claimed already fetching from staking info %s", bigClaimedAmount.String())
+	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
+	logger.Infof("claimable amout %s after deducting claimed amout %s from reward %s", claimableAmount.String(), bigClaimedAmount.String(), stakingReward.String())
+	// err = transferHelper(ctx, adminWalletAddress, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while transfer from admin to default wallet: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+	claimableAmounAfterDeductingFee := new(big.Int).Set(claimableAmount).Sub(claimableAmount, bigFee)
+	logger.Infof("claimable amout after deducting fee %s is %s", bigFee.String(), claimableAmounAfterDeductingFee.String())
+	err = addUTXO(ctx, defaultWalletAddress, claimableAmounAfterDeductingFee, BUSY_COIN_SYMBOL)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while adding reward utxo: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	bigClaimedAmount = bigClaimedAmount.Add(bigClaimedAmount, claimableAmount)
+	stakingInfo.Claimed = bigClaimedAmount.String()
+	stakingInfo.Amount = currentPhaseConfig.CurrentStakingLimit
+	stakingInfoAsBytes, _ = json.Marshal(stakingInfo)
+	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddr), stakingInfoAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating staking info: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	logger.Infof("staking reward before returning response ", stakingReward.String())
+	stakingInfo.TotalReward = stakingReward.String()
+	stakingInfo.Claimed = claimableAmount.String()
+
+	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
+	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
+	logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
+	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, amounOtherThenStakingLimit, BUSY_COIN_SYMBOL, bigZero)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, claimableAmounAfterDeductingFee.Mul(claimableAmounAfterDeductingFee, minusOne))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating total supply: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	// err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+
+	response.Message = "successfully claimed"
+	response.Success = true
+	response.Data = stakingInfo
+	logger.Info(response.Message)
+	return response
+}
+
+func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr string) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	commonName, _ := getCommonName(ctx)
+	fee, _ := getCurrentTxFee(ctx)
+	bigFee, _ := new(big.Int).SetString(fee, 10)
+	defaultWalletAddress, err := getDefaultWalletAddress(ctx, commonName)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting default wallet address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	balance, _ := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	if bigFee.Cmp(balance) == 1 {
+		response.Message = "Not enough balance for tx fee"
+		logger.Error(response.Message)
+		return response
+	}
+	stakingAddrAsBytes, err := ctx.GetStub().GetState(stakingAddr)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching staking address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if stakingAddrAsBytes == nil {
+		response.Message = fmt.Sprintf("Staking address %s not found", stakingAddr)
+		logger.Error(response.Message)
+		return response
+	}
+	var stAddr Wallet
+	json.Unmarshal(stakingAddrAsBytes, &stAddr)
+	if stAddr.UserID != commonName {
+		response.Message = "you're not owner of staking address"
+		logger.Error(response.Message)
+		return response
+	}
+
+	stakingReward, err := countStakingReward(ctx, stakingAddr)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while couting staking reward: %s", err.Error())
+		logger.Error(response.Message)
+		return response
 	}
 
 	stakingInfoAsBytes, err := ctx.GetStub().GetState(fmt.Sprintf("info~%s", stakingAddr))
@@ -1313,15 +1568,86 @@ func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, stak
 		logger.Error(response.Message)
 		return response
 	}
-	if stakingInfoAsBytes == nil {
-		response.Message = fmt.Sprintf("Staking info for address %s not found", stakingAddr)
-		logger.Error(response.Message)
-		return response
-	}
 	var stakingInfo StakingInfo
 	_ = json.Unmarshal(stakingInfoAsBytes, &stakingInfo)
 
-	response.Message = "successfully fetched token"
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	// bigCurrentStakingLimit, _ := new(big.Int).SetString(phaseConfig.CurrentStakingLimit, 10)
+
+	// adminWalletAddress, _ := getDefaultWalletAddress(ctx, ADMIN_USER_ID)
+	bigClaimedAmount, _ := new(big.Int).SetString(stakingInfo.Claimed, 10)
+	logger.Infof("Amount %s already claimed by %s", bigClaimedAmount.String(), stakingAddr)
+	claimableAmount := new(big.Int).Set(stakingReward).Sub(stakingReward, bigClaimedAmount)
+	logger.Infof("claimable amount after dedcuting claimed amount %s from total reward %s is %s", bigClaimedAmount.String(), stakingReward.String(), claimableAmount.String())
+	// claimableAmount = claimableAmount.Add(claimableAmount, bigCurrentStakingLimit)
+	bigStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	logger.Infof("staking amount for staking address %s is %s it is fetched from staking info", stakingAddr, bigStakingAmount.String())
+	fmt.Println(bigZero)
+	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, bigStakingAmount, BUSY_COIN_SYMBOL, bigZero)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while transfer from staking address to default wallet: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	// err = transferHelper(ctx, adminWalletAddress, defaultWalletAddress, claimableAmount, BUSY_COIN_SYMBOL, bigZero)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while transfer from admin to default wallet: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+	claimableAmounAfterDeductingFee := new(big.Int).Set(claimableAmount).Sub(claimableAmount, bigFee)
+	err = addUTXO(ctx, defaultWalletAddress, claimableAmounAfterDeductingFee, BUSY_COIN_SYMBOL)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while adding reward utxo: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	bigClaimedAmount = bigClaimedAmount.Add(bigClaimedAmount, claimableAmount)
+	stakingInfo.Claimed = bigClaimedAmount.String()
+	stakingInfo.Amount = currentPhaseConfig.CurrentStakingLimit
+	stakingInfoAsBytes, _ = json.Marshal(stakingInfo)
+	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddr), stakingInfoAsBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating staking info: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	stakingInfo.TotalReward = stakingReward.String()
+	stakingInfo.Claimed = claimableAmount.String()
+
+	err = ctx.GetStub().DelState(stakingAddr)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while deleting staking address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	_, err = updateTotalStakingAddress(ctx, -1)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating total staking address: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	// err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	// if err != nil {
+	// 	response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
+	// 	logger.Error(response.Message)
+	// 	return response
+	// }
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, claimableAmounAfterDeductingFee.Mul(claimableAmounAfterDeductingFee, minusOne))
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating total supply: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	response.Message = "successfully unstaked"
 	response.Success = true
 	response.Data = stakingInfo
 	logger.Info(response.Message)
