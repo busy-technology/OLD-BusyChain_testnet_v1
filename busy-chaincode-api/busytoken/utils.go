@@ -15,7 +15,7 @@ var minusOne *big.Int = new(big.Int).SetInt64(-1)
 
 const (
 	PHASE_UPDATE_TIMELINE = "phaseUpdateTimeline"
-	REWARD_NUMERATOR      = "1046423135464"
+	REWARD_NUMERATOR      = "1045706897862"
 	// Added two more zeros in REWARD_DENOMINATOR so we don't need devide again with 100
 	REWARD_DENOMINATOR = "100000000000000000000"
 	BUSY_COIN_SYMBOL   = "busy"
