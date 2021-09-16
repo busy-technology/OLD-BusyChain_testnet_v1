@@ -1470,6 +1470,8 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 		return response
 	}
 	bigClaimedAmount = bigClaimedAmount.Add(bigClaimedAmount, claimableAmount)
+	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	stakingInfo.Claimed = bigClaimedAmount.String()
 	stakingInfo.Amount = currentPhaseConfig.CurrentStakingLimit
 	stakingInfoAsBytes, _ = json.Marshal(stakingInfo)
@@ -1483,8 +1485,6 @@ func (bt *Busy) Claim(ctx contractapi.TransactionContextInterface, stakingAddr s
 	stakingInfo.TotalReward = stakingReward.String()
 	stakingInfo.Claimed = claimableAmount.String()
 
-	bigCurrentStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
-	bigCurrentStakingLimit, _ := new(big.Int).SetString(currentPhaseConfig.CurrentStakingLimit, 10)
 	amounOtherThenStakingLimit := bigCurrentStakingAmount.Sub(bigCurrentStakingAmount, bigCurrentStakingLimit)
 	logger.Infof("amounOtherThenStakingLimit: %s", amounOtherThenStakingLimit.String())
 	err = transferHelper(ctx, stakingAddr, defaultWalletAddress, amounOtherThenStakingLimit, BUSY_COIN_SYMBOL, bigZero)
