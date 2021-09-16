@@ -9,6 +9,7 @@ const enrollOrdererAdmin = require("../../sdk/enrollOrdererAdmin");
 const invoke = require("../../sdk/invoke");
 const query = require("../../sdk/query");
 const queryUser = require("../../sdk/queryUser");
+const querySupply = require("../../sdk/querySupply");
 const recoverUser = require("../../sdk/recoverUser");
 const { exception } = require("console");
 
@@ -118,21 +119,30 @@ exports.issueToken = async (walletDetails, userId, userKey) => {
 
 exports.totalSupply = async (walletDetails, userId, userKey) => {
   try {
-    const invokeFabricChaincodeWithCertificate =
-      await invoke.FabricChaincodeInvokeWithCertificate(
-        "busychannel",
-        "busytoken",
-        "GetTotalSupply",
-        walletDetails,
-        userId,
-        userKey
-      );
+    // const invokeFabricChaincodeWithCertificate =
+    //   await invoke.FabricChaincodeInvokeWithCertificate(
+    //     "busychannel",
+    //     "busytoken",
+    //     "GetTotalSupply",
+    //     walletDetails,
+    //     userId,
+    //     userKey
+    //   );
 
-    if (invokeFabricChaincodeWithCertificate) {
+    const invokeWalletQuery = await querySupply.ChaincodeSupplyQuery(
+      "busychannel",
+      "busytoken",
+      "GetTotalSupply",
+      walletDetails,
+      userId,
+      userKey
+    );
+
+    if (invokeWalletQuery) {
       // function to remove the user key
 
       await invoke.removeKeyFromWallet(userId);
-      return invokeFabricChaincodeWithCertificate;
+      return invokeWalletQuery;
     }
   } catch (exception) {
     console.log("IN CATCH OF ISSUE TOKEN SERVICE.");

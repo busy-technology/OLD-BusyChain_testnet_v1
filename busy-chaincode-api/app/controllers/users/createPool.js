@@ -2,18 +2,44 @@ const User = require("../../models/Users");
 const Pool = require("../../models/Pools");
 const voting = require("../../../blockchain/test-scripts/voting");
 const tokenTransactions = require("../../models/token-transactions");
+const constants = require("../../../constants");
+const { Certificate } = require("@fidm/x509");
 
 module.exports = async (req, res, next) => {
   const votingInfo = req.body.votingInfo;
-  const userId = req.body.userId;
+  const walletId = req.body.walletId;
   const blockchain_credentials = req.body.credentials;
   try {
-    const user = await User.findOne({ userId: userId });
-    const response = await voting.CreatePool(userId, blockchain_credentials, votingInfo);
-    const resp = JSON.parse(response.chaincodeResponse);
-    if (resp.success == true) {
+    const user = await User.findOne({
+      walletId: walletId
+    });
+    if (user) {
+      const commanName = Certificate.fromPEM(
+        Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
+      ).subject.commonName;
+      console.log("CN", commanName);
+      if (user.userId != commanName) {
+        return res.send(404, {
+          status: false,
+          message: `This certificate is not valid.`,
+        });
+      }
+
+      if (
+        blockchain_credentials.type != "X.509" ||
+        blockchain_credentials.mspId != "BusyMSP"
+      ) {
+        console.log("type of certificate incorrect.");
+        return res.send(404, {
+          status: false,
+          message: `Incorrect type or MSPID.`,
+        });
+      }
+      const response = await voting.CreatePool(walletId, user.userId, blockchain_credentials, votingInfo);
+      const resp = JSON.parse(response.chaincodeResponse);
+      if (resp.success == true) {
         console.log("Pool Created Successfully")
-        
+
         const poolEntry = await new Pool({
           PoolID: resp.txId,
           PoolInfo: resp.data,
@@ -30,15 +56,14 @@ module.exports = async (req, res, next) => {
 
         const tokenEntry = await new tokenTransactions({
           tokenName: "busy",
-          amount: "166666000000000000000000",
+          amount: constants.CREATE_POOL_AMOUNT,
           function: "CreatePool",
           txId: resp.txId,
-          sender: userId,
-          receiver: resp.txid,
-          description:
-          userId + " burned " + "166666000000000000000000" + " " + token + " for pool creation",
+          sender: walletId,
+          receiver: resp.txId,
+          description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + " " + token + " for pool creation",
         });
-  
+
         await tokenEntry
           .save()
           .then((result, error) => {
@@ -49,17 +74,24 @@ module.exports = async (req, res, next) => {
           });
 
         return res.send(200, {
-            status: true,
-            message: "Pool Created Successfully",
-            chaincodeResponse: resp,
+          status: true,
+          message: "Pool Created Successfully",
+          chaincodeResponse: resp,
         })
-    } else {
+      } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
-        status: false,
-        message: resp.message,
+          status: false,
+          message: resp.message,
         });
-    };
+      };
+    } else {
+      console.log("WalletId do not exists.");
+      return res.send(404, {
+        statPus: false,
+        message: `WalletId do not exists.`,
+      });
+    }
   } catch (exception) {
     console.log(exception);
     return res.send(404, {

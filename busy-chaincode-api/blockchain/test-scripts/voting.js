@@ -1,12 +1,12 @@
 const voting = require("../services/user/voting");
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.CreatePool = async (userId, userKey, votingInfo) => {
+exports.CreatePool = async (walletId, userId, userKey, votingInfo) => {
   try {
 
     console.log("Recieved a create pool for ", votingInfo);
 
-    const data = await voting.CreatePool(userId, userKey, votingInfo);
+    const data = await voting.CreatePool(walletId, userId, userKey, votingInfo);
 
 
     if (data) {
@@ -26,12 +26,12 @@ exports.CreatePool = async (userId, userKey, votingInfo) => {
 };
 
 
-exports.CreateVote = async (userId, userKey, votingAddress, amount, voteType) => {
+exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, voteType) => {
     try {
   
       console.log("Recieved a vote to ", votingAddress);
   
-      const data = await voting.CreateVote(userId, userKey, votingAddress, amount, voteType);
+      const data = await voting.CreateVote(walletId, userId, userKey, votingAddress, amount, voteType);
   
   
       if (data) {
