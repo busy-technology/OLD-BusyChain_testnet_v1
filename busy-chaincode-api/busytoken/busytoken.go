@@ -1360,7 +1360,7 @@ func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, user
 	var stakingAddr Wallet
 	responseData := map[string]interface{}{}
 	for resultIterator.HasNext() {
-		tmpData := map[string]string{}
+		tmpData := map[string]interface{}{}
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &stakingAddr)
 		stakingInfo, _ := getStakingInfo(ctx, stakingAddr.Address)
@@ -1372,6 +1372,7 @@ func (bt *Busy) GetStakingInfo(ctx contractapi.TransactionContextInterface, user
 			return response
 		}
 		tmpData["totalReward"] = reward.String()
+		tmpData["creationTIme"] = stakingInfo.TimeStamp
 		responseData[stakingAddr.Address] = tmpData
 	}
 
