@@ -349,11 +349,14 @@ func updatePhase(ctx contractapi.TransactionContextInterface) (*PhaseConfig, err
 		return nil, err
 	}
 
-	phaseUpdateTimeline := map[uint64]uint64{}
+	phaseUpdateTimeline := map[uint64]PhaseUpdateInfo{}
 	phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
 	_ = json.Unmarshal(phaseUpdateTimelineAsBytes, &phaseUpdateTimeline)
 	now, _ := ctx.GetStub().GetTxTimestamp()
-	phaseUpdateTimeline[phaseConfig.CurrentPhase] = uint64(now.Seconds)
+	phaseUpdateTimeline[phaseConfig.CurrentPhase] = PhaseUpdateInfo{
+		UpdatedAt:    uint64(now.Seconds),
+		StakingLimit: phaseConfig.CurrentStakingLimit,
+	}
 	phaseUpdateTimelineAsBytes, _ = json.Marshal(phaseUpdateTimeline)
 	err = ctx.GetStub().PutState(PHASE_UPDATE_TIMELINE, phaseUpdateTimelineAsBytes)
 	return &phaseConfig, err
@@ -415,8 +418,8 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 		logger.Infof("percentageNumerator: %s", percentageNumerator.String())
 		// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 		// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
-		bigStakingAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
-		logger.Infof("stakingAmount: %s", stakingInfo.Amount)
+		bigStakingAmount, _ := new(big.Int).SetString(phaseUpdateTimeline[stakingInfo.Phase].StakingLimit, 10)
+		logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 		tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 		logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
 		stakingReward := tmpStakingReward.Div(tmpStakingReward, bigRewardDenominator)
@@ -424,22 +427,22 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 		return stakingReward, err
 	}
 	var phaseCount uint64 = stakingInfo.Phase
-	bigPhaseAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
-	bigTwo := new(big.Int).SetUint64(2)
+	// bigPhaseAmount, _ := new(big.Int).SetString(stakingInfo.Amount, 10)
+	// bigTwo := new(big.Int).SetUint64(2)
 	var reward *big.Int = new(big.Int).Set(bigZero)
 	logger.Infof("user created staking address in phase %d and current phase is %d means user is not claiming in same phase", stakingInfo.Phase, currentPhaseConfig.CurrentPhase)
 	for phaseCount != currentPhaseConfig.CurrentPhase+1 {
 		logger.Infof("#################### loop starting with phase %d and current reward is %s ####################", phaseCount, reward.String())
 		if phaseCount == stakingInfo.Phase {
 			logger.Info("##### couting reward for same phase in which user created staking address phase: %d", phaseCount)
-			stakingTimePeriod := phaseUpdateTimeline[phaseCount+1] - stakingInfo.TimeStamp
+			stakingTimePeriod := phaseUpdateTimeline[phaseCount+1].UpdatedAt - stakingInfo.TimeStamp
 			bigStakingTimePeriod := new(big.Int).SetUint64(stakingTimePeriod)
 			logger.Infof("stakingTimePeriod: %s", bigStakingTimePeriod.String())
 			percentageNumerator := bigStakingTimePeriod.Mul(bigStakingTimePeriod, bigRewardNumerator)
 			logger.Infof("percentageNumerator: %s", percentageNumerator.String())
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
-			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
+			bigStakingAmount, _ := new(big.Int).SetString(phaseUpdateTimeline[phaseCount].StakingLimit, 10)
 			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
@@ -448,14 +451,14 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			logger.Infof("stakingReward after couting reward for phase %d: %s", phaseCount, stakingReward.String())
 		} else if phaseCount == currentPhaseConfig.CurrentPhase {
 			logger.Info("##### couting reward for current phase: %d", phaseCount)
-			stakingTimePeriod := uint64(now.Seconds) - phaseUpdateTimeline[phaseCount-1]
+			stakingTimePeriod := uint64(now.Seconds) - phaseUpdateTimeline[phaseCount-1].UpdatedAt
 			bigStakingTimePeriod := new(big.Int).SetUint64(stakingTimePeriod)
 			logger.Infof("stakingTimePeriod: %s", bigStakingTimePeriod.String())
 			percentageNumerator := bigStakingTimePeriod.Mul(bigStakingTimePeriod, bigRewardNumerator)
 			logger.Infof("percentageNumerator: %s", percentageNumerator.String())
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
-			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
+			bigStakingAmount, _ := new(big.Int).SetString(phaseUpdateTimeline[phaseCount].StakingLimit, 10)
 			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
@@ -464,14 +467,14 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			logger.Infof("stakingReward after couting reward for phase %d: %s", phaseCount, stakingReward.String())
 		} else {
 			logger.Info("##### couting reward for phase: %d", phaseCount)
-			stakingTimePeriod := phaseUpdateTimeline[phaseCount+1] - phaseUpdateTimeline[phaseCount]
+			stakingTimePeriod := phaseUpdateTimeline[phaseCount+1].UpdatedAt - phaseUpdateTimeline[phaseCount].UpdatedAt
 			bigStakingTimePeriod := new(big.Int).SetUint64(stakingTimePeriod)
 			logger.Infof("stakingTimePeriod: %s", bigStakingTimePeriod.String())
 			percentageNumerator := bigStakingTimePeriod.Mul(bigStakingTimePeriod, bigRewardNumerator)
 			logger.Infof("percentageNumerator: %s", percentageNumerator.String())
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
-			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
+			bigStakingAmount, _ := new(big.Int).SetString(phaseUpdateTimeline[phaseCount].StakingLimit, 10)
 			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
@@ -480,7 +483,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			logger.Infof("stakingReward after couting reward for phase %d: %s", phaseCount, stakingReward.String())
 		}
 		phaseCount += 1
-		bigPhaseAmount = bigPhaseAmount.Div(bigPhaseAmount, bigTwo)
+		// bigPhaseAmount = bigPhaseAmount.Div(bigPhaseAmount, bigTwo)
 		logger.Infof("#################### loop ended with phase %d and current reward is %s ####################", phaseCount, reward.String())
 	}
 	logger.Infof("After finishing all iteration of loop reward is %s", reward.String())
@@ -503,8 +506,8 @@ func getStakingInfo(ctx contractapi.TransactionContextInterface, stakingAddr str
 	return &stakingInfo, nil
 }
 
-func getPhaseUpdateTimeline(ctx contractapi.TransactionContextInterface) (map[uint64]uint64, error) {
-	var phaseUpdateTimeline map[uint64]uint64
+func getPhaseUpdateTimeline(ctx contractapi.TransactionContextInterface) (map[uint64]PhaseUpdateInfo, error) {
+	var phaseUpdateTimeline map[uint64]PhaseUpdateInfo
 	phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
 	if err != nil {
 		return nil, err

@@ -155,8 +155,11 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	}
 
 	now, _ := ctx.GetStub().GetTxTimestamp()
-	phaseUpdateTimeline := map[uint64]uint64{
-		1: uint64(now.Seconds),
+	phaseUpdateTimeline := map[uint64]PhaseUpdateInfo{
+		1: PhaseUpdateInfo{
+			UpdatedAt:    uint64(now.Seconds),
+			StakingLimit: phaseConfig.CurrentStakingLimit,
+		},
 	}
 	// phaseUpdateTimelineAsBytes, err := ctx.GetStub().GetState(PHASE_UPDATE_TIMELINE)
 	// _ = json.Unmarshal(phaseUpdateTimelineAsBytes, &phaseUpdateTimeline)
