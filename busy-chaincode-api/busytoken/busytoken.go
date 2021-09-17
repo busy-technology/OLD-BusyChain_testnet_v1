@@ -688,7 +688,7 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 	_ = json.Unmarshal(userAsBytes, &user)
 
 	if user.DefaultWallet == recipiant {
-		response.Message = "can't transfet to same address"
+		response.Message = "You can not transfer to the same address"
 		logger.Error(response.Message)
 		return response
 	}
