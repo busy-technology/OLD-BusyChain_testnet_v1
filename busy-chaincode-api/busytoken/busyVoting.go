@@ -25,7 +25,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 	votingConfigBytes, err := ctx.GetStub().GetState("VotingConfig")
 	votingConfig := VotingConfig{}
 	if err = json.Unmarshal(votingConfigBytes, &votingConfig); err != nil {
-		response.Message = fmt.Sprintf("Error while unmarshalling the voting config state: %s", err.Error())
+		response.Message = fmt.Sprintf("Error occured while unmarshalling the voting config state: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
@@ -34,7 +34,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 	//  Checking if pool Already Exists
 	poolAsBytes, err := ctx.GetStub().GetState("PoolData")
 	if poolAsBytes != nil {
-		response.Message = fmt.Sprintf("A voting pool Already Exists")
+		response.Message = fmt.Sprintf("Running pool already exists, it is not possible to run more than 1 at once")
 		logger.Info(response.Message)
 		return response
 	}
@@ -42,13 +42,13 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 	commonName, _ := getCommonName(ctx)
 	defaultAddress, err := getDefaultWalletAddress(ctx, commonName)
 	if err != nil {
-		response.Message = fmt.Sprintf("Error getting the default address for %s", commonName)
+		response.Message = fmt.Sprintf("Error occured while fetching wallet %s", commonName)
 		logger.Error(response.Message)
 		return response
 	}
 
 	if walletid != defaultAddress {
-		response.Message = fmt.Sprintf("Walletid in the request does not match with default wallet id for %s", commonName)
+		response.Message = fmt.Sprintf("Wallet in the request does not match with the wallet for %s", commonName)
 		logger.Error(response.Message)
 		return response
 	}
@@ -56,7 +56,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 
 	minimumCoins, _ := new(big.Int).SetString(votingConfig.MinimumCoins, 10)
 	if balance.Cmp(minimumCoins) == -1 {
-		response.Message = fmt.Sprintf("User: %s does not have minimum 10 mil coins to create pool", commonName)
+		response.Message = fmt.Sprintf("User %s does not have the minimum number of 10 millions of coins to create a new pool", commonName)
 		logger.Error(response.Message)
 		return response
 	}
