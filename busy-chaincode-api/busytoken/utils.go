@@ -440,7 +440,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
 			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
-			logger.Infof("stakingAmount: %s", stakingInfo.Amount)
+			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
 			stakingReward := tmpStakingReward.Div(tmpStakingReward, bigRewardDenominator)
@@ -456,7 +456,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
 			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
-			logger.Infof("stakingAmount: %s", stakingInfo.Amount)
+			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
 			stakingReward := tmpStakingReward.Div(tmpStakingReward, bigRewardDenominator)
@@ -472,7 +472,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			// stakingPercentage := tmpStakingPercentage.Div(tmpStakingPercentage, bigRewardDenominator)
 			// logger.Infof("stakingPercentage: %s", stakingPercentage.String())
 			bigStakingAmount := new(big.Int).Set(bigPhaseAmount)
-			logger.Infof("stakingAmount: %s", stakingInfo.Amount)
+			logger.Infof("stakingAmount: %s", bigStakingAmount.String())
 			tmpStakingReward := bigStakingAmount.Mul(bigStakingAmount, percentageNumerator)
 			logger.Infof("tmpStakingReward: %s", tmpStakingReward.String())
 			stakingReward := tmpStakingReward.Div(tmpStakingReward, bigRewardDenominator)
@@ -480,7 +480,7 @@ func countStakingReward(ctx contractapi.TransactionContextInterface, stakingAddr
 			logger.Infof("stakingReward after couting reward for phase %d: %s", phaseCount, stakingReward.String())
 		}
 		phaseCount += 1
-		bigPhaseAmount.Div(bigPhaseAmount, bigTwo)
+		bigPhaseAmount = bigPhaseAmount.Div(bigPhaseAmount, bigTwo)
 		logger.Infof("#################### loop ended with phase %d and current reward is %s ####################", phaseCount, reward.String())
 	}
 	logger.Infof("After finishing all iteration of loop reward is %s", reward.String())
