@@ -496,7 +496,7 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 				"docType": "token",
 				"tokenName": "%s"
 			 } 
-		}`, tokenName)Error while fetching quering data: %s
+		}`, tokenName)
 		resultIterator, err := ctx.GetStub().GetQueryResult(queryString)
 		if err != nil {
 			response.Message = fmt.Sprintf("Error occured while fetching query data: %s", err.Error())
@@ -1175,7 +1175,7 @@ func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Respo
 	if lockedToken.ReleaseAt <= uint64(now.Seconds) {
 		if lockedToken.TotalAmount == lockedToken.ReleasedAmount {
 			response.Message = "All tokens have been already unlocked"
-                        response.Success = true
+			response.Success = true
 			logger.Error(response.Message)
 			return response
 		}
@@ -1195,7 +1195,7 @@ func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Respo
 			return response
 		}
 		response.Message = "All tokens have been already unlocked"
-                response.Success = true
+		response.Success = true
 		logger.Info(response.Message)
 		return response
 	}
