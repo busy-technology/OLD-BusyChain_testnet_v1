@@ -89,6 +89,7 @@ function createBusy() {
   infoln "Generating the user msp"
   set -x
   fabric-ca-client enroll -u https://user1:user1pw@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/users/User1@busy.technology/msp --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
+  cp ${PWD}/organizations/peerOrganizations/busy.technology/users/User1@busy.technology/msp/keystore/* ${PWD}/organizations/peerOrganizations/busy.technology/users/User1@busy.technology/msp/keystore/explorer-user.pem
   { set +x; } 2>/dev/null
 
   cp ${PWD}/organizations/peerOrganizations/busy.technology/msp/config.yaml ${PWD}/organizations/peerOrganizations/busy.technology/users/User1@busy.technology/msp/config.yaml
