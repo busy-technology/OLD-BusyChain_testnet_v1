@@ -445,7 +445,7 @@ exports.RecoverUsers = async (userData) => {
 exports.CurrentPhase = async (userId, userKey) => {
   try {
     await enrollAdmin.FabricAdminEnroll();
-    const invokeChaincode = await voting.FarbiceInvokewithcreds(
+    const invokeChaincode = await voting.FarbicInvokewithcreds(
         "busychannel",
         "busytoken",
         "GetCurrentPhase",
@@ -467,7 +467,7 @@ exports.CurrentPhase = async (userId, userKey) => {
 exports.CurrentFees = async (userId, userKey) => {
   try {
     await enrollAdmin.FabricAdminEnroll();
-    const invokeChaincode = await voting.FarbiceInvokewithcreds(
+    const invokeChaincode = await voting.FarbicInvokewithcreds(
         "busychannel",
         "busytoken",
         "GetCurrentFee",
