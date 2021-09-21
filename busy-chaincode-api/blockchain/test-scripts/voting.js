@@ -1,12 +1,12 @@
 const voting = require("../services/user/voting");
 //const sendResponse = require('../middleware/requestHandler');
 
-exports.CreatePool = async (walletId, userId, userKey, votingInfo) => {
+exports.CreatePool = async (walletId, userId, userKey, poolName, poolDescription) => {
   try {
 
-    console.log("Recieved a create pool for ", votingInfo);
+    console.log("Recieved a create pool for ", poolName);
 
-    const data = await voting.CreatePool(walletId, userId, userKey, votingInfo);
+    const data = await voting.CreatePool(walletId, userId, userKey, poolName, poolDescription);
 
 
     if (data) {
@@ -118,3 +118,48 @@ exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, vo
       console.log("exception", exception);
     }
   };
+
+  exports.PoolConfig = async (userId, userKey) => {
+    try {
+  
+  
+      const data = await voting.PoolConfig(userId, userKey);
+  
+  
+      if (data) {
+        console.log("RESPONSE FROM CHAINCODE", data);
+        const output = {
+          chaincodeResponse: data,
+        };
+        return output;
+      } else {
+        console.log("error");
+      }
+    } catch (exception) {
+      //logger.error(exception.errors);
+      //return sendResponse(res, false, 200, exception.errors);
+      console.log("exception", exception);
+    }
+  };
+
+
+exports.UpdatePoolConfig = async (userId, userKey, minimumCoins, poolFee, votingPeriod, votingStartTime) => {
+  try {
+
+    const data = await voting.UpdatePoolConfig(userId, userKey, minimumCoins, poolFee, votingPeriod, votingStartTime);
+
+    if (data) {
+      console.log("RESPONSE FROM CHAINCODE", data);
+      const output = {
+        chaincodeResponse: data,
+      };
+      return output;
+    } else {
+      console.log("error");
+    }
+  } catch (exception) {
+    //logger.error(exception.errors);
+    //return sendResponse(res, false, 200, exception.errors);
+    console.log("exception", exception);
+  }
+};

@@ -67,7 +67,8 @@ type Pool struct {
 	VotingPowerYes   string    `json:"votingPowerYes"`
 	VotingPowerNo    string    `json:"votingPowerNo"`
 	TokenType        string    `json:"tokenType"`
-	VotingInfo       string    `json:"votingInfo"`
+	PoolName         string    `json:"poolName"`
+	PoolDescription  string    `json:"poolDescription"`
 }
 
 // Vote represents the tokens given by individual vote to the pool

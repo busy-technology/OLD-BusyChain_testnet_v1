@@ -75,7 +75,7 @@ module.exports = (server) => {
   );
 
   server.post(
-    "/buyTokens",
+    "/buy",
     middleware.utility.required(["recipiant", "amount", "token"]),
     middleware.utility.isAmount(["amount"]),
     adminAuth,
@@ -83,7 +83,7 @@ module.exports = (server) => {
   );
 
   server.post(
-    "/transferTokens",
+    "/transfer",
     middleware.utility.required([
       "sender",
       "credentials",
@@ -113,7 +113,7 @@ module.exports = (server) => {
   //auth,
 
   server.post(
-    "/issueTokens",
+    "/issue",
     middleware.utility.required([
       "walletId",
       "credentials",
@@ -124,6 +124,8 @@ module.exports = (server) => {
     ]),
     middleware.utility.isAmount(["amount"]),
     middleware.utility.isAmount(["decimals"]),
+    middleware.utility.isAlphaNumeric(["tokenName"]),
+    middleware.utility.isAlphaNumeric(["symbol"]),
     auth,
     controller.users.issue
   );
@@ -149,7 +151,7 @@ module.exports = (server) => {
   );
 
   server.post(
-    "/burnTokens",
+    "/burn",
     middleware.utility.required(["walletId", "amount", "token"]),
     middleware.utility.isAmount(["amount"]),
     adminAuth,
@@ -191,11 +193,11 @@ module.exports = (server) => {
   //controller.auth.apiKey,
 
   server.post(
-    "/lockedTokensInfo",
+    "/lockedVestingInfo",
     middleware.utility.required(["walletId"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.lockedTokensInfo
+    controller.users.lockedVestingInfo
   );
 
   // server.post(
@@ -230,7 +232,21 @@ module.exports = (server) => {
   );
 
   server.get(
-    "/tokenTransactions",
+    "/currentPhase",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.getCurrentPhase
+  );
+
+  server.get(
+    "/transactionFees",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.getCurrentFee
+  );
+
+  server.get(
+    "/transactions",
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.tokenTransactions
@@ -289,10 +305,33 @@ module.exports = (server) => {
   // endpoint for creating pool
   server.post(
     "/createPool",
-    middleware.utility.required(["walletId","credentials","votingInfo"]),
+    middleware.utility.required(["walletId","credentials","poolName", "poolDescription"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.createPool
+  );
+
+  // endpoint for pool Config
+  server.get(
+    "/poolConfig",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.getPoolConfig
+  );
+
+   // endpoint for pool Config
+   server.post(
+    "/poolConfig",
+    middleware.utility.required([
+      "minimumCoins",
+      "poolFee",
+      "votingPeriod",
+      "votingStartTime",
+    ]),
+    adminAuth,
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.updatePoolConfig
   );
 
   // endpoint for creating pool
@@ -303,7 +342,7 @@ module.exports = (server) => {
     controller.users.queryPool
   );
 
-  // endpoint for creating pool
+  // endpoint for pool history
   server.get(
     "/poolHistory",
     middleware.auth.generateToken,

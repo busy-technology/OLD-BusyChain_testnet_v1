@@ -6,7 +6,8 @@ const constants = require("../../../constants");
 const { Certificate } = require("@fidm/x509");
 
 module.exports = async (req, res, next) => {
-  const votingInfo = req.body.votingInfo;
+  const poolName = req.body.poolName;
+  const poolDescription = req.body.poolDescription;
   const walletId = req.body.walletId;
   const blockchain_credentials = req.body.credentials;
   try {
@@ -35,7 +36,7 @@ module.exports = async (req, res, next) => {
           message: `Incorrect type or MSPID.`,
         });
       }
-      const response = await voting.CreatePool(walletId, user.userId, blockchain_credentials, votingInfo);
+      const response = await voting.CreatePool(walletId, user.userId, blockchain_credentials, poolName, poolDescription);
       const resp = JSON.parse(response.chaincodeResponse);
       if (resp.success == true) {
         console.log("Pool Created Successfully")

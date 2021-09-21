@@ -73,7 +73,7 @@ module.exports = async (req, res, next) => {
 
         return res.send(200, {
           status: true,
-          message: "Busy tokens successfully purchased.",
+          message: "Coins have been successfully purchased.",
           chaincodeResponse: response,
         });
       } else {

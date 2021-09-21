@@ -1,5 +1,5 @@
 const is_password = (value) => {
-  return /^[a-zA-Z\s]*$/.test(value);
+  return true;
   //allows space and letter only
 };
 

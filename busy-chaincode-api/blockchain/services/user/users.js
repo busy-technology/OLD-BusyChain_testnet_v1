@@ -12,6 +12,7 @@ const queryUser = require("../../sdk/queryUser");
 const querySupply = require("../../sdk/querySupply");
 const recoverUser = require("../../sdk/recoverUser");
 const { exception } = require("console");
+const voting = require("../../sdk/voting");
 
 exports.RegisterUsers = async (userData, mnemonic) => {
   try {
@@ -434,6 +435,50 @@ exports.RecoverUsers = async (userData) => {
       return {
         userRegistered: userRegistered,
       };
+    }
+  } catch (exception) {
+    return exception;
+  }
+};
+
+
+exports.CurrentPhase = async (userId, userKey) => {
+  try {
+    await enrollAdmin.FabricAdminEnroll();
+    const invokeChaincode = await voting.FarbiceInvokewithcreds(
+        "busychannel",
+        "busytoken",
+        "GetCurrentPhase",
+        userId,
+        userKey,
+      );
+    if (invokeChaincode) {
+        return invokeChaincode;
+    } 
+    else {
+        return null
+    }
+  } catch (exception) {
+    return exception;
+  }
+};
+
+
+exports.CurrentFees = async (userId, userKey) => {
+  try {
+    await enrollAdmin.FabricAdminEnroll();
+    const invokeChaincode = await voting.FarbiceInvokewithcreds(
+        "busychannel",
+        "busytoken",
+        "GetCurrentFee",
+        userId,
+        userKey,
+      );
+    if (invokeChaincode) {
+        return invokeChaincode;
+    } 
+    else {
+        return null
     }
   } catch (exception) {
     return exception;

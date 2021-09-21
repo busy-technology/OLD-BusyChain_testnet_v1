@@ -8,6 +8,7 @@ module.exports = {
     isCountry: require("./utility/is-country"),
     isName: require("./utility/is-name"),
     isAmount: require("./utility/is-amount"),
+    isAlphaNumeric: require("./utility/is-alphanumeric"),
   },
   auth: {
     generateToken: require("./auth/generate-token"),

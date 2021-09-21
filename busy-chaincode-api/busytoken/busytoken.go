@@ -60,7 +60,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 
 	// setting Voting Config
 	votingConfig := VotingConfig{
-		MinimumCoins:    "10000000000000000000000000",
+		MinimumCoins:    "15000000000000000000000000",
 		PoolFee:         "166666000000000000000000",
 		VotingPeriod:    20 * time.Minute, // 7 days + 2 days
 		VotingStartTime: 5 * time.Minute,
@@ -449,13 +449,23 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		Data:    nil,
 	}
 
-	if amount == "0" {
-		response.Message = "Token with zero amount can not be issued"
+	bigAmount, isConverted := new(big.Int).SetString(amount, 10)
+	if !isConverted {
+		response.Message = "Error encountered converting amount"
+		logger.Error(response.Message)
+		return response
+	}
+	if bigAmount.Cmp(bigZero) == 0 {
+		response.Message = "Amount cannot be zero for the issuing tokens"
 		logger.Error(response.Message)
 		return response
 	}
 
-	bigAmount, _ := new(big.Int).SetString(amount, 10)
+	if decimals <= 0 && decimals > 18 {
+		response.Message = "Decimals should be in the range of 1-18"
+		logger.Error(response.Message)
+		return response
+	}
 	commonName, _ := getCommonName(ctx)
 	issueTokenFee, _ := new(big.Int).SetString(ISSUE_TOKEN_FEE, 10)
 	minusOne, _ := new(big.Int).SetString("-1", 10)
@@ -1657,5 +1667,49 @@ func (bt *Busy) Unstake(ctx contractapi.TransactionContextInterface, stakingAddr
 	response.Success = true
 	response.Data = stakingInfo
 	logger.Info(response.Message)
+	return response
+}
+
+// GetCurrrentPhase config is to retrieve the current Phase config in Busy Chain
+func (bt *Busy) GetCurrentPhase(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	currentPhaseConfig, err := getPhaseConfig(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while getting phase config: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	response.Success = true
+	response.Message = "Successfully fetched Current Phase"
+	response.Data = currentPhaseConfig
+	return response
+}
+
+// GetCurrentFee config is to retrieve the current fees in Busy Chain
+func (bt *Busy) GetCurrentFee(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	// Fetch current transfer fee
+	transferFee, err := getCurrentTxFee(ctx)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error occured while fetching transfer fee %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	response.Success = true
+	response.Message = "Successfully fetched Current Transfer fee"
+	response.Data = transferFee
 	return response
 }

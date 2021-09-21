@@ -25,5 +25,5 @@ const WalletSchema = new mongoose.Schema({
 
 WalletSchema.plugin(timeStamp);
 
-const Wallets = mongoose.model("BusyWallets", WalletSchema);
+const Wallets = mongoose.model("StakingAddress", WalletSchema);
 module.exports = Wallets;

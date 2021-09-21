@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/big"
+	"regexp"
 	"time"
 
 	"github.com/hyperledger/fabric-contract-api-go/contractapi"
@@ -14,7 +15,7 @@ type BusyVoting struct {
 	contractapi.Contract
 }
 
-func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, walletid string, votingInfo string, token string) Response {
+func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, walletid string, PoolName string, PoolDescription string, token string) Response {
 	response := Response{
 		TxID:    ctx.GetStub().GetTxID(),
 		Success: false,
@@ -29,12 +30,37 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 		logger.Error(response.Message)
 		return response
 	}
-	logger.Info("Received a Create Pool Transaction with ", votingInfo)
+	logger.Info("Received a Create Pool Transaction with ", PoolName)
 
+	if PoolName == "" {
+		response.Message = "Pool Name cannot be empty"
+		logger.Error(response.Message)
+		return response
+	}
+
+	re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
+	if len(PoolName) > 30 {
+		response.Message = "Pool Name cannot be more than 30 characters"
+		logger.Error(response.Message)
+		return response
+	}
+
+	// checking for special characters
+	if !re.MatchString(PoolName) {
+		response.Message = "Pool Name cannot be Contain Special Characters"
+		logger.Error(response.Message)
+		return response
+	}
+
+	if len(PoolDescription) > 500 {
+		response.Message = "Pool Description Cannot be have more than 500 characters"
+		logger.Error(response.Message)
+		return response
+	}
 	//  Checking if pool Already Exists
 	poolAsBytes, err := ctx.GetStub().GetState("PoolData")
 	if poolAsBytes != nil {
-		response.Message = fmt.Sprintf("Running pool already exists, it is not possible to run more than 1 at once")
+		response.Message = fmt.Sprintf("Running pool already exists, it is not possible to run more than 1 one pool at a time")
 		logger.Info(response.Message)
 		return response
 	}
@@ -56,7 +82,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 
 	minimumCoins, _ := new(big.Int).SetString(votingConfig.MinimumCoins, 10)
 	if balance.Cmp(minimumCoins) == -1 {
-		response.Message = fmt.Sprintf("User %s does not have the minimum number of 10 millions of coins to create a new pool", commonName)
+		response.Message = fmt.Sprintf("User %s does not have the minimum number of %s millions of coins to create a new pool", commonName, votingConfig.MinimumCoins)
 		logger.Error(response.Message)
 		return response
 	}
@@ -81,7 +107,8 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 		VotingPowerYes:   bigZero.String(),
 		VotingPowerNo:    bigZero.String(),
 		TokenType:        token,
-		VotingInfo:       votingInfo,
+		PoolName:         PoolName,
+		PoolDescription:  PoolDescription,
 	}
 	poolAddrAsBytes, _ := json.Marshal(poolData)
 
@@ -384,5 +411,65 @@ func (bv *BusyVoting) PoolHistory(ctx contractapi.TransactionContextInterface) R
 	response.Success = true
 	response.Data = poolDataList
 	response.Message = "Pool History Fetched successfully"
+	return response
+}
+
+// Pool Config to retrieve the configuration date for the Pool
+func (bv *BusyVoting) PoolConfig(ctx contractapi.TransactionContextInterface) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+
+	votingConfigBytes, err := ctx.GetStub().GetState("VotingConfig")
+	if err != nil {
+		response.Message = fmt.Sprintf("Error occured while retrieving the voting config state: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	votingConfig := VotingConfig{}
+	if err = json.Unmarshal(votingConfigBytes, &votingConfig); err != nil {
+		response.Message = fmt.Sprintf("Error occured while unmarshalling the voting config state: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	response.Success = true
+	response.Data = votingConfig
+	response.Message = "Voting Config Fetched successfully"
+	return response
+}
+
+// Update Pool Config to Update the configuration date for the Pool
+func (bv *BusyVoting) UpdatePoolConfig(ctx contractapi.TransactionContextInterface, MinimumCoins string, PoolFee string, VotingPeriod int64, VotingStartTime int64) Response {
+	response := Response{
+		TxID:    ctx.GetStub().GetTxID(),
+		Success: false,
+		Message: "",
+		Data:    nil,
+	}
+	votingConfig := VotingConfig{
+		MinimumCoins:    MinimumCoins,
+		PoolFee:         PoolFee,
+		VotingPeriod:    time.Duration(VotingPeriod),
+		VotingStartTime: time.Duration(VotingStartTime),
+	}
+	votingConfigBytes, err := json.Marshal(&votingConfig)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error occured while marshalling the voting config state: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+
+	err = ctx.GetStub().PutState("VotingConfig", votingConfigBytes)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while updating state in blockchain: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	response.Success = true
+	response.Data = votingConfig
+	response.Message = "Voting Config Updated successfully"
 	return response
 }

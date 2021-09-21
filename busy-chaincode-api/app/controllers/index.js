@@ -16,7 +16,7 @@ module.exports = {
     burn: require("./users/burnToken"),
     vesting1: require("./users/vestingV1"),
     vesting2: require("./users/vestingV2"),
-    lockedTokensInfo: require("./users/lockedTokensInfo"),
+    lockedVestingInfo: require("./users/lockedVestingInfo"),
     queryWallet: require("./users/queryWallet"),
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
@@ -33,6 +33,10 @@ module.exports = {
     destroyPool: require("./users/destroyPool"),
     queryPool: require("./users/queryPool"),
     poolHistory: require("./users/poolHistory"),
+    getCurrentPhase: require("./users/getCurrentPhase"),
+    getCurrentFee: require("./users/getFee"),
+    getPoolConfig: require("./users/poolConfig"),
+    updatePoolConfig: require("./users/updatePoolConfig"),
   },
 
   auth: {
