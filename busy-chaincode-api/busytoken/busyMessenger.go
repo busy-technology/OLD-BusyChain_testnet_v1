@@ -210,10 +210,10 @@ func RemoveCoins(ctx contractapi.TransactionContextInterface, address string, co
 		DocType: "utxo",
 		Address: address,
 		Amount:  bigTxFee.Mul(bigTxFee, minusOne).String(),
-		Token:   "busy",
+		Token:   BUSY_COIN_SYMBOL,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
-	err := ctx.GetStub().PutState(fmt.Sprintf("message~%s~%s~%s", ctx.GetStub().GetTxID(), address, "busy"), utxoAsBytes)
+	err := ctx.GetStub().PutState(fmt.Sprintf("message~%s~%s~%s", ctx.GetStub().GetTxID(), address, BUSY_COIN_SYMBOL), utxoAsBytes)
 	if err != nil {
 		return err
 	}
@@ -229,10 +229,10 @@ func AddCoins(ctx contractapi.TransactionContextInterface, address string, coins
 		DocType: "utxo",
 		Address: address,
 		Amount:  bigTxFee.Mul(bigTxFee, plusOne).String(),
-		Token:   "busy",
+		Token:   BUSY_COIN_SYMBOL,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
-	err := ctx.GetStub().PutState(fmt.Sprintf("message~%s~%s~%s", ctx.GetStub().GetTxID(), address, "busy"), utxoAsBytes)
+	err := ctx.GetStub().PutState(fmt.Sprintf("message~%s~%s~%s", ctx.GetStub().GetTxID(), address, BUSY_COIN_SYMBOL), utxoAsBytes)
 	if err != nil {
 		return err
 	}
