@@ -1,7 +1,8 @@
 const User = require("../../models/Users");
 const voting = require("../../../blockchain/test-scripts/voting");
-const tokenTransactions = require("../../models/token-transactions");
+const transactions = require("../../models/transactions");
 const { Certificate } = require("@fidm/x509");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   const walletId = req.body.walletId;
@@ -38,12 +39,16 @@ module.exports = async (req, res, next) => {
       const response = await voting.CreateVote(walletId,user.userId, blockchain_credentials, votingAddress, amount, voteType);
       const resp = JSON.parse(response.chaincodeResponse);
       if (resp.success == true) {
-        const tokenEntry = await new tokenTransactions({
+        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials,txId);
+        const blockResp = blockResponse.chaincodeResponse;
+        const tokenEntry = await new transactions({
           tokenName: "busy",
           amount: amount,
           function: "CreateVote",
           txId: resp.txId,
           sender: walletId,
+          blockNum: blockResp.blockNum,
+          dataHash: blockResp.dataHash,
           receiver: voteType + "-" + votingAddress,
           description: walletId + " burned " + amount + " busy for voting to poolID " + votingAddress,
         });

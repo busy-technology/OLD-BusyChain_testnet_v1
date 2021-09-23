@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     // const addressString = address.toString();
     // console.log("address", addressString);
     const adminId = "admin";
-    const userId = "sample";
+    var userId = "sample";
 
     console.log("IN USER");
     const adminData = await Admin.findOne({ userId: adminId });
@@ -30,6 +30,7 @@ module.exports = async (req, res, next) => {
     const user = await User.findOne({ walletId: address });
     console.log("User", user);
     if (user) {
+      userId = user.userId;
       const response1 = await lockedTokensInfo.getLockedTokens(
         userId,
         blockchain_credentials,

@@ -1,7 +1,10 @@
 const User = require("../../models/Users");
-const { Certificate } = require("@fidm/x509");
-const tokenTransactions = require("../../models/token-transactions");
+const {
+  Certificate
+} = require("@fidm/x509");
+const transactions = require("../../models/transactions");
 const transferScript = require("../../../blockchain/test-scripts/transferTokens");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -11,7 +14,9 @@ module.exports = async (req, res, next) => {
       amount = req.body.amount,
       token = req.body.token;
 
-    const user = await User.findOne({ walletId: sender });
+    const user = await User.findOne({
+      walletId: sender
+    });
     console.log("User", user);
 
     if (user) {
@@ -37,7 +42,9 @@ module.exports = async (req, res, next) => {
         });
       }
 
-      const receiver = await User.findOne({ walletId: recipiant });
+      const receiver = await User.findOne({
+        walletId: recipiant
+      });
 
       if (receiver) {
         const response1 = await transferScript.transferToken(
@@ -53,17 +60,19 @@ module.exports = async (req, res, next) => {
         console.log("DATA 2", response);
         const txId = response.txId;
         console.log("TRANSACTION ID", txId);
-
+        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials, txId);
+        const blockResp = blockResponse.chaincodeResponse;
         if (response.success == true) {
-          const tokenEntry = await new tokenTransactions({
+          const tokenEntry = await new transactions({
             tokenName: token,
             amount: amount,
             function: "Transfer",
             txId: txId,
             sender: sender,
             receiver: recipiant,
-            description:
-              sender +
+            blockNum: blockResp.blockNum,
+            dataHash: blockResp.dataHash,
+            description: sender +
               " transferred " +
               amount +
               " " +
@@ -83,8 +92,7 @@ module.exports = async (req, res, next) => {
 
           return res.send(200, {
             status: true,
-            message:
-              sender +
+            message: sender +
               " transferred " +
               amount +
               " " +

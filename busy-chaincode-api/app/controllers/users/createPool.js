@@ -1,9 +1,13 @@
 const User = require("../../models/Users");
 const Pool = require("../../models/Pools");
 const voting = require("../../../blockchain/test-scripts/voting");
-const tokenTransactions = require("../../models/token-transactions");
+const transactions = require("../../models/transactions");
 const constants = require("../../../constants");
-const { Certificate } = require("@fidm/x509");
+const config = require("../../../blockchain/test-scripts/config");
+
+const {
+  Certificate
+} = require("@fidm/x509");
 
 module.exports = async (req, res, next) => {
   const poolName = req.body.poolName;
@@ -55,13 +59,17 @@ module.exports = async (req, res, next) => {
             console.log("ERROR DB", error);
           });
 
-        const tokenEntry = await new tokenTransactions({
+        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials, txId);
+        const blockResp = blockResponse.chaincodeResponse;
+        const tokenEntry = await new transactions({
           tokenName: "busy",
           amount: constants.CREATE_POOL_AMOUNT,
           function: "CreatePool",
           txId: resp.txId,
           sender: walletId,
           receiver: resp.txId,
+          blockNum: blockResp.blockNum,
+          dataHash: blockResp.dataHash,
           description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + " " + token + " for pool creation",
         });
 

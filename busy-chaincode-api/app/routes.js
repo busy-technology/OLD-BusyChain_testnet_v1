@@ -96,6 +96,21 @@ module.exports = (server) => {
     controller.users.transfer
   );
 
+
+  server.post(
+    "/updateBlocks",
+    controller.auth.apiKey,
+    adminAuth,
+    controller.users.updateBlocks
+  );
+
+
+  server.get(
+    "/getBlocks",
+    controller.auth.apiKey,
+    controller.users.getBlocks
+  );
+
   server.post(
     "/claim",
     middleware.utility.required(["stakingAddr"]),
@@ -249,7 +264,7 @@ module.exports = (server) => {
     "/transactions",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.tokenTransactions
+    controller.users.transactions,
   );
 
   server.get(

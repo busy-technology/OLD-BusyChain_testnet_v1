@@ -10,8 +10,8 @@ module.exports = async (req, res, next) => {
       numerator = req.body.numerator,
       denominator = req.body.denominator,
       releaseAt = req.body.releaseAt,
-      adminId = "ordererAdmin",
-      userId = "sample";
+      adminId = "ordererAdmin";
+    var userId = "sample";
 
     console.log("IN USER");
     const adminData = await Admin.findOne({ userId: adminId });
@@ -33,6 +33,7 @@ module.exports = async (req, res, next) => {
     const user = await User.findOne({ walletId: recipient });
     console.log("User", user);
     if (user) {
+      userId = user.userId;
       const response1 = await vestingV1.vestingV1(
         userId,
         blockchain_credentials,

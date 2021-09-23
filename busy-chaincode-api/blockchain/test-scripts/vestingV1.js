@@ -12,7 +12,6 @@ exports.vestingV1 = async (
   releaseAt
 ) => {
   try {
-    console.log("USER KEY", userKey);
     const walletDetails = {
       recipient: recipient,
       amount: amount,

@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"strconv"
@@ -242,11 +243,22 @@ func addUTXO(ctx contractapi.TransactionContextInterface, address string, amount
 	return err
 }
 
-func calculatePercentage(amount *big.Int, numerator uint64, denominator uint64) *big.Int {
+func calculatePercentage(amount *big.Int, numerator uint64, denominator uint64) (*big.Int, error) {
 	bigNumerator := new(big.Int).SetUint64(numerator)
 	bigDenominator := new(big.Int).SetUint64(denominator)
+
+	if bigNumerator.Cmp(bigZero) == 0 {
+		return nil, errors.New("Numerator cannot be zero")
+	}
+
+	if bigDenominator.Cmp(bigZero) == 0 {
+		return nil, errors.New("Denominator cannot be zero")
+	}
+	if bigNumerator.Cmp(bigDenominator) > 0 {
+		return nil, errors.New("Numerator cannot be greater than denominator")
+	}
 	amount = amount.Mul(amount, bigNumerator)
-	return amount.Div(amount, bigDenominator)
+	return amount.Div(amount, bigDenominator), nil
 }
 
 // last Message key

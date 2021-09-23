@@ -21,7 +21,7 @@ module.exports = {
     queryWalletAdmin: require("./users/queryWalletAdmin"),
     fetchWallets: require("./users/wallets"),
     stakingAddresses: require("./users/getDefaultWallets"),
-    tokenTransactions: require("./users/tokenTransactions"),
+    transactions: require("./users/transactions"),
     issuedCoins: require("./users/issuedCoins"),
     stakingInfo: require("./users/stakingInfo"),
     recoverUser: require("./users/recoverUser"),
@@ -37,6 +37,8 @@ module.exports = {
     getCurrentFee: require("./users/getFee"),
     getPoolConfig: require("./users/poolConfig"),
     updatePoolConfig: require("./users/updatePoolConfig"),
+    updateBlocks: require("./users/updateBlocks"),
+    getBlocks: require("./users/getBlocks"),
   },
 
   auth: {

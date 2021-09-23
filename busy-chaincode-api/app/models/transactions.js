@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const tokenTransactionSchema = new Schema({
+const TransactionSchema = new Schema({
   tokenName: {
     type: String,
     required: true,
@@ -30,10 +30,18 @@ const tokenTransactionSchema = new Schema({
     type: String,
     required: true,
   },
+  blockNum: {
+    type: Number,
+    required: true,
+  },
+  dataHash: {
+    type: String,
+    required: true,
+  },
   createdDate: {
     type: Date,
     default: Date.now,
   },
 });
 
-module.exports = mongoose.model("tokenTransactions", tokenTransactionSchema);
+module.exports = mongoose.model("transactions", TransactionSchema);

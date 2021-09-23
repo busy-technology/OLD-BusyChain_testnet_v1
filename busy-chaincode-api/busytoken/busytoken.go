@@ -963,8 +963,12 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 	}
 
 	totalAmount := new(big.Int).Set(bigAmount)
-	currentVesting := calculatePercentage(bigAmount, numerator, denominator)
-
+	currentVesting, err := calculatePercentage(bigAmount, numerator, denominator)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while Calculating Vesting percentage: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
 	txFee, err := getCurrentTxFee(ctx)
 	bigTxFee, _ := new(big.Int).SetString(txFee, 10)
 	if err != nil {

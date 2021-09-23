@@ -1,7 +1,7 @@
-const tokenTransactions = require("../../models/token-transactions");
+const transactions = require("../../models/transactions");
 
 module.exports = async (req, res, next) => {
-  tokenTransactions.find({}).exec(function (err, result) {
+  transactions.find({}).exec(function (err, result) {
     if (err) {
       return res.send(200, {
         status: false,

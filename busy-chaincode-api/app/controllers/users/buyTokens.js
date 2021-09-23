@@ -1,7 +1,8 @@
 const User = require("../../models/Users");
 const Admin = require("../../models/admin");
-const tokenTransactions = require("../../models/token-transactions");
+const transactions = require("../../models/transactions");
 const transferScript = require("../../../blockchain/test-scripts/transferTokens");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -45,13 +46,18 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
-        const tokenEntry = await new tokenTransactions({
+
+        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials,txId);
+        const blockResp = blockResponse.chaincodeResponse;
+        const tokenEntry = await new transactions({
           tokenName: token,
           amount: amount,
           function: "Buy",
           txId: txId,
           sender: adminId,
           receiver: recipiant,
+          blockNum: blockResp.blockNum,
+          dataHash: blockResp.dataHash,
           description:
             recipiant +
             " purchased " +
