@@ -78,7 +78,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 		logger.Error(response.Message)
 		return response
 	}
-	balance, _ := getBalanceHelper(ctx, defaultAddress, "busy")
+	balance, _ := getBalanceHelper(ctx, defaultAddress, BUSY_COIN_SYMBOL)
 
 	minimumCoins, _ := new(big.Int).SetString(votingConfig.MinimumCoins, 10)
 	if balance.Cmp(minimumCoins) == -1 {
@@ -188,7 +188,7 @@ func (bv *BusyVoting) CreateVote(ctx contractapi.TransactionContextInterface, wa
 		return response
 	}
 
-	balance, _ := getBalanceHelper(ctx, defaultAddress, "busy")
+	balance, _ := getBalanceHelper(ctx, defaultAddress, BUSY_COIN_SYMBOL)
 
 	amountInt, isConverted := new(big.Int).SetString(amount, 10)
 
@@ -380,10 +380,10 @@ func burnCoins(ctx contractapi.TransactionContextInterface, address string, coin
 		DocType: "utxo",
 		Address: address,
 		Amount:  bigTxFee.Mul(bigTxFee, minusOne).String(),
-		Token:   "busy",
+		Token:   BUSY_COIN_SYMBOL,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
-	err = ctx.GetStub().PutState(fmt.Sprintf("voting~%s~%s~%s", ctx.GetStub().GetTxID(), address, "busy"), utxoAsBytes)
+	err = ctx.GetStub().PutState(fmt.Sprintf("voting~%s~%s~%s", ctx.GetStub().GetTxID(), address, BUSY_COIN_SYMBOL), utxoAsBytes)
 	if err != nil {
 		return err
 	}

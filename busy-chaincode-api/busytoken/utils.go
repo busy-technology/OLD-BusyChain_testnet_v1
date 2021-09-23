@@ -19,7 +19,7 @@ const (
 	REWARD_NUMERATOR      = "1045706897862"
 	// Added two more zeros in REWARD_DENOMINATOR so we don't need devide again with 100
 	REWARD_DENOMINATOR = "100000000000000000000"
-	BUSY_COIN_SYMBOL   = "busy"
+	BUSY_COIN_SYMBOL   = "BUSY"
 	ADMIN_USER_ID      = "ordererAdmin"
 )
 
@@ -140,7 +140,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 		if err != nil {
 			return fmt.Errorf("error while pruning token UTXOs: %s", err.Error())
 		}
-		busyBalance, busyUtxoKeys, err := pruneUTXOs(ctx, sender, "busy")
+		busyBalance, busyUtxoKeys, err := pruneUTXOs(ctx, sender, BUSY_COIN_SYMBOL)
 		if err != nil {
 			return fmt.Errorf("error while pruning busy UTXOs: %s", err.Error())
 		}
@@ -190,7 +190,7 @@ func transferHelper(ctx contractapi.TransactionContextInterface, sender string, 
 			DocType: "utxo",
 			Address: sender,
 			Amount:  busyBalance.String(),
-			Token:   "busy",
+			Token:   BUSY_COIN_SYMBOL,
 		}
 		utxoAsBytes, _ = json.Marshal(utxo)
 		err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s~%s", txID, recipiant, sender, BUSY_COIN_SYMBOL), utxoAsBytes)
@@ -308,10 +308,10 @@ func burnTxFee(ctx contractapi.TransactionContextInterface, address string, toke
 		DocType: "utxo",
 		Address: address,
 		Amount:  bigTxFee.Mul(bigTxFee, minusOne).String(),
-		Token:   "busy",
+		Token:   BUSY_COIN_SYMBOL,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
-	err = ctx.GetStub().PutState(fmt.Sprintf("burnTxFee~%s~%s~%s", ctx.GetStub().GetTxID(), address, "busy"), utxoAsBytes)
+	err = ctx.GetStub().PutState(fmt.Sprintf("burnTxFee~%s~%s~%s", ctx.GetStub().GetTxID(), address, BUSY_COIN_SYMBOL), utxoAsBytes)
 	if err != nil {
 		return err
 	}

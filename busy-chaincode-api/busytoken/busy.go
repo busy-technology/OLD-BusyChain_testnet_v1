@@ -17,7 +17,7 @@ type Busy struct {
 	contractapi.Contract
 }
 
-var logger = flogging.MustGetLogger("busy")
+var logger = flogging.MustGetLogger(BUSY_COIN_SYMBOL)
 
 const TRANSFER_FEE string = "1000000000000000"
 const ISSUE_TOKEN_FEE string = "2500000000000000000000"
@@ -78,13 +78,13 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		DocType:     "token",
 		ID:          0,
 		TokenName:   "Busy",
-		TokenSymbol: "busy",
+		TokenSymbol: BUSY_COIN_SYMBOL,
 		Admin:       commonName,
 		TotalSupply: supply.String(),
 		Decimals:    18,
 	}
 	tokenAsBytes, _ := json.Marshal(token)
-	err = ctx.GetStub().PutState("busy", tokenAsBytes)
+	err = ctx.GetStub().PutState(BUSY_COIN_SYMBOL, tokenAsBytes)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while updating coin on blockchain : %s", err.Error())
 		logger.Error(response.Message)
@@ -122,7 +122,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		DocType: "utxo",
 		Address: wallet.Address,
 		Amount:  supply.String(),
-		Token:   "busy",
+		Token:   BUSY_COIN_SYMBOL,
 	}
 	utxoAsBytes, _ := json.Marshal(utxo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("%s~%s~%s", response.TxID, wallet.Address, token.TokenSymbol), utxoAsBytes)
@@ -172,7 +172,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 
-	response.Message = fmt.Sprintf("Successfully issued coin %s", "busy")
+	response.Message = fmt.Sprintf("Successfully issued coin %s", BUSY_COIN_SYMBOL)
 	response.Success = true
 	response.Data = token
 	logger.Info(response.Message)
@@ -287,13 +287,13 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 		logger.Error(response.Message)
 		return response
 	}
-	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, stakingAmount, "busy", new(big.Int).Set(bigTxFee))
+	err = transferHelper(ctx, defaultWalletAddress, stakingAddress.Address, stakingAmount, BUSY_COIN_SYMBOL, new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while transfering coins to the staking address: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(bigTxFee))
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -348,7 +348,7 @@ func (bt *Busy) GetBalance(ctx contractapi.TransactionContextInterface, address 
 	}
 
 	if token == "" {
-		token = "busy"
+		token = BUSY_COIN_SYMBOL
 	}
 	exists, err := ifTokenExists(ctx, token)
 	if err != nil {
@@ -428,8 +428,8 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 	for resultIterator.HasNext() {
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
-		balance, _ := getBalanceHelper(ctx, wallet.Address, "busy")
-		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), "busy")
+		balance, _ := getBalanceHelper(ctx, wallet.Address, BUSY_COIN_SYMBOL)
+		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), BUSY_COIN_SYMBOL)
 	}
 
 	responseData["messageCoins"] = userDetails.MessageCoins
@@ -475,7 +475,7 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		logger.Error(response.Message)
 		return response
 	}
-	balance, err := getBalanceHelper(ctx, defaultWalletAddress, "busy")
+	balance, err := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while fetching user's balance: %s", err.Error())
 		logger.Error(response.Message)
@@ -585,13 +585,13 @@ func (bt *Busy) IssueToken(ctx contractapi.TransactionContextInterface, tokenNam
 		return response
 	}
 
-	err = addUTXO(ctx, defaultWalletAddress, new(big.Int).Set(issueTokenFee).Mul(issueTokenFee, minusOne), "busy")
+	err = addUTXO(ctx, defaultWalletAddress, new(big.Int).Set(issueTokenFee).Mul(issueTokenFee, minusOne), BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while burning fee for issue token: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(issueTokenFee))
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, new(big.Int).Set(issueTokenFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while burning issue token fee from total supply: %s", err.Error())
 		logger.Error(response.Message)
@@ -683,7 +683,7 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 	}
 	// bigAmountWithTransferFee := bigAmount.Add(bigAmount, bigTransferFee)
 	if token == "" {
-		token = "busy"
+		token = BUSY_COIN_SYMBOL
 	}
 	sender, _ := getCommonName(ctx)
 	userAsBytes, err := ctx.GetStub().GetState(sender)
@@ -744,7 +744,7 @@ func (bt *Busy) Transfer(ctx contractapi.TransactionContextInterface, recipiant 
 		return response
 	}
 	// minusOne, _ := new(big.Int).SetString("-1", 10)
-	err = updateTotalSupply(ctx, "busy", bigTransferFee)
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, bigTransferFee)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -767,7 +767,7 @@ func (bt *Busy) GetTotalSupply(ctx contractapi.TransactionContextInterface, symb
 	}
 
 	if symbol == "" {
-		symbol = "busy"
+		symbol = BUSY_COIN_SYMBOL
 	}
 	var token Token
 	tokenAsBytes, err := ctx.GetStub().GetState(symbol)
@@ -882,7 +882,7 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 		logger.Error(response.Message)
 		return response
 	}
-	err = burnTxFee(ctx, defaultWalletAddress, "busy")
+	err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning tx fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -943,7 +943,7 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 		return response
 	}
 	adminAddress, _ := getDefaultWalletAddress(ctx, commonName)
-	balance, _ := getBalanceHelper(ctx, adminAddress, "busy")
+	balance, _ := getBalanceHelper(ctx, adminAddress, BUSY_COIN_SYMBOL)
 	if balance.Cmp(bigAmount) == -1 {
 		response.Message = "There is not enough balance in the wallet"
 		logger.Error(response.Message)
@@ -976,13 +976,13 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 		logger.Error(response.Message)
 		return response
 	}
-	err = transferHelper(ctx, adminAddress, recipient, currentVesting, "busy", new(big.Int).Set(bigTxFee))
+	err = transferHelper(ctx, adminAddress, recipient, currentVesting, BUSY_COIN_SYMBOL, new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while transfer: %s", err.Error())
 		logger.Error(response.Message)
 		return response
 	}
-	err = updateTotalSupply(ctx, "busy", new(big.Int).Set(bigTxFee))
+	err = updateTotalSupply(ctx, BUSY_COIN_SYMBOL, new(big.Int).Set(bigTxFee))
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -1058,7 +1058,7 @@ func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInte
 		return response
 	}
 	adminAddress, _ := getDefaultWalletAddress(ctx, commonName)
-	balance, _ := getBalanceHelper(ctx, adminAddress, "busy")
+	balance, _ := getBalanceHelper(ctx, adminAddress, BUSY_COIN_SYMBOL)
 	if balance.Cmp(bigAmount) == -1 {
 		response.Message = "There is not enough balance in the wallet"
 		logger.Error(response.Message)
@@ -1104,7 +1104,7 @@ func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInte
 		logger.Error(response.Message)
 		return response
 	}
-	err = burnTxFee(ctx, defaultWalletAddress, "busy")
+	err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -1198,7 +1198,7 @@ func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Respo
 		}
 		amountToReleaseNow := bigTotalAmount.Sub(bigTotalAmount, bigReleasedAmount)
 		lockedToken.ReleasedAmount = lockedToken.TotalAmount
-		err = addUTXO(ctx, walletAddress, amountToReleaseNow, "busy")
+		err = addUTXO(ctx, walletAddress, amountToReleaseNow, BUSY_COIN_SYMBOL)
 		if err != nil {
 			response.Message = fmt.Sprintf("Error occured while claiming: %s", err.Error())
 			logger.Error(response.Message)
@@ -1228,7 +1228,7 @@ func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Respo
 		return response
 	}
 	releasableAmount = releasableAmount.Sub(releasableAmount, bigReleasedAmount)
-	addUTXO(ctx, walletAddress, releasableAmount, "busy")
+	addUTXO(ctx, walletAddress, releasableAmount, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error occured while claiming: %s", err.Error())
 		logger.Error(response.Message)
@@ -1244,7 +1244,7 @@ func (bt *Busy) AttemptUnlock(ctx contractapi.TransactionContextInterface) Respo
 		return response
 	}
 
-	err = burnTxFee(ctx, walletAddress, "busy")
+	err = burnTxFee(ctx, walletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
@@ -1292,7 +1292,7 @@ func (bt *Busy) UpdateTransferFee(ctx contractapi.TransactionContextInterface, n
 		logger.Error(response.Message)
 		return response
 	}
-	err = burnTxFee(ctx, defaultWalletAddress, "busy")
+	err = burnTxFee(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
 	if err != nil {
 		response.Message = fmt.Sprintf("Error while burning transfer fee: %s", err.Error())
 		logger.Error(response.Message)
