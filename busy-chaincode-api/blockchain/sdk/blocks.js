@@ -4,7 +4,7 @@ const {
 } = require("fabric-network");
 const protobuf = require('protobufjs');
 const blocks = require("../../app/models/blocks");
-const BlockDecoder = require("/Users/sandeepkomerelli/pp/Raj_Hansraj/busy-chaincode-api/node_modules/fabric-client/lib/BlockDecoder");
+const BlockDecoder = require("fabric-client/lib/BlockDecoder");
 const fs = require("fs");
 const path = require("path");
 
