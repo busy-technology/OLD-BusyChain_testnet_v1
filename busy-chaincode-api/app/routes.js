@@ -97,7 +97,7 @@ module.exports = (server) => {
   );
 
 
-  server.post(
+  server.get(
     "/updateBlocks",
     controller.auth.apiKey,
     controller.users.updateBlocks
