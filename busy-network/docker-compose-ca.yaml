@@ -27,10 +27,10 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  busy-ca-server:
+  ca.busy.technology:
     image: hyperledger/fabric-ca:1.4.9
-    container_name: busy-ca-server
-    hostname: busy-ca-server
+    container_name: ca.busy.technology
+    hostname: ca.busy.technology
     ports:
       - "7054:7054"
     environment:
