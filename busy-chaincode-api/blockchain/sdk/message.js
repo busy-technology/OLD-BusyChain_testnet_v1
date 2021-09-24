@@ -63,7 +63,7 @@ exports.FarbiceInvokeMessage = async (
     console.log(contractName)
     // Submit the specified transaction.
     // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-    const result = await contract.submitTransaction(functionName,recipient, "busy");
+    const result = await contract.submitTransaction(functionName,recipient, "BUSY");
     console.log("Transaction has been submitted");
     console.log("result: ", result.toString());
     // Disconnect from the gateway.

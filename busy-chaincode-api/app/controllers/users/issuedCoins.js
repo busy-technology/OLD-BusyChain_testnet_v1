@@ -28,6 +28,8 @@ module.exports = async (req, res, next) => {
           websiteUrl: result[i].websiteUrl,
           socialMedia: result[i].socialMedia,
           createdDate: result[i].createdDate,
+          blockNum: result[i].blockNum,
+          dataHash: result[i].dataHash
         };
         output.push(object);
       }

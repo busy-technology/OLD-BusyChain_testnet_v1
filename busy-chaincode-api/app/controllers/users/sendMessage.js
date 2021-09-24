@@ -30,7 +30,7 @@ module.exports = async (req, res, next) => {
            const sendMessageEntry = await new sendMessageTransactions({
              sender:sender,
              recipient: recipient,
-             tokenName: "busy",
+             tokenName: "BUSY",
              function: "SendMessage",
              txId: resp.txId,
              blockNum: blockResp.blockNum,

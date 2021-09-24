@@ -63,7 +63,7 @@ exports.FarbicInvokePool = async (
 
     // Submit the specified transaction.
     // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-    const result = await contract.submitTransaction(functionName,walletId,poolName,poolDescription, "busy");
+    const result = await contract.submitTransaction(functionName,walletId,poolName,poolDescription, "BUSY");
     console.log("Transaction has been submitted");
     console.log("result: ", result.toString());
     // Disconnect from the gateway.
@@ -137,8 +137,7 @@ exports.FarbicInvokeVote = async (
     const contract = network.getContract(contractName);
 
     // Submit the specified transaction.
-    // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-    const result = await contract.submitTransaction(functionName, walletId ,votingAddress, amount, voteType, "busy");
+    const result = await contract.submitTransaction(functionName, walletId ,votingAddress, amount, voteType, "BUSY");
     console.log("Transaction has been submitted");
     console.log("result: ", result.toString());
     // Disconnect from the gateway.
@@ -287,7 +286,7 @@ exports.FarbicInvokewithcreds = async (
   
       // Submit the specified transaction.
       // const invoked = await contract.submitTransaction('UpdateMobileNo', userdata.akcessId, userdata.phoneNumber);
-      const result = await contract.submitTransaction(functionName, minimumCoins ,poolFee, votingPeriod, votingStarttime, "busy");
+      const result = await contract.submitTransaction(functionName, minimumCoins ,poolFee, votingPeriod, votingStarttime, "BUSY");
       console.log("Transaction has been submitted");
       console.log("result: ", result.toString());
       // Disconnect from the gateway.
