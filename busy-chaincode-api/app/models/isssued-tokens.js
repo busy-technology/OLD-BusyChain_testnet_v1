@@ -52,6 +52,14 @@ const issuedCoinsSchema = new Schema({
     type: String,
     required: true,
   },
+  blockNum: {
+    type: Number,
+    required: true,
+  },
+  dataHash: {
+    type: String,
+    required: true,
+  },
   receiver: {
     type: String,
     required: true,
@@ -73,7 +81,7 @@ const issuedCoinsSchema = new Schema({
   },
   createdDate: {
     type: Date,
-    default: Date.now,
+    required: true,
   },
 });
 

@@ -1,24 +1,24 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const vestingTransactionSchema = new Schema({
-  recipient: {
+const SendMessageTransactionSchema = new Schema({
+  tokenName: {
     type: String,
     required: true,
   },
-  amount: {
-    type: String,
-    required: true,
-  },
-  startAt: {
-    type: String,
-    required: true,
-  },
-  releaseAt: {
+  function: {
     type: String,
     required: true,
   },
   txId: {
+    type: String,
+    required: true,
+  },
+  sender: {
+    type: String,
+    required: true,
+  },
+  recipient: {
     type: String,
     required: true,
   },
@@ -36,7 +36,4 @@ const vestingTransactionSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model(
-  "vestingV2Transactions",
-  vestingTransactionSchema
-);
+module.exports = mongoose.model("sendMessageTransactions", SendMessageTransactionSchema);

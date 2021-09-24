@@ -109,9 +109,19 @@ exports.FabricInvokeBlocks = async (
             const dataHash = blockResponse.header.data_hash;
             const previousHash = blockResponse.header.previous_hash;
             const transactions = [];
+            var createdAt;
             for (var j = 0; j < txcount; j++) {
                 let tx_id = blockResponse.data.data[j].payload.header.channel_header.tx_id;
-                transactions.push(tx_id);
+                let timestamp = blockResponse.data.data[j].payload.header.channel_header.timestamp;
+                if(j == 0){
+                    createdAt = timestamp;
+                }
+                let transaction = {
+                    txId: tx_id,
+                    timestamp: timestamp,
+                }
+                transactions.push(transaction);
+               
             }
             const blockEntry = await new blocks({
                 blockNum: block_num,
@@ -120,6 +130,7 @@ exports.FabricInvokeBlocks = async (
                 blockHash: currentHash,
                 preHash: previousHash,
                 transactions: transactions,
+                createdDate: new Date(createdAt),
             });
 
             await blockEntry
@@ -208,9 +219,20 @@ exports.FabricInvokeBlocksTransaction = async (
 
         const result = await contract.evaluateTransaction(functionName, channelName, txId);
         const blockResponse = BlockDecoder.decode(result);
+        
+        const txcount = blockResponse.data.data.length;
+        var transactionTimestamp;
+        // retrieving the transaction timestamp
+        for (var j = 0; j < txcount; j++) {
+            let tx_id = blockResponse.data.data[j].payload.header.channel_header.tx_id;
+            if(tx_id == txId){
+                transactionTimestamp = blockResponse.data.data[j].payload.header.channel_header.timestamp;
+            }
+        }
         const response = {
             blockNum : blockResponse.header.number,
             dataHash: blockResponse.header.data_hash,
+            timestamp: transactionTimestamp,
         }
         await gateway.disconnect();
         return response;

@@ -1,6 +1,8 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
 const sendMessage = require("../../../blockchain/test-scripts/sendMessage");
+const config = require("../../../blockchain/test-scripts/config");
+const sendMessageTransactions = require("../../models/sendmessage");
 
 module.exports = async (req, res, next) => {
   const sender = req.body.sender;
@@ -23,6 +25,29 @@ module.exports = async (req, res, next) => {
            // Storing the data from the blockchain
            await User.updateOne({userId: sender}, {messageCoins: resp.data.Sender})
            await User.updateOne({userId: sender}, {messageCoins: resp.data.Recipient})
+           const blockResponse = await config.GetBlockFromTransactionId(sender, blockchain_credentials, resp.txId);
+           const blockResp = blockResponse.chaincodeResponse;
+           const sendMessageEntry = await new sendMessageTransactions({
+             sender:sender,
+             recipient: recipient,
+             tokenName: "busy",
+             function: "SendMessage",
+             txId: resp.txId,
+             blockNum: blockResp.blockNum,
+             dataHash: blockResp.dataHash,     
+             createdDate: new Date(blockResp.timestamp),
+           });
+   
+           await sendMessageEntry
+             .save()
+             .then((result, error) => {
+               console.log("Send Message transaction recorded.");
+             })
+             .catch((error) => {
+               console.log("ERROR DB", error);
+             });
+   
+
            return res.send(200, {
              status: true,
              message: "Message Sent",

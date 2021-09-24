@@ -2,6 +2,7 @@ const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
 const IssuetokenTransactions = require("../../models/isssued-tokens");
 const IssueToken = require("../../../blockchain/test-scripts/issueTokens");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -71,6 +72,9 @@ module.exports = async (req, res, next) => {
           console.log("TRANSACTION ID", txId);
 
           if (response.success == true) {
+            const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, txId);
+            const blockResp = blockResponse.chaincodeResponse;
+            console.log("blockresp",blockResp);
             const tokenEntry = await new IssuetokenTransactions({
               tokenName: tokenName,
               name: response.data.tokenName,
@@ -83,8 +87,11 @@ module.exports = async (req, res, next) => {
               tokendeciamls: response.data.decimals,
               function: "Issue Tokens",
               txId: txId,
+              blockNum: blockResp.blockNum,
+              dataHash: blockResp.dataHash,
               sender: "Busy network",
               receiver: user.userId + " with address " + walletId,
+              createdDate: new Date(blockResp.timestamp),
               description:
                 user.userId +
                 " issued " +

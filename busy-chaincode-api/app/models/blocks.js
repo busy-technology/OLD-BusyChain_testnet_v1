@@ -25,7 +25,7 @@ const BlocksSchema = new Schema({
   },
   createdDate: {
     type: Date,
-    default: Date.now,
+    required: true,
   },
 });
 

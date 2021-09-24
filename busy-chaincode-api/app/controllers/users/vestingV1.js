@@ -2,6 +2,7 @@ const Admin = require("../../models/admin");
 const User = require("../../models/Users");
 const vestingTransactions = require("../../models/vesting1");
 const vestingV1 = require("../../../blockchain/test-scripts/vestingV1");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -50,6 +51,8 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
+        const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, txId);
+        const blockResp = blockResponse.chaincodeResponse;
         const vestingEntry = await new vestingTransactions({
           recipient: recipient,
           amount: amount,
@@ -57,6 +60,9 @@ module.exports = async (req, res, next) => {
           denominator: denominator,
           releaseAt: releaseAt,
           txId: txId,
+          blockNum: blockResp.blockNum,
+          dataHash: blockResp.dataHash,   
+          createdDate: new Date(blockResp.timestamp),
         });
 
         await vestingEntry

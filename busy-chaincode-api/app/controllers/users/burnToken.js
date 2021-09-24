@@ -55,6 +55,7 @@ module.exports = async (req, res, next) => {
         dataHash: blockResp.dataHash,
         description:
           adminId + " burned " + amount + " " + token + " of " + address,
+        createdDate: new Date(blockResp.timestamp),
       });
 
       await tokenEntry

@@ -39,7 +39,7 @@ module.exports = async (req, res, next) => {
       const response = await voting.CreateVote(walletId,user.userId, blockchain_credentials, votingAddress, amount, voteType);
       const resp = JSON.parse(response.chaincodeResponse);
       if (resp.success == true) {
-        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials,txId);
+        const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials,resp.txId);
         const blockResp = blockResponse.chaincodeResponse;
         const tokenEntry = await new transactions({
           tokenName: "busy",
@@ -49,6 +49,7 @@ module.exports = async (req, res, next) => {
           sender: walletId,
           blockNum: blockResp.blockNum,
           dataHash: blockResp.dataHash,
+          createdDate: new Date(blockResp.timestamp),
           receiver: voteType + "-" + votingAddress,
           description: walletId + " burned " + amount + " busy for voting to poolID " + votingAddress,
         });

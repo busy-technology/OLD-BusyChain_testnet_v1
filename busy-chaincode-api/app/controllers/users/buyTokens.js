@@ -66,6 +66,7 @@ module.exports = async (req, res, next) => {
             token +
             " from " +
             adminId,
+          createdDate: new Date(blockResp.timestamp),
         });
 
         await tokenEntry

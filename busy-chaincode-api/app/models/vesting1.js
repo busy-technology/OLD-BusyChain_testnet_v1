@@ -26,9 +26,17 @@ const vestingTransactionSchema = new Schema({
     type: String,
     required: true,
   },
+  blockNum: {
+    type: Number,
+    required: true,
+  },
+  dataHash: {
+    type: String,
+    required: true,
+  },
   createdDate: {
     type: Date,
-    default: Date.now,
+    required: true,
   },
 });
 

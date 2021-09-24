@@ -60,7 +60,7 @@ module.exports = async (req, res, next) => {
         console.log("DATA 2", response);
         const txId = response.txId;
         console.log("TRANSACTION ID", txId);
-        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials, txId);
+        const blockResponse = await config.GetBlockFromTransactionId(sender, blockchain_credentials, txId);
         const blockResp = blockResponse.chaincodeResponse;
         if (response.success == true) {
           const tokenEntry = await new transactions({
@@ -72,6 +72,7 @@ module.exports = async (req, res, next) => {
             receiver: recipiant,
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
+            createdDate: new Date(blockResp.timestamp),
             description: sender +
               " transferred " +
               amount +

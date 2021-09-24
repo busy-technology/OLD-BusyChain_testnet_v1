@@ -100,7 +100,6 @@ module.exports = (server) => {
   server.post(
     "/updateBlocks",
     controller.auth.apiKey,
-    adminAuth,
     controller.users.updateBlocks
   );
 
@@ -272,6 +271,27 @@ module.exports = (server) => {
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.issuedCoins
+  );
+
+  server.get(
+    "/getVestingV1",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.getVestingV1,
+  );
+
+  server.get(
+    "/getVestingV2",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.getVestingV2,
+  );
+
+  server.get(
+    "/sendMessageTransactions",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.sendMessageTransactions,
   );
 
   server.post(

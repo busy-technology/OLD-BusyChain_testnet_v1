@@ -59,7 +59,7 @@ module.exports = async (req, res, next) => {
             console.log("ERROR DB", error);
           });
 
-        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials, txId);
+        const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, resp.txId);
         const blockResp = blockResponse.chaincodeResponse;
         const tokenEntry = await new transactions({
           tokenName: "busy",
@@ -70,6 +70,7 @@ module.exports = async (req, res, next) => {
           receiver: resp.txId,
           blockNum: blockResp.blockNum,
           dataHash: blockResp.dataHash,
+          createdDate: new Date(blockResp.timestamp),
           description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + " " + token + " for pool creation",
         });
 
