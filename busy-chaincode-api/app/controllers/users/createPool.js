@@ -71,7 +71,7 @@ module.exports = async (req, res, next) => {
           blockNum: blockResp.blockNum,
           dataHash: blockResp.dataHash,
           createdDate: new Date(blockResp.timestamp),
-          description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + " " + token + " for pool creation",
+          description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + "BUSY" + " for pool creation",
         });
 
         await tokenEntry
