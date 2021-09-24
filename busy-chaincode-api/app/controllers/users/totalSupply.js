@@ -33,7 +33,7 @@ module.exports = async (req, res, next) => {
     });
     console.log("COIN", coinSymbol);
 
-    if (coinSymbol || symbol == "busy") {
+    if (coinSymbol || symbol == "BUSY") {
       const response1 = await totalSupply.totalSupply(
         userId,
         blockchain_credentials,

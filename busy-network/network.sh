@@ -37,6 +37,6 @@ infoln "Deploying busy chaincode"
 infoln "Coping CCP to application"
 cp organizations/peerOrganizations/busy.technology/connection-busy.json ../busy-chaincode-api/blockchain/sdk/connection-profile/
 
-infoln "starting explorer"
-docker-compose -f docker-compose-explorer.yaml up -d
-infoln "explorer started"
+#infoln "starting explorer"
+#docker-compose -f docker-compose-explorer.yaml up -d
+#infoln "explorer started"
