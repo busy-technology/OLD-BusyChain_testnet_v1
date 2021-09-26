@@ -184,8 +184,7 @@ module.exports = (server) => {
       "releaseAt",
     ]),
     middleware.utility.isAmount(["amount"]),
-    middleware.utility.isAmount(["numerator"]),
-    middleware.utility.isAmount(["denominator"]),
+    middleware.utility.isNumeratorDenominator(["numerator", "denominator"]),
     adminAuth,
     controller.users.vesting1
   );
@@ -199,6 +198,7 @@ module.exports = (server) => {
       "releaseAt",
     ]),
     middleware.utility.isAmount(["amount"]),
+    middleware.utility.isTime(["startAt", "releaseAt"]),
     adminAuth,
     controller.users.vesting2
   );
@@ -242,7 +242,7 @@ module.exports = (server) => {
     "/defaultWallets",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.stakingAddresses
+    controller.users.defaultWallets,
   );
 
   server.get(
@@ -267,10 +267,10 @@ module.exports = (server) => {
   );
 
   server.get(
-    "/issuedCoins",
+    "/issuedTokens",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.issuedCoins
+    controller.users.issuedTokens
   );
 
   server.get(
@@ -310,6 +310,16 @@ module.exports = (server) => {
     controller.users.recoverUser
   );
 
+
+  server.post(
+    "/resetPassword",
+    middleware.utility.required(["userId", "password", "confirmPassword","seedPhrase"]),
+    middleware.utility.isPassword(["password"]),
+    middleware.utility.isPassword(["confirmPassword"]),
+    auth,
+    controller.users.resetPassword
+  );
+
   // server.post(
   //   "/addAdmin",
   //   middleware.utility.required(["credentials"]),
@@ -342,7 +352,8 @@ module.exports = (server) => {
     "/createPool",
     middleware.utility.required(["walletId","credentials","poolName", "poolDescription"]),
     middleware.auth.generateToken,
-    controller.auth.apiKey,
+    middleware.utility.isPoolName(["poolName"]),
+    middleware.utility.isPoolDescription(["poolDescription"]),
     controller.users.createPool
   );
 
@@ -366,6 +377,10 @@ module.exports = (server) => {
     adminAuth,
     middleware.auth.generateToken,
     controller.auth.apiKey,
+    middleware.utility.isAmount(["poolFee"]),
+    middleware.utility.isAmount(["minimumCoins"]),
+    middleware.utility.isTime(["votingPeriod"]),
+    middleware.utility.isTime(["votingStartTime"]),
     controller.users.updatePoolConfig
   );
 
@@ -395,6 +410,8 @@ module.exports = (server) => {
       "amount",
       "voteType",
     ]),
+    middleware.utility.isAmount(["amount"]),
+    middleware.utility.voteType(["voteType"]),
     middleware.auth.generateToken,
     controller.auth.apiKey,
     controller.users.createVote

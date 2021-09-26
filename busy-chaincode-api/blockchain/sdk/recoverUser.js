@@ -58,7 +58,6 @@ exports.FabricUserRecover = async (userData) => {
     const adminUser = await provider.getUserContext(adminExists, "admin");
 
     const secret = bip39.mnemonicToSeedSync(userData.mnemonic).toString("hex");
-    console.log("SEC", secret);
 
     const enrollment = await ca.enroll({
       enrollmentID: userData.userId,

@@ -14,14 +14,10 @@ exports.recoverUsers = async (userId, mnemonic) => {
 
     const data = await UserServices.RecoverUsers(userData);
 
-    console.log("DATA", data);
-
     if (data) {
       const blockchain_credentials = JSON.parse(
         JSON.stringify(data.userRegistered)
       );
-
-      console.log("blockchain_credentials", blockchain_credentials);
 
       const output = {
         blockchain_credentials: blockchain_credentials,
@@ -32,9 +28,7 @@ exports.recoverUsers = async (userId, mnemonic) => {
       console.log("error");
     }
   } catch (exception) {
-    //logger.error(exception.errors);
-    //return sendResponse(res, false, 200, exception.errors);
-    console.log("exception", exception);
+    throw (exception);
   }
 };
 

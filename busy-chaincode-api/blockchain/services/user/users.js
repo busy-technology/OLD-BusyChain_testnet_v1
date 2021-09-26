@@ -155,7 +155,7 @@ exports.totalSupply = async (walletDetails, userId, userKey) => {
 exports.stakingInfo = async (walletDetails, userId, userKey) => {
   try {
     const invokeFabricChaincodeWithCertificate =
-      await invoke.FabricChaincodeInvokeWithCertificate(
+      await querySupply.ChaincodeSupplyQuery(
         "busychannel",
         "busytoken",
         "GetStakingInfo",
@@ -437,7 +437,7 @@ exports.RecoverUsers = async (userData) => {
       };
     }
   } catch (exception) {
-    return exception;
+    throw(exception);
   }
 };
 
@@ -445,7 +445,7 @@ exports.RecoverUsers = async (userData) => {
 exports.CurrentPhase = async (userId, userKey) => {
   try {
     await enrollAdmin.FabricAdminEnroll();
-    const invokeChaincode = await voting.FarbicInvokewithcreds(
+    const invokeChaincode = await voting.FarbicQuerywithcreds(
         "busychannel",
         "busytoken",
         "GetCurrentPhase",
@@ -467,7 +467,7 @@ exports.CurrentPhase = async (userId, userKey) => {
 exports.CurrentFees = async (userId, userKey) => {
   try {
     await enrollAdmin.FabricAdminEnroll();
-    const invokeChaincode = await voting.FarbicInvokewithcreds(
+    const invokeChaincode = await voting.FarbicQuerywithcreds(
         "busychannel",
         "busytoken",
         "GetCurrentFee",

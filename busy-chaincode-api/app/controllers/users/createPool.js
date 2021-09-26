@@ -61,9 +61,10 @@ module.exports = async (req, res, next) => {
 
         const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, resp.txId);
         const blockResp = blockResponse.chaincodeResponse;
+        console.log(resp.data.poolFee)
         const tokenEntry = await new transactions({
           tokenName: "BUSY",
-          amount: constants.CREATE_POOL_AMOUNT,
+          amount: resp.data.poolFee,
           function: "CreatePool",
           txId: resp.txId,
           sender: walletId,
@@ -71,7 +72,7 @@ module.exports = async (req, res, next) => {
           blockNum: blockResp.blockNum,
           dataHash: blockResp.dataHash,
           createdDate: new Date(blockResp.timestamp),
-          description: walletId + " burned " + constants.CREATE_POOL_AMOUNT + "BUSY" + " for pool creation",
+          description: walletId + " burned " + resp.data.poolFee + "BUSY" + " for pool creation",
         });
 
         await tokenEntry

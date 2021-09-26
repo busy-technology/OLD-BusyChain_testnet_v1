@@ -27,8 +27,6 @@ module.exports = async (req, res, next) => {
       type: adminData.certificate.type,
     };
 
-    console.log("BLOCK", blockchain_credentials);
-
     // const wallet = await Wallet.findOne({ userId: userId });
     // console.log("WALLET", wallet);
 

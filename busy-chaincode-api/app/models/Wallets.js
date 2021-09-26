@@ -12,6 +12,11 @@ const WalletSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  stakingWalletId: {
+    type: String,
+    required: true,
+    trim: true,
+  },
   type: {
     type: String,
     required: true,
@@ -21,9 +26,19 @@ const WalletSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  blockNum: {
+    type: Number,
+    required: true,
+  },
+  dataHash: {
+    type: String,
+    required: true,
+  },
+  createdDate: {
+    type: Date,
+    required: true,
+  },
 });
-
-WalletSchema.plugin(timeStamp);
 
 const Wallets = mongoose.model("StakingAddress", WalletSchema);
 module.exports = Wallets;

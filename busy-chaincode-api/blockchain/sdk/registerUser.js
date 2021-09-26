@@ -59,7 +59,6 @@ exports.FabricUserRegister = async (userData, key) => {
     const adminUser = await provider.getUserContext(adminExists, "admin");
 
     const secret = bip39.mnemonicToSeedSync(key).toString("hex");
-    console.log("SEC", secret);
 
     const secret1 = await ca.register(
       {

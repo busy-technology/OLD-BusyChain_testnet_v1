@@ -5,8 +5,6 @@ module.exports = async (req, res, next) => {
     const userId = "ordererAdmin";
     const credentials = req.body.credentials;
 
-    console.log("CREDENTIALS", credentials);
-
     const credential = {
       certificate: credentials.credentials.certificate,
       privateKey: credentials.credentials.privateKey,

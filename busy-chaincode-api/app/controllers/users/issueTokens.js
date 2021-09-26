@@ -1,6 +1,6 @@
 const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
-const IssuetokenTransactions = require("../../models/isssued-tokens");
+const IssuetokenTransactions = require("../../models/issued-tokens");
 const IssueToken = require("../../../blockchain/test-scripts/issueTokens");
 const config = require("../../../blockchain/test-scripts/config");
 
@@ -90,7 +90,7 @@ module.exports = async (req, res, next) => {
               blockNum: blockResp.blockNum,
               dataHash: blockResp.dataHash,
               sender: "Busy network",
-              receiver: user.userId + " with address " + walletId,
+              receiver: walletId,
               createdDate: new Date(blockResp.timestamp),
               description:
                 user.userId +

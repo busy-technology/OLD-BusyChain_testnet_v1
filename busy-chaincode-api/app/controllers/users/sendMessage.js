@@ -1,5 +1,4 @@
 const User = require("../../models/Users");
-const Wallet = require("../../models/Wallets");
 const sendMessage = require("../../../blockchain/test-scripts/sendMessage");
 const config = require("../../../blockchain/test-scripts/config");
 const sendMessageTransactions = require("../../models/sendmessage");
@@ -10,8 +9,8 @@ module.exports = async (req, res, next) => {
   const blockchain_credentials = req.body.credentials;
 
   try {
-    const sendUser = await User.findOne({ userId: sender });
-    const recUser = await User.findOne({userId: recipient})
+    const sendUser = await User.findOne({ walletId: sender });
+    const recUser = await User.findOne({walletId: recipient})
     if (sendUser && recUser) {
         const response = await sendMessage.sendMessage(
           sender,
@@ -23,8 +22,8 @@ module.exports = async (req, res, next) => {
            console.log("Message Sent Successfully")
 
            // Storing the data from the blockchain
-           await User.updateOne({userId: sender}, {messageCoins: resp.data.Sender})
-           await User.updateOne({userId: sender}, {messageCoins: resp.data.Recipient})
+           await User.updateOne({walletId: sender}, {messageCoins: resp.data.Sender})
+           await User.updateOne({walletId: recipient}, {messageCoins: resp.data.Recipient})
            const blockResponse = await config.GetBlockFromTransactionId(sender, blockchain_credentials, resp.txId);
            const blockResp = blockResponse.chaincodeResponse;
            const sendMessageEntry = await new sendMessageTransactions({
@@ -62,13 +61,13 @@ module.exports = async (req, res, next) => {
         };
     } else {
       if (!sendUser){
-        console.log("Sender do not exist.");
+        console.log("Sender WalletId do not exist.");
         return res.send(404, {
           status: false,
           message: `Sender do not exist.`,
         });
       } else {
-        console.log("Recipient do not exist.");
+        console.log("Recipient WalletId do not exist.");
         return res.send(404, {
           status: false,
           message: `Recipient do not exist.`,

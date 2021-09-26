@@ -13,10 +13,11 @@ type User struct {
 }
 
 type Wallet struct {
-	DocType string `json:"docType"`
-	UserID  string `json:"userId"`
-	Address string `json:"address"`
-	Balance string `json:"balance"`
+	DocType   string `json:"docType"`
+	UserID    string `json:"userId"`
+	Address   string `json:"address"`
+	Balance   string `json:"balance"`
+	CreatedAt uint64 `json:"createdAt"`
 }
 
 // UTXO unspent transaction output
@@ -69,6 +70,7 @@ type Pool struct {
 	TokenType        string    `json:"tokenType"`
 	PoolName         string    `json:"poolName"`
 	PoolDescription  string    `json:"poolDescription"`
+	PoolFee          string    `json:"poolFee"`
 }
 
 // Vote represents the tokens given by individual vote to the pool

@@ -38,7 +38,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 		return response
 	}
 
-	re := regexp.MustCompile("^[a-zA-Z0-9_]*$")
+	re := regexp.MustCompile("^[a-zA-Z0-9_ ]*$")
 	if len(PoolName) > 30 {
 		response.Message = "Pool Name cannot be more than 30 characters"
 		logger.Error(response.Message)
@@ -47,13 +47,13 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 
 	// checking for special characters
 	if !re.MatchString(PoolName) {
-		response.Message = "Pool Name cannot be Contain Special Characters"
+		response.Message = "Pool name cannot contain special characters"
 		logger.Error(response.Message)
 		return response
 	}
 
 	if len(PoolDescription) > 500 {
-		response.Message = "Pool Description Cannot be have more than 500 characters"
+		response.Message = "Pool Description cannot have more than 500 characters"
 		logger.Error(response.Message)
 		return response
 	}
@@ -109,6 +109,7 @@ func (bv *BusyVoting) CreatePool(ctx contractapi.TransactionContextInterface, wa
 		TokenType:        token,
 		PoolName:         PoolName,
 		PoolDescription:  PoolDescription,
+		PoolFee:          votingConfig.PoolFee,
 	}
 	poolAddrAsBytes, _ := json.Marshal(poolData)
 

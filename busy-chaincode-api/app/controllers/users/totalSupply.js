@@ -1,5 +1,5 @@
 const Admin = require("../../models/admin");
-const IssuetokenTransactions = require("../../models/isssued-tokens");
+const IssuetokenTransactions = require("../../models/issued-tokens");
 const totalSupply = require("../../../blockchain/test-scripts/totalSupply");
 
 module.exports = async (req, res, next) => {
@@ -22,8 +22,6 @@ module.exports = async (req, res, next) => {
       mspId: adminData.certificate.mspId,
       type: adminData.certificate.type,
     };
-
-    console.log("BLOCK", blockchain_credentials);
 
     // const lowerToken = symbol.toLowerCase();
     // console.log("LOWER TOKEN", lowerToken);

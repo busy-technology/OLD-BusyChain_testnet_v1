@@ -38,7 +38,7 @@ module.exports = async (req, res, next) => {
       );
       console.log("RESPONSE 1", response1);
       const response = JSON.parse(response1.chaincodeResponse);
-      console.log("CHECK", response);
+      
       console.log("DATA 2", response);
       const txId = response.txId;
       console.log("TRANSACTION ID", txId);

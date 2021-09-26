@@ -1,4 +1,4 @@
-const IssuetokenTransactions = require("../../models/isssued-tokens");
+const IssuetokenTransactions = require("../../models/issued-tokens");
 
 module.exports = async (req, res, next) => {
   IssuetokenTransactions.countDocuments({}, function (err, count) {
@@ -16,11 +16,11 @@ module.exports = async (req, res, next) => {
 
       for (let i = 0; i < count; i++) {
         var object = {
-          coinName: result[i].tokenName,
-          coinSupply: result[i].tokenSupply,
-          coinAdmin: result[i].tokenAdmin,
-          coinDecimals: result[i].tokendeciamls,
-          coinSymbol: result[i].tokenSymbol,
+          tokenName: result[i].tokenName,
+          tokenSupply: result[i].tokenSupply,
+          tokenAdmin: result[i].tokenAdmin,
+          tokenDecimals: result[i].tokendeciamls,
+          tokenSymbol: result[i].tokenSymbol,
           txId: result[i].txId,
           sender: "Busy network",
           receiver: result[i].receiver,

@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
     const response = await voting.UpdatePoolConfig(adminId, blockchain_credentials,minimumCoins, poolFee, votingPeriod, votingStartTime);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-        console.log("Voting Config Updated successfully")
+      console.log("Voting Config Updated successfully");
         return res.send(200, {
             status: true,
             message: "Voting Config Updated successfully",

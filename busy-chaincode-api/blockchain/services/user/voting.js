@@ -74,7 +74,7 @@ exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, vo
   exports.QueryPool = async (userId, userKey) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
-      const invokeChaincode = await voting.FarbicInvokewithcreds(
+      const invokeChaincode = await voting.FarbicQuerywithcreds(
           "busychannel",
           "busytoken",
           "BusyVoting:QueryPool",
@@ -96,7 +96,7 @@ exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, vo
   exports.PoolHistory = async (userId, userKey) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
-      const invokeChaincode = await voting.FarbicInvokewithcreds(
+      const invokeChaincode = await voting.FarbicQuerywithcreds(
           "busychannel",
           "busytoken",
           "BusyVoting:PoolHistory",
@@ -117,7 +117,7 @@ exports.CreateVote = async (walletId, userId, userKey, votingAddress, amount, vo
   exports.PoolConfig = async (userId, userKey) => {
     try {
       await enrollAdmin.FabricAdminEnroll();
-      const invokeChaincode = await voting.FarbicInvokewithcreds(
+      const invokeChaincode = await voting.FarbicQuerywithcreds(
           "busychannel",
           "busytoken",
           "BusyVoting:PoolConfig",

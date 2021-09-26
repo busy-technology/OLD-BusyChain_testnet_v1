@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const issuedCoinsSchema = new Schema({
+const issuedTokensSchema = new Schema({
   tokenName: {
     type: String,
     required: true,
@@ -85,4 +85,4 @@ const issuedCoinsSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("issuedCoins", issuedCoinsSchema);
+module.exports = mongoose.model("issuedTokens", issuedTokensSchema);

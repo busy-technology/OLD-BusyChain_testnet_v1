@@ -22,7 +22,6 @@ exports.registerUsers = async (userId) => {
 
       //   GIVE ALL THE CONSOLES IN RESPONSE OF API
 
-      console.log("blockchain_credentials", blockchain_credentials);
       console.log("chaincodeResponse", response);
       console.log("MNEMONIC GENERATED", mnemonic);
 

@@ -62,8 +62,8 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	votingConfig := VotingConfig{
 		MinimumCoins:    "15000000000000000000000000",
 		PoolFee:         "166666000000000000000000",
-		VotingPeriod:    20 * time.Minute, // 7 days + 2 days
-		VotingStartTime: 5 * time.Minute,
+		VotingPeriod:    9 * 24 * 60 * time.Minute, // 7 days + 2 days
+		VotingStartTime: 2 * 24 * 60 * time.Minute,
 	}
 	votingConfigAsBytes, _ := json.Marshal(votingConfig)
 	err = ctx.GetStub().PutState("VotingConfig", votingConfigAsBytes)
@@ -72,6 +72,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		logger.Error(response.Message)
 		return response
 	}
+	now, _ := ctx.GetStub().GetTxTimestamp()
 
 	supply, _ := new(big.Int).SetString("255000000000000000000000000", 10)
 	token := Token{
@@ -92,10 +93,11 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	}
 
 	wallet := Wallet{
-		DocType: "wallet",
-		UserID:  commonName,
-		Address: response.TxID,
-		Balance: supply.String(),
+		DocType:   "wallet",
+		UserID:    commonName,
+		Address:   response.TxID,
+		Balance:   supply.String(),
+		CreatedAt: uint64(now.Seconds),
 	}
 	walletAsBytes, _ := json.Marshal(wallet)
 	err = ctx.GetStub().PutState(response.TxID, walletAsBytes)
@@ -154,7 +156,6 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 
-	now, _ := ctx.GetStub().GetTxTimestamp()
 	phaseUpdateTimeline := map[uint64]PhaseUpdateInfo{
 		1: PhaseUpdateInfo{
 			UpdatedAt:    uint64(now.Seconds),
@@ -201,10 +202,13 @@ func (bt *Busy) CreateUser(ctx contractapi.TransactionContextInterface) Response
 		return response
 	}
 
+	now, _ := ctx.GetStub().GetTxTimestamp()
+
 	wallet := Wallet{
-		DocType: "wallet",
-		UserID:  commonName,
-		Address: "B-" + response.TxID,
+		DocType:   "wallet",
+		UserID:    commonName,
+		Address:   "B-" + response.TxID,
+		CreatedAt: uint64(now.Seconds),
 		// Balance: 0.00,
 	}
 	walletAsBytes, _ := json.Marshal(wallet)
@@ -275,10 +279,11 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
 	stakingAddress := Wallet{
-		DocType: "stakingAddr",
-		UserID:  commonName,
-		Address: "staking-" + response.TxID,
-		Balance: stakingAmount.String(),
+		DocType:   "stakingAddr",
+		UserID:    commonName,
+		Address:   "staking-" + response.TxID,
+		Balance:   stakingAmount.String(),
+		CreatedAt: uint64(now.Seconds),
 	}
 	txFee, err := getCurrentTxFee(ctx)
 	bigTxFee, _ := new(big.Int).SetString(txFee, 10)
@@ -429,7 +434,11 @@ func (bt *Busy) GetUser(ctx contractapi.TransactionContextInterface, userID stri
 		data, _ := resultIterator.Next()
 		json.Unmarshal(data.Value, &wallet)
 		balance, _ := getBalanceHelper(ctx, wallet.Address, BUSY_COIN_SYMBOL)
-		responseData[wallet.Address] = fmt.Sprintf("%s %s", balance.String(), BUSY_COIN_SYMBOL)
+		walletDetails := make(map[string]interface{}, 3)
+		walletDetails["balance"] = balance.String()
+		walletDetails["token"] = BUSY_COIN_SYMBOL
+		walletDetails["createdAt"] = wallet.CreatedAt
+		responseData[wallet.Address] = walletDetails
 	}
 
 	responseData["messageCoins"] = userDetails.MessageCoins

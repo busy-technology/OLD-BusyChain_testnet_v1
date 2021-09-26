@@ -16,7 +16,7 @@ module.exports = async (req, res, next) => {
 
       for (let i = 0; i < count; i++) {
         var object = {
-          walletId: result[i].walletId,
+          walletId: result[i].stakingWalletId,
           createdDate: result[i].createdAt,
         };
         output.push(object);

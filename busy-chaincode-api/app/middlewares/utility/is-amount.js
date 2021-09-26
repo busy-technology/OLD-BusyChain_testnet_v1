@@ -1,4 +1,7 @@
 const is_amount = (value) => {
+  if(/^0.*$/.test(value)){
+    return false
+  }
   return /^[0-9]+$/.test(value);
   //allows space and letter only
 };

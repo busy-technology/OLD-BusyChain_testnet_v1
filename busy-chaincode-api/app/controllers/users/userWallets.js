@@ -25,8 +25,6 @@ module.exports = async (req, res, next) => {
       type: adminData.certificate.type,
     };
 
-    console.log("BLOCK", blockchain_credentials);
-
     const response1 = await QueryUsers.userWallet(
       userId,
       blockchain_credentials

@@ -13,6 +13,7 @@ module.exports = async (req, res, next) => {
 
     console.log("IN USER");
     const adminData = await Admin.findOne({ userId: adminId });
+ 
     console.log("ADMIN", adminData);
 
     const credentials = {
@@ -25,8 +26,6 @@ module.exports = async (req, res, next) => {
       mspId: adminData.certificate.mspId,
       type: adminData.certificate.type,
     };
-
-    console.log("BLOCK", blockchain_credentials);
 
     const response1 = await burn.burnTokens(
       userId,

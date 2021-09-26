@@ -2,6 +2,7 @@ const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
 const { Certificate } = require("@fidm/x509");
 const WalletScript = require("../../../blockchain/test-scripts/walletCreate");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -44,17 +45,24 @@ module.exports = async (req, res, next) => {
         const response = JSON.parse(response1.chaincodeResponse);
         console.log("CHECK", response);
         console.log("DATA 2", response);
-        const walletId = response.data;
+        const stakingWalletId = response.data;
         const txId = response.txId;
-        console.log("WalletId", walletId);
+        console.log("WalletId", stakingWalletId);
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
+
+        const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, response.txId);
+        const blockResp = blockResponse.chaincodeResponse;
           const wallet = await new Wallet({
             userId: userId,
-            walletId: walletId,
+            stakingWalletId: stakingWalletId,
+            walletId: user.walletId,
             type: type,
             txId: response.txId,
+            blockNum: blockResp.blockNum,
+            dataHash: blockResp.dataHash,
+            createdDate: new Date(blockResp.timestamp),
           });
 
           await wallet
