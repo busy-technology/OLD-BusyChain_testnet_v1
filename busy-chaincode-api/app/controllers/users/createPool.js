@@ -61,7 +61,6 @@ module.exports = async (req, res, next) => {
 
         const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, resp.txId);
         const blockResp = blockResponse.chaincodeResponse;
-        console.log(resp.data.poolFee)
         const tokenEntry = await new transactions({
           tokenName: "BUSY",
           amount: resp.data.poolFee,

@@ -12,9 +12,7 @@ module.exports = async (req, res, next) => {
 
     if (user) {
       try {
-        console.log("IN USER");
         const response = await RecoverScript.recoverUsers(userId, mnemonic);
-        console.log("RESPONSE", response);
 
         if (response.blockchain_credentials.credentials) {
           return res.send(200, {

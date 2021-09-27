@@ -13,8 +13,8 @@ module.exports = async (req, res, next) => {
     const recUser = await User.findOne({walletId: recipient})
     if (sendUser && recUser) {
         const response = await sendMessage.sendMessage(
-          sender,
-          recipient,
+          sendUser.userId,
+          recUser.userId,
           blockchain_credentials,
         );
         const resp = JSON.parse(response.chaincodeResponse);
@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
            // Storing the data from the blockchain
            await User.updateOne({walletId: sender}, {messageCoins: resp.data.Sender})
            await User.updateOne({walletId: recipient}, {messageCoins: resp.data.Recipient})
-           const blockResponse = await config.GetBlockFromTransactionId(sender, blockchain_credentials, resp.txId);
+           const blockResponse = await config.GetBlockFromTransactionId(sendUser.userId, blockchain_credentials, resp.txId);
            const blockResp = blockResponse.chaincodeResponse;
            const sendMessageEntry = await new sendMessageTransactions({
              sender:sender,
