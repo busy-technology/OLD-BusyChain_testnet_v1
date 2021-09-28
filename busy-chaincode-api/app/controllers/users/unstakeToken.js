@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
       blockchain_credentials = req.body.credentials;
 
     const address = await Wallet.findOne({
-      walletId: stakingAddr,
+      stakingWalletId: stakingAddr,
     });
     console.log("ADDRESS", address);
 

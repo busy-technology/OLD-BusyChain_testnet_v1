@@ -106,14 +106,14 @@ module.exports = (server) => {
 
   server.post(
     "/claim",
-    middleware.utility.required(["stakingAddr"]),
+    middleware.utility.required(["stakingAddr", "credentials"]),
     auth,
     controller.users.claim
   );
 
   server.post(
     "/unstake",
-    middleware.utility.required(["stakingAddr"]),
+    middleware.utility.required(["stakingAddr", "credentials"]),
     auth,
     controller.users.unstake
   );

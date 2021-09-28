@@ -8,6 +8,8 @@ services:
     - "3000:3000"
     depends_on:
     - mongo
+    volumes: 
+    - ../busy-chaincode-api/blockchain/sdk/connection-profile:/usr/src/app/blockchain/sdk/connection-profile
     networks:
     - busy-blockchain
   mongo:

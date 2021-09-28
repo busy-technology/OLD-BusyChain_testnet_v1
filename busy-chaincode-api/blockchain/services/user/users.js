@@ -155,7 +155,7 @@ exports.totalSupply = async (walletDetails, userId, userKey) => {
 exports.stakingInfo = async (walletDetails, userId, userKey) => {
   try {
     const invokeFabricChaincodeWithCertificate =
-      await querySupply.ChaincodeSupplyQuery(
+      await querySupply.ChaincodeStakingQuery(
         "busychannel",
         "busytoken",
         "GetStakingInfo",

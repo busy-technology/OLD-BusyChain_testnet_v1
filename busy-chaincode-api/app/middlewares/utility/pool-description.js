@@ -2,7 +2,7 @@ const pool_description = (value) => {
     if(value.length > 500){
 		return false;
 	}
-   return /^[a-zA-Z0-9_ ]*$/.test(value);
+   return true
 };
    
 module.exports = (fields) => {
