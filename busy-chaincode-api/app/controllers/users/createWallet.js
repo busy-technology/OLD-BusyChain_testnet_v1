@@ -3,6 +3,7 @@ const Wallet = require("../../models/Wallets");
 const { Certificate } = require("@fidm/x509");
 const WalletScript = require("../../../blockchain/test-scripts/walletCreate");
 const config = require("../../../blockchain/test-scripts/config");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -37,6 +38,23 @@ module.exports = async (req, res, next) => {
           });
         }
 
+        console.log(
+          "PRIVATE KEY",
+          blockchain_credentials.credentials.privateKey
+        );
+
+        // const decodedPrivateKey = base58.decode(
+        //   blockchain_credentials.credentials.privateKey
+        // );
+        const decodedPrivateKey = bs58.decode(
+          blockchain_credentials.credentials.privateKey
+        );
+
+        console.log("DECODED KEY", decodedPrivateKey.toString());
+
+        blockchain_credentials.credentials.privateKey =
+          decodedPrivateKey.toString();
+
         const response1 = await WalletScript.WalletCreation(
           userId,
           blockchain_credentials
@@ -51,9 +69,12 @@ module.exports = async (req, res, next) => {
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
-
-        const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, response.txId);
-        const blockResp = blockResponse.chaincodeResponse;
+          const blockResponse = await config.GetBlockFromTransactionId(
+            user.userId,
+            blockchain_credentials,
+            response.txId
+          );
+          const blockResp = blockResponse.chaincodeResponse;
           const wallet = await new Wallet({
             userId: userId,
             stakingWalletId: stakingWalletId,

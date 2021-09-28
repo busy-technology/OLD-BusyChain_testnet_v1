@@ -96,19 +96,13 @@ module.exports = (server) => {
     controller.users.transfer
   );
 
-
   server.get(
     "/updateBlocks",
     controller.auth.apiKey,
     controller.users.updateBlocks
   );
 
-
-  server.get(
-    "/getBlocks",
-    controller.auth.apiKey,
-    controller.users.getBlocks
-  );
+  server.get("/getBlocks", controller.auth.apiKey, controller.users.getBlocks);
 
   server.post(
     "/claim",
@@ -242,7 +236,7 @@ module.exports = (server) => {
     "/defaultWallets",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.defaultWallets,
+    controller.users.defaultWallets
   );
 
   server.get(
@@ -263,7 +257,7 @@ module.exports = (server) => {
     "/transactions",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.transactions,
+    controller.users.transactions
   );
 
   server.get(
@@ -277,21 +271,21 @@ module.exports = (server) => {
     "/getVestingV1",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.getVestingV1,
+    controller.users.getVestingV1
   );
 
   server.get(
     "/getVestingV2",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.getVestingV2,
+    controller.users.getVestingV2
   );
 
   server.get(
     "/sendMessageTransactions",
     middleware.auth.generateToken,
     controller.auth.apiKey,
-    controller.users.sendMessageTransactions,
+    controller.users.sendMessageTransactions
   );
 
   server.post(
@@ -310,10 +304,14 @@ module.exports = (server) => {
     controller.users.recoverUser
   );
 
-
   server.post(
     "/resetPassword",
-    middleware.utility.required(["userId", "password", "confirmPassword","seedPhrase"]),
+    middleware.utility.required([
+      "userId",
+      "password",
+      "confirmPassword",
+      "seedPhrase",
+    ]),
     middleware.utility.isPassword(["password"]),
     middleware.utility.isPassword(["confirmPassword"]),
     auth,
@@ -350,7 +348,12 @@ module.exports = (server) => {
   // endpoint for creating pool
   server.post(
     "/createPool",
-    middleware.utility.required(["walletId","credentials","poolName", "poolDescription"]),
+    middleware.utility.required([
+      "walletId",
+      "credentials",
+      "poolName",
+      "poolDescription",
+    ]),
     middleware.auth.generateToken,
     middleware.utility.isPoolName(["poolName"]),
     middleware.utility.isPoolDescription(["poolDescription"]),
@@ -365,8 +368,8 @@ module.exports = (server) => {
     controller.users.getPoolConfig
   );
 
-   // endpoint for pool Config
-   server.post(
+  // endpoint for pool Config
+  server.post(
     "/poolConfig",
     middleware.utility.required([
       "minimumCoins",

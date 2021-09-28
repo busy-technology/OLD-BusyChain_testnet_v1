@@ -1,6 +1,7 @@
 const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
 const attemptUnlockScript = require("../../../blockchain/test-scripts/attemptUnlock");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -32,13 +33,22 @@ module.exports = async (req, res, next) => {
         });
       }
 
+      const decodedPrivateKey = bs58.decode(
+        blockchain_credentials.credentials.privateKey
+      );
+
+      console.log("DECODED KEY", decodedPrivateKey.toString());
+
+      blockchain_credentials.credentials.privateKey =
+        decodedPrivateKey.toString();
+
       const response1 = await attemptUnlockScript.AttemptUnlock(
         userId,
         blockchain_credentials
       );
       console.log("RESPONSE 1", response1);
       const response = JSON.parse(response1.chaincodeResponse);
-      
+
       console.log("DATA 2", response);
       const txId = response.txId;
       console.log("TRANSACTION ID", txId);

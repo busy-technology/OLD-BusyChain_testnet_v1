@@ -19,8 +19,11 @@
   "homepage": "https://github.com/ramboraj123/Raj_Hansraj#readme",
   "dependencies": {
     "@fidm/x509": "^1.2.1",
+    "base58": "^2.0.1",
+    "base58-encode": "^0.2.0",
     "bcrypt": "^5.0.1",
     "bip39": "^3.0.4",
+    "bs58": "^4.0.1",
     "express-mongo-sanitize": "^2.1.0",
     "fabric-ca-client": "^2.2.2",
     "fabric-client": "^1.4.18",

@@ -1,10 +1,9 @@
 const User = require("../../models/Users");
-const {
-  Certificate
-} = require("@fidm/x509");
+const { Certificate } = require("@fidm/x509");
 const transactions = require("../../models/transactions");
 const transferScript = require("../../../blockchain/test-scripts/transferTokens");
 const config = require("../../../blockchain/test-scripts/config");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -15,7 +14,7 @@ module.exports = async (req, res, next) => {
       token = req.body.token;
 
     const user = await User.findOne({
-      walletId: sender
+      walletId: sender,
     });
     console.log("User", user);
 
@@ -43,10 +42,19 @@ module.exports = async (req, res, next) => {
       }
 
       const receiver = await User.findOne({
-        walletId: recipiant
+        walletId: recipiant,
       });
 
       if (receiver) {
+        const decodedPrivateKey = bs58.decode(
+          blockchain_credentials.credentials.privateKey
+        );
+
+        console.log("DECODED KEY", decodedPrivateKey.toString());
+
+        blockchain_credentials.credentials.privateKey =
+          decodedPrivateKey.toString();
+
         const response1 = await transferScript.transferToken(
           sender,
           blockchain_credentials,
@@ -60,7 +68,11 @@ module.exports = async (req, res, next) => {
         console.log("DATA 2", response);
         const txId = response.txId;
         console.log("TRANSACTION ID", txId);
-        const blockResponse = await config.GetBlockFromTransactionId(sender, blockchain_credentials, txId);
+        const blockResponse = await config.GetBlockFromTransactionId(
+          sender,
+          blockchain_credentials,
+          txId
+        );
         const blockResp = blockResponse.chaincodeResponse;
         if (response.success == true) {
           const tokenEntry = await new transactions({
@@ -73,7 +85,8 @@ module.exports = async (req, res, next) => {
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
-            description: sender +
+            description:
+              sender +
               " transferred " +
               amount +
               " " +
@@ -93,7 +106,8 @@ module.exports = async (req, res, next) => {
 
           return res.send(200, {
             status: true,
-            message: sender +
+            message:
+              sender +
               " transferred " +
               amount +
               " " +

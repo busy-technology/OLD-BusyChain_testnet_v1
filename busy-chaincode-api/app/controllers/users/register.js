@@ -2,6 +2,7 @@ const User = require("../../models/Users");
 const UserScript = require("../../../blockchain/test-scripts/userRegister");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -34,6 +35,18 @@ module.exports = async (req, res, next) => {
       const data = await UserScript.registerUsers(userId);
       console.log("DATA 2", data);
       console.log("HASH", hash);
+      console.log(
+        "PRIVATE KEY",
+        data.blockchain_credentials.credentials.privateKey
+      );
+
+      const bytes = Buffer.from(
+        data.blockchain_credentials.credentials.privateKey,
+        "utf-8"
+      );
+
+      const encodedPrivateKey = bs58.encode(bytes);
+
       if (data.chaincodeResponse.success == true) {
         const users = await new User({
           firstName: firstName,
@@ -46,7 +59,7 @@ module.exports = async (req, res, next) => {
           country: country,
           txId: data.chaincodeResponse.txId,
           messageCoins: {
-            "totalCoins": 0
+            totalCoins: 0,
           },
         });
 
@@ -58,6 +71,8 @@ module.exports = async (req, res, next) => {
           .catch((error) => {
             console.log("ERROR DB", error);
           });
+
+        data.blockchain_credentials.credentials.privateKey = encodedPrivateKey;
 
         return res.send(200, {
           status: true,

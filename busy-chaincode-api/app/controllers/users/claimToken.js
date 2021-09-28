@@ -1,8 +1,8 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
 const { Certificate } = require("@fidm/x509");
-
 const claimScript = require("../../../blockchain/test-scripts/claim");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -40,6 +40,15 @@ module.exports = async (req, res, next) => {
             message: `Incorrect type or MSPID.`,
           });
         }
+
+        const decodedPrivateKey = bs58.decode(
+          blockchain_credentials.credentials.privateKey
+        );
+
+        console.log("DECODED KEY", decodedPrivateKey.toString());
+
+        blockchain_credentials.credentials.privateKey =
+          decodedPrivateKey.toString();
 
         const response1 = await claimScript.claimToken(
           user.userId,

@@ -3,6 +3,7 @@ const { Certificate } = require("@fidm/x509");
 const IssuetokenTransactions = require("../../models/issued-tokens");
 const IssueToken = require("../../../blockchain/test-scripts/issueTokens");
 const config = require("../../../blockchain/test-scripts/config");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   try {
@@ -56,6 +57,15 @@ module.exports = async (req, res, next) => {
       console.log("COIN", coinName);
       if (!coinName) {
         if (!coinSymbol) {
+          const decodedPrivateKey = bs58.decode(
+            blockchain_credentials.credentials.privateKey
+          );
+
+          console.log("DECODED KEY", decodedPrivateKey.toString());
+
+          blockchain_credentials.credentials.privateKey =
+            decodedPrivateKey.toString();
+
           const response1 = await IssueToken.issueToken(
             walletId,
             blockchain_credentials,
@@ -72,9 +82,13 @@ module.exports = async (req, res, next) => {
           console.log("TRANSACTION ID", txId);
 
           if (response.success == true) {
-            const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, txId);
+            const blockResponse = await config.GetBlockFromTransactionId(
+              user.userId,
+              blockchain_credentials,
+              txId
+            );
             const blockResp = blockResponse.chaincodeResponse;
-            console.log("blockresp",blockResp);
+            console.log("blockresp", blockResp);
             const tokenEntry = await new IssuetokenTransactions({
               tokenName: tokenName,
               name: response.data.tokenName,
