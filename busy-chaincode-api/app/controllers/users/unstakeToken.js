@@ -76,6 +76,8 @@ module.exports = async (req, res, next) => {
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
+            walletId: response.data.defaultWalletAddress,
+            stakingWalletId: response.data.stakingAddr,
           });
   
           await unstakeEntry

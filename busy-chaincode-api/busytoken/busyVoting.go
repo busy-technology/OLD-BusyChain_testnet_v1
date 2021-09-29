@@ -340,7 +340,7 @@ func (bv *BusyVoting) QueryPool(ctx contractapi.TransactionContextInterface) Res
 	}
 	commonName, _ := getCommonName(ctx)
 	if commonName != "busy_network" {
-		response.Message = "You are not allowed to Delete Voting pool"
+		response.Message = "You are not allowed to Query Voting pool"
 		logger.Error(response.Message)
 		return response
 	}

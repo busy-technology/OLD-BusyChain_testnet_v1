@@ -1,6 +1,8 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
-const { Certificate } = require("@fidm/x509");
+const {
+  Certificate
+} = require("@fidm/x509");
 const WalletScript = require("../../../blockchain/test-scripts/walletCreate");
 const config = require("../../../blockchain/test-scripts/config");
 const bs58 = require("bs58");
@@ -12,7 +14,9 @@ module.exports = async (req, res, next) => {
       type = req.body.type;
     console.log("TYPE", type);
 
-    const user = await User.findOne({ userId: userId });
+    const user = await User.findOne({
+      userId: userId
+    });
     console.log("User", user);
     if (user) {
       const commanName = Certificate.fromPEM(
@@ -53,12 +57,11 @@ module.exports = async (req, res, next) => {
           blockchain_credentials
         );
         const response = JSON.parse(response1.chaincodeResponse);
-        const stakingWalletId = response.data.stakingAddr;
         const txId = response.txId;
-        console.log("WalletId", stakingWalletId);
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
+          const stakingWalletId = response.data.stakingAddr;
           const blockResponse = await config.GetBlockFromTransactionId(
             user.userId,
             blockchain_credentials,
@@ -91,7 +94,7 @@ module.exports = async (req, res, next) => {
 
           return res.send(200, {
             status: true,
-            message: "Wallet created.",
+            message: "Staking Address Created.",
             chaincodeResponse: stakingWalletId,
           });
         } else {

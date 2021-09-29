@@ -85,9 +85,11 @@ module.exports = async (req, res, next) => {
           "$inc": {
             "walletBalance": amount
           }
-        }, function (err, doc) {
-          if (err) return new Error(err);
-          console.log("Updating Default wallet Balace")
+        }).exec().then(user => {
+          console.log('Updating Default wallet Balance for');
+        }).catch(err => {
+          console.log(err);
+          throw new Error(err);
         });
 
         return res.send(200, {

@@ -49,14 +49,18 @@ module.exports = async (req, res, next) => {
       );
       const blockResp = blockResponse.chaincodeResponse;
       await User.updateOne({
-        walletId: address,
+        userId: user.userId
       }, {
         "$inc": {
-          "walletBalance": -1*amount
+          "walletBalance": amount
         }
-      }, function (err, doc) {
-        if (err) return new Error(err);
+      }).exec().then(user => {
+        console.log('Updating Default wallet Balance');
+      }).catch(err => {
+        console.log(err);
+        throw new Error(err);
       });
+
 
       const tokenEntry = await new transactions({
         tokenName: token,
