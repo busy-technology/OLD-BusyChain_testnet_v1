@@ -1,6 +1,9 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
 const { Certificate } = require("@fidm/x509");
+const unstakeTransactions = require("../../models/unstakeTransactions");
+const config = require("../../../blockchain/test-scripts/config");
+
 const unstakeScript = require("../../../blockchain/test-scripts/unstake");
 const bs58 = require("bs58");
 
@@ -63,7 +66,30 @@ module.exports = async (req, res, next) => {
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
-          await Wallet.deleteOne({ walletId: address.walletId });
+          const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, response.txId);
+          const blockResp = blockResponse.chaincodeResponse;
+
+          const unstakeEntry = await new unstakeTransactions({
+            tokenName: "BUSY",
+            amount: response.data.amount,
+            totalReward: response.data.totalReward,
+            claimed: response.data.claimed,
+            txId: response.txId,
+            blockNum: blockResp.blockNum,
+            dataHash: blockResp.dataHash,
+            createdDate: new Date(blockResp.timestamp),
+          });
+  
+          await unstakeEntry
+            .save()
+            .then((result, error) => {
+              console.log("Create Pool Transaction Recorded");
+            })
+            .catch((error) => {
+              console.log("ERROR DB", error);
+            });
+
+          await Wallet.updateOne({ stakingWalletId: address.stakingWalletId }, { amount: "0", totalReward: response.data.totalReward, claimed: response.data.claimed});
 
           return res.send(200, {
             status: true,

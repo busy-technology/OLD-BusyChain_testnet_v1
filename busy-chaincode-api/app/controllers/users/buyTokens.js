@@ -12,7 +12,9 @@ module.exports = async (req, res, next) => {
       token = req.body.token,
       adminId = "busy_network";
 
-    const adminData = await Admin.findOne({ userId: adminId });
+    const adminData = await Admin.findOne({
+      userId: adminId
+    });
     console.log("ADMIN", adminData);
 
     const credentials = {
@@ -26,7 +28,9 @@ module.exports = async (req, res, next) => {
       type: adminData.certificate.type,
     };
 
-    const user = await User.findOne({ walletId: recipiant });
+    const user = await User.findOne({
+      walletId: recipiant
+    });
     console.log("User", user);
     if (user) {
       const response1 = await transferScript.transferToken(
@@ -44,11 +48,8 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
-        const blockResponse = await config.GetBlockFromTransactionId(
-          adminId,
-          blockchain_credentials,
-          txId
-        );
+
+        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials, txId);
         const blockResp = blockResponse.chaincodeResponse;
         const tokenEntry = await new transactions({
           tokenName: token,
@@ -59,8 +60,7 @@ module.exports = async (req, res, next) => {
           receiver: recipiant,
           blockNum: blockResp.blockNum,
           dataHash: blockResp.dataHash,
-          description:
-            recipiant +
+          description: recipiant +
             " purchased " +
             amount +
             " " +
@@ -78,6 +78,17 @@ module.exports = async (req, res, next) => {
           .catch((error) => {
             console.log("ERROR DB", error);
           });
+
+        await User.updateOne({
+          userId: user.userId
+        }, {
+          "$inc": {
+            "walletBalance": amount
+          }
+        }, function (err, doc) {
+          if (err) return new Error(err);
+          console.log("Updating Default wallet Balace")
+        });
 
         return res.send(200, {
           status: true,

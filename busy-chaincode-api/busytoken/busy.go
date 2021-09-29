@@ -337,7 +337,7 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	}
 
 	response.Message = fmt.Sprintf("Staking address %s has been successfully created", stakingAddress.Address)
-	response.Data = stakingAddress.Address
+	response.Data = stakingInfo
 	response.Success = true
 	logger.Info(response.Message)
 	return response
@@ -810,6 +810,17 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 
 	if amount == "0" {
 		response.Message = "It is not possible to burn zero amount"
+		logger.Error(response.Message)
+		return response
+	}
+	exists, err := ifTokenExists(ctx, symbol)
+	if err != nil {
+		response.Message = fmt.Sprintf("Error while fetching token details: %s", err.Error())
+		logger.Error(response.Message)
+		return response
+	}
+	if !exists {
+		response.Message = fmt.Sprintf("Token %s does not exist", symbol)
 		logger.Error(response.Message)
 		return response
 	}
