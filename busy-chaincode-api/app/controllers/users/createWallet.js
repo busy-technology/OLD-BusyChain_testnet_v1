@@ -59,11 +59,8 @@ module.exports = async (req, res, next) => {
           userId,
           blockchain_credentials
         );
-        console.log("RESPONSE 1", response1);
         const response = JSON.parse(response1.chaincodeResponse);
-        console.log("CHECK", response);
-        console.log("DATA 2", response);
-        const stakingWalletId = response.data;
+        const stakingWalletId = response.data.stakingAddr;
         const txId = response.txId;
         console.log("WalletId", stakingWalletId);
         console.log("TRANSACTION ID", txId);
@@ -84,6 +81,9 @@ module.exports = async (req, res, next) => {
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
+            amount: response.data.amount,
+            totalReward: response.data.totalReward,
+            claimed: response.data.claimed
           });
 
           await wallet
@@ -98,7 +98,7 @@ module.exports = async (req, res, next) => {
           return res.send(200, {
             status: true,
             message: "Wallet created.",
-            chaincodeResponse: response,
+            chaincodeResponse: stakingWalletId,
           });
         } else {
           console.log("Failed to execute chaincode function");

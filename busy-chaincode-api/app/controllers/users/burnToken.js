@@ -2,6 +2,7 @@ const Admin = require("../../models/admin");
 const transactions = require("../../models/transactions");
 const burn = require("../../../blockchain/test-scripts/burnTokens");
 const config = require("../../../blockchain/test-scripts/config");
+const User = require("../../models/Users");
 
 module.exports = async (req, res, next) => {
   try {
@@ -43,6 +44,16 @@ module.exports = async (req, res, next) => {
     if (response.success == true) {
       const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials,txId);
       const blockResp = blockResponse.chaincodeResponse;
+      await User.updateOne({
+        walletId: address,
+      }, {
+        "$inc": {
+          "walletBalance": -1*amount
+        }
+      }, function (err, doc) {
+        if (err) return new Error(err);
+      });
+
       const tokenEntry = await new transactions({
         tokenName: token,
         amount: amount,

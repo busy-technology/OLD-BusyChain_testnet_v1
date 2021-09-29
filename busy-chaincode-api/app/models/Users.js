@@ -31,6 +31,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
+  walletBalance: {
+    type: Number,
+    required: false,
+  },
   password: {
     type: String,
     required: true,

@@ -2,7 +2,6 @@ const User = require("../../models/Users");
 const Pool = require("../../models/Pools");
 const voting = require("../../../blockchain/test-scripts/voting");
 const transactions = require("../../models/transactions");
-const constants = require("../../../constants");
 const config = require("../../../blockchain/test-scripts/config");
 
 const {

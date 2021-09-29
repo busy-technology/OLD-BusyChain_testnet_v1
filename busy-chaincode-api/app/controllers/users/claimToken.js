@@ -3,6 +3,8 @@ const Wallet = require("../../models/Wallets");
 const { Certificate } = require("@fidm/x509");
 const claimScript = require("../../../blockchain/test-scripts/claim");
 const bs58 = require("bs58");
+const claimTransactions = require("../../models/stakingClaimTransactions");
+const config = require("../../../blockchain/test-scripts/config");
 
 module.exports = async (req, res, next) => {
   try {
@@ -63,6 +65,31 @@ module.exports = async (req, res, next) => {
         console.log("TRANSACTION ID", txId);
 
         if (response.success == true) {
+          const blockResponse = await config.GetBlockFromTransactionId(user.userId, blockchain_credentials, response.txId);
+          const blockResp = blockResponse.chaincodeResponse;
+
+          const claimEntry = await new claimTransactions({
+            tokenName: "BUSY",
+            amount: response.data.amount,
+            totalReward: response.data.totalReward,
+            claimed: response.data.claimed,
+            txId: response.txId,
+            blockNum: blockResp.blockNum,
+            dataHash: blockResp.dataHash,
+            createdDate: new Date(blockResp.timestamp),
+          });
+  
+          await claimEntry
+            .save()
+            .then((result, error) => {
+              console.log("Create Pool Transaction Recorded");
+            })
+            .catch((error) => {
+              console.log("ERROR DB", error);
+            });
+           
+            await Wallet.updateOne({ stakingWalletId: address.stakingWalletId }, { amount: response.data.amount, totalReward: response.data.totalReward, claimed: response.data.claimed});
+
           return res.send(200, {
             status: true,
             message: "Coins claimed",

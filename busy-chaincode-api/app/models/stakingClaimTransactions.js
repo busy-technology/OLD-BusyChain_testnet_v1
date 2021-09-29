@@ -1,26 +1,14 @@
 const mongoose = require("mongoose");
-const timeStamp = require("mongoose-timestamp");
+const Schema = mongoose.Schema;
 
-const WalletSchema = new mongoose.Schema({
-  userId: {
+const ClaimTransactionSchema = new Schema({
+  tokenName: {
     type: String,
     required: true,
-    trim: true,
   },
-  walletId: {
+  amount: {
     type: String,
     required: true,
-    trim: true,
-  },
-  stakingWalletId: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  type: {
-    type: String,
-    required: true,
-    trim: true,
   },
   txId: {
     type: String,
@@ -42,15 +30,10 @@ const WalletSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  amount: {
-    type: String,
-    required: true,
-  },
   claimed: {
     type: String,
     required: true,
   },
 });
 
-const Wallets = mongoose.model("StakingAddress", WalletSchema);
-module.exports = Wallets;
+module.exports = mongoose.model("claimTransactions", ClaimTransactionSchema);

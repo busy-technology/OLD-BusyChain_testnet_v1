@@ -58,6 +58,7 @@ module.exports = async (req, res, next) => {
           password: hash,
           country: country,
           txId: data.chaincodeResponse.txId,
+          walletBalance: 0,
           messageCoins: {
             totalCoins: 0,
           },
