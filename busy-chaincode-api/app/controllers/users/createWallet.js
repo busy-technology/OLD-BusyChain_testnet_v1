@@ -38,19 +38,12 @@ module.exports = async (req, res, next) => {
           });
         }
 
-        console.log(
-          "PRIVATE KEY",
-          blockchain_credentials.credentials.privateKey
-        );
-
         // const decodedPrivateKey = base58.decode(
         //   blockchain_credentials.credentials.privateKey
         // );
         const decodedPrivateKey = bs58.decode(
           blockchain_credentials.credentials.privateKey
         );
-
-        console.log("DECODED KEY", decodedPrivateKey.toString());
 
         blockchain_credentials.credentials.privateKey =
           decodedPrivateKey.toString();
@@ -82,6 +75,7 @@ module.exports = async (req, res, next) => {
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
             amount: response.data.amount,
+            initialStakingLimit: response.data.amount,
             totalReward: response.data.totalReward,
             claimed: response.data.claimed
           });

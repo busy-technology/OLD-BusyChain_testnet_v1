@@ -15,13 +15,7 @@ module.exports = async (req, res, next) => {
       try {
         const response = await RecoverScript.recoverUsers(userId, mnemonic);
 
-        console.log("CRED", response.blockchain_credentials.credentials);
-
         if (response.blockchain_credentials.credentials) {
-          console.log(
-            "PRIVATE KEY",
-            response.blockchain_credentials.credentials.privateKey
-          );
 
           const bytes = Buffer.from(
             response.blockchain_credentials.credentials.privateKey,
@@ -29,8 +23,6 @@ module.exports = async (req, res, next) => {
           );
 
           const encodedPrivateKey = bs58.encode(bytes);
-
-          console.log("Encoded Key", encodedPrivateKey);
 
           response.blockchain_credentials.credentials.privateKey =
             encodedPrivateKey;

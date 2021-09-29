@@ -3,6 +3,7 @@ const voting = require("../../../blockchain/test-scripts/voting");
 const transactions = require("../../models/transactions");
 const { Certificate } = require("@fidm/x509");
 const config = require("../../../blockchain/test-scripts/config");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   const walletId = req.body.walletId;
@@ -36,6 +37,13 @@ module.exports = async (req, res, next) => {
           message: `Incorrect type or MSPID.`,
         });
       }
+      const decodedPrivateKey = bs58.decode(
+        blockchain_credentials.credentials.privateKey
+      );
+
+      blockchain_credentials.credentials.privateKey =
+        decodedPrivateKey.toString();
+        
       const response = await voting.CreateVote(walletId,user.userId, blockchain_credentials, votingAddress, amount, voteType);
       const resp = JSON.parse(response.chaincodeResponse);
       if (resp.success == true) {

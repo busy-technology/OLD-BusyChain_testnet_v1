@@ -37,8 +37,6 @@ module.exports = async (req, res, next) => {
         blockchain_credentials.credentials.privateKey
       );
 
-      console.log("DECODED KEY", decodedPrivateKey.toString());
-
       blockchain_credentials.credentials.privateKey =
         decodedPrivateKey.toString();
 

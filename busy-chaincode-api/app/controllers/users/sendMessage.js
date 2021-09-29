@@ -2,6 +2,11 @@ const User = require("../../models/Users");
 const sendMessage = require("../../../blockchain/test-scripts/sendMessage");
 const config = require("../../../blockchain/test-scripts/config");
 const sendMessageTransactions = require("../../models/sendmessage");
+const bs58 = require("bs58");
+
+const {
+  Certificate
+} = require("@fidm/x509");
 
 module.exports = async (req, res, next) => {
   const sender = req.body.sender;
@@ -12,6 +17,35 @@ module.exports = async (req, res, next) => {
     const sendUser = await User.findOne({ walletId: sender });
     const recUser = await User.findOne({walletId: recipient})
     if (sendUser && recUser) {
+      const commanName = Certificate.fromPEM(
+        Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
+      ).subject.commonName;
+      console.log("CN", commanName);
+      if (sendUser.userId != commanName) {
+        return res.send(404, {
+          status: false,
+          message: `This certificate is not valid.`,
+        });
+      }
+
+      if (
+        blockchain_credentials.type != "X.509" ||
+        blockchain_credentials.mspId != "BusyMSP"
+      ) {
+        console.log("type of certificate incorrect.");
+        return res.send(404, {
+          status: false,
+          message: `Incorrect type or MSPID.`,
+        });
+      }
+
+      const decodedPrivateKey = bs58.decode(
+        blockchain_credentials.credentials.privateKey
+      );
+
+      blockchain_credentials.credentials.privateKey =
+        decodedPrivateKey.toString();
+
         const response = await sendMessage.sendMessage(
           sendUser.userId,
           recUser.userId,

@@ -35,10 +35,6 @@ module.exports = async (req, res, next) => {
       const data = await UserScript.registerUsers(userId);
       console.log("DATA 2", data);
       console.log("HASH", hash);
-      console.log(
-        "PRIVATE KEY",
-        data.blockchain_credentials.credentials.privateKey
-      );
 
       const bytes = Buffer.from(
         data.blockchain_credentials.credentials.privateKey,

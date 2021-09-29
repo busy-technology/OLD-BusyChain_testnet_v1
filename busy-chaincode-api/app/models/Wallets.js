@@ -46,6 +46,10 @@ const WalletSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  initialStakingLimit: {
+    type: String,
+    required: true,
+  },
   claimed: {
     type: String,
     required: true,
