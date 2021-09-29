@@ -5,7 +5,7 @@ const staking = require("../../../blockchain/test-scripts/staking-info");
 module.exports = async (req, res, next) => {
   try {
     const userIdentity = req.body.userId;
-    const adminId = "admin";
+    const adminId = "busy_network";
     const userId = "sample";
 
     console.log("IN USER");

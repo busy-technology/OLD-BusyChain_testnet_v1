@@ -274,7 +274,7 @@ func (bv *BusyVoting) DestroyPool(ctx contractapi.TransactionContextInterface) R
 		Data:    nil,
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to Delete Voting pool"
 		logger.Error(response.Message)
 		return response
@@ -339,7 +339,7 @@ func (bv *BusyVoting) QueryPool(ctx contractapi.TransactionContextInterface) Res
 		Data:    nil,
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to Delete Voting pool"
 		logger.Error(response.Message)
 		return response

@@ -39,7 +39,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to issue busy coin"
 		logger.Error(response.Message)
 		return response
@@ -848,7 +848,7 @@ func (bt *Busy) Burn(ctx contractapi.TransactionContextInterface, address string
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to issue busy coin"
 		logger.Error(response.Message)
 		return response
@@ -940,7 +940,7 @@ func (bt *Busy) MultibeneficiaryVestingV1(ctx contractapi.TransactionContextInte
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to create vesting"
 		logger.Error(response.Message)
 		return response
@@ -1055,7 +1055,7 @@ func (bt *Busy) MultibeneficiaryVestingV2(ctx contractapi.TransactionContextInte
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to create vesting"
 		logger.Error(response.Message)
 		return response
@@ -1281,7 +1281,7 @@ func (bt *Busy) UpdateTransferFee(ctx contractapi.TransactionContextInterface, n
 		return response
 	}
 	commonName, _ := getCommonName(ctx)
-	if commonName != "ordererAdmin" {
+	if commonName != "busy_network" {
 		response.Message = "You are not allowed to set the transaction fee"
 		logger.Error(response.Message)
 		return response

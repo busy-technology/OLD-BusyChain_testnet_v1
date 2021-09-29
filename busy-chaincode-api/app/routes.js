@@ -61,7 +61,7 @@ module.exports = (server) => {
   server.post(
     "/createStakingAddress",
     middleware.utility.required(["userId", "credentials", "type"]),
-    auth,
+    //auth,
     controller.users.wallet
   );
 

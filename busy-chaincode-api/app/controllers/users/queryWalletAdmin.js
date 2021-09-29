@@ -7,7 +7,7 @@ module.exports = async (req, res, next) => {
     const userId = "sample";
     const walletId = req.body.walletId;
     const token = req.body.token;
-    const adminId = "admin";
+    const adminId = "busy_network";
 
     //const user = await User.findOne({ userId: userId });
 

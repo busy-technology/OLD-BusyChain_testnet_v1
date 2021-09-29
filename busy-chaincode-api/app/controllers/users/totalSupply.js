@@ -5,7 +5,7 @@ const totalSupply = require("../../../blockchain/test-scripts/totalSupply");
 module.exports = async (req, res, next) => {
   try {
     const symbol = req.body.symbol;
-    const adminId = "admin";
+    const adminId = "busy_network";
     const userId = "sample";
 
     console.log("IN USER");

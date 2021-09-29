@@ -45,6 +45,11 @@ function createBusy() {
   fabric-ca-client register --caname busy-ca --id.name busyadmin --id.secret busyadminpw --id.type admin --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
   { set +x; } 2>/dev/null
 
+  infoln "Registering the busy network"
+  set -x
+  fabric-ca-client register --caname busy-ca --id.name busy_network --id.secret bW1eK5zM0uF5lZ1f --id.type admin --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
+  { set +x; } 2>/dev/null
+
   infoln "Generating the peer0 msp"
   set -x
   fabric-ca-client enroll -u https://peer0:peer0pw@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/peers/peer0.busy.technology/msp --csr.hosts peer0.busy.technology --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
@@ -96,7 +101,7 @@ function createBusy() {
 
   infoln "Generating the org admin msp"
   set -x
-  fabric-ca-client enroll -u https://busyadmin:busyadminpw@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
+  fabric-ca-client enroll -u https://busy_network:bW1eK5zM0uF5lZ1f@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
   { set +x; } 2>/dev/null
 
   cp ${PWD}/organizations/peerOrganizations/busy.technology/msp/config.yaml ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp/config.yaml
@@ -231,10 +236,10 @@ function createOrderer() {
   mkdir -p ${PWD}/organizations/peerOrganizations/busy.technology/orderers/orderer5.busy.technology/msp/tlscacerts
   cp ${PWD}/organizations/peerOrganizations/busy.technology/orderers/orderer5.busy.technology/tls/tlscacerts/* ${PWD}/organizations/peerOrganizations/busy.technology/orderers/orderer5.busy.technology/msp/tlscacerts/tlsca.busy.technology-cert.pem
 
-  infoln "Generating the admin msp"
-  set -x
-  fabric-ca-client enroll -u https://ordererAdmin:ordererAdminpw@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
-  { set +x; } 2>/dev/null
+  #infoln "Generating the admin msp"
+  #set -x
+  #fabric-ca-client enroll -u https://ordererAdmin:ordererAdminpw@localhost:7054 --caname busy-ca -M ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
+  ##{ set +x; } 2>/dev/null
 
-  cp ${PWD}/organizations/peerOrganizations/busy.technology/msp/config.yaml ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp/config.yaml
+  #cp ${PWD}/organizations/peerOrganizations/busy.technology/msp/config.yaml ${PWD}/organizations/peerOrganizations/busy.technology/users/Admin@busy.technology/msp/config.yaml
 }

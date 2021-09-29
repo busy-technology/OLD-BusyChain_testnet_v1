@@ -5,7 +5,7 @@ const QueryUsers = require("../../../blockchain/test-scripts/userWallets");
 module.exports = async (req, res, next) => {
   try {
     const userId = req.body.userId;
-    const adminId = "admin";
+    const adminId = "busy_network";
 
     const user = await User.findOne({ userId: userId });
 

@@ -20,7 +20,7 @@ const (
 	// Added two more zeros in REWARD_DENOMINATOR so we don't need devide again with 100
 	REWARD_DENOMINATOR = "100000000000000000000"
 	BUSY_COIN_SYMBOL   = "BUSY"
-	ADMIN_USER_ID      = "ordererAdmin"
+	ADMIN_USER_ID      = "busy_network"
 )
 
 // UnknownTransactionHandler returns a shim error

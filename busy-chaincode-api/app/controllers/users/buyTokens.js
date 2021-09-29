@@ -10,7 +10,7 @@ module.exports = async (req, res, next) => {
       userId = req.body.recipiant,
       amount = req.body.amount,
       token = req.body.token,
-      adminId = "ordererAdmin";
+      adminId = "busy_network";
 
     const adminData = await Admin.findOne({ userId: adminId });
     console.log("ADMIN", adminData);
@@ -44,8 +44,11 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
-
-        const blockResponse = await config.GetBlockFromTransactionId(adminId, blockchain_credentials,txId);
+        const blockResponse = await config.GetBlockFromTransactionId(
+          adminId,
+          blockchain_credentials,
+          txId
+        );
         const blockResp = blockResponse.chaincodeResponse;
         const tokenEntry = await new transactions({
           tokenName: token,

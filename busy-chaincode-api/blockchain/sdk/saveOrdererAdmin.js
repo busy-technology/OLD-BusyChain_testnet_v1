@@ -4,7 +4,7 @@ const Admin = require("../../app/models/admin");
 const fs = require("fs");
 const path = require("path");
 
-const adminUserId = "ordererAdmin";
+const adminUserId = "busy_network";
 
 exports.saveOrdererAdmin = async () => {
   try {

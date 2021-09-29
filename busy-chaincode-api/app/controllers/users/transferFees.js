@@ -5,7 +5,7 @@ const transactionFeeService = require("../../../blockchain/test-scripts/transact
 module.exports = async (req, res, next) => {
   try {
     const newTransferFee = req.body.newTransferFee;
-    const adminId = "ordererAdmin";
+    const adminId = "busy_network";
     const userId = "sample";
 
     console.log("IN USER");

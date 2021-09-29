@@ -5,8 +5,8 @@ const { Wallets } = require("fabric-network");
 const fs = require("fs");
 const path = require("path");
 
-const adminUserId = "ordererAdmin";
-const adminUserPasswd = "ordererAdminpw";
+const adminUserId = "busy_network";
+const adminUserPasswd = "bW1eK5zM0uF5lZ1f";
 
 exports.FabricAdminEnroll = async () => {
   try {
