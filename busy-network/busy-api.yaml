@@ -16,8 +16,8 @@ services:
     image: mongo
     environment:
       # provide your credentials here
-      - MONGO_INITDB_ROOT_USERNAME=busyadmin
-      - MONGO_INITDB_ROOT_PASSWORD=BusyChain123
+      - MONGO_INITDB_ROOT_USERNAME=******
+      - MONGO_INITDB_ROOT_PASSWORD=**********
       - MONGO_INITDB_DATABASE=busy
     ports:
     - "27017:27017"
