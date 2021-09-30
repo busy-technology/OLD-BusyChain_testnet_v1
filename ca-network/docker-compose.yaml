@@ -37,7 +37,7 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_CA_NAME=busy-ca
       - FABRIC_CA_SERVER_DB_TYPE=postgres
-      - FABRIC_CA_SERVER_DB_DATASOURCE=host=ca-database port=5432 user=fabric password=Busy@@123 dbname=busy_ca_db sslmode=disable
+      - FABRIC_CA_SERVER_DB_DATASOURCE=host=ca-database port=5432 user=fabric password=******** dbname=busy_ca_db sslmode=disable
       - FABRIC_CA_SERVER_CSR_HOSTS=busy-ca-server, localhost, ca.busy.network
     networks:
       - busy-blockchain
@@ -45,5 +45,5 @@ services:
       - ca-database
     volumes:
       - "./fabric-ca-server:/etc/hyperledger/fabric-ca-server"
-    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    command: sh -c 'fabric-ca-server start -b ****:*****'
 
