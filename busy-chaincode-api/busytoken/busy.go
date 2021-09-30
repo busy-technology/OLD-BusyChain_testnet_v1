@@ -145,7 +145,7 @@ func (bt *Busy) Init(ctx contractapi.TransactionContextInterface) Response {
 	phaseConfig := PhaseConfig{
 		CurrentPhase:          1,
 		TotalStakingAddr:      bigZero.String(),
-		NextStakingAddrTarget: "10",
+		NextStakingAddrTarget: "100",
 		CurrentStakingLimit:   currentStakingLimit.String(),
 	}
 	phaseConfigAsBytes, _ := json.Marshal(phaseConfig)
