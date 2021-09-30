@@ -1,10 +1,14 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
-const { Certificate } = require("@fidm/x509");
+const {
+  Certificate
+} = require("@fidm/x509");
 const claimScript = require("../../../blockchain/test-scripts/claim");
 const bs58 = require("bs58");
 const claimTransactions = require("../../models/stakingClaimTransactions");
 const config = require("../../../blockchain/test-scripts/config");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -17,7 +21,9 @@ module.exports = async (req, res, next) => {
     console.log("ADDRESS", address);
 
     if (address) {
-      const user = await User.findOne({ userId: address.userId });
+      const user = await User.findOne({
+        userId: address.userId
+      });
       console.log("User", user);
 
       if (user) {
@@ -47,8 +53,6 @@ module.exports = async (req, res, next) => {
           blockchain_credentials.credentials.privateKey
         );
 
-        console.log("DECODED KEY", decodedPrivateKey.toString());
-
         blockchain_credentials.credentials.privateKey =
           decodedPrivateKey.toString();
 
@@ -77,18 +81,47 @@ module.exports = async (req, res, next) => {
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
+            walletId: response.data.defaultWalletAddress,
+            stakingWalletId: response.data.stakingAddr,
           });
-  
+
           await claimEntry
             .save()
             .then((result, error) => {
-              console.log("Create Pool Transaction Recorded");
+              console.log("Unstake Transaction Recorded");
             })
             .catch((error) => {
               console.log("ERROR DB", error);
             });
-           
-            await Wallet.updateOne({ stakingWalletId: address.stakingWalletId }, { amount: response.data.amount, totalReward: response.data.totalReward, claimed: response.data.claimed});
+
+            const balanceResponse = await QueryScript.queryWallet(
+              user.userId,
+              blockchain_credentials,
+              user.walletId,
+              constants.BUSY_TOKEN
+            );
+            const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+            await User.updateOne({
+              walletId: user.walletId
+            }, {
+              "$set": {
+                "walletBalance": balanceResp.data
+              }
+            }).exec().then(doc => {
+              console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+            }).catch(err => {
+              console.log(err);
+              throw new Error(err);
+            });
+    
+
+          await Wallet.updateOne({
+            stakingWalletId: address.stakingWalletId
+          }, {
+            amount: response.data.amount,
+            totalReward: response.data.totalReward,
+            claimed: response.data.claimed
+          });
 
           return res.send(200, {
             status: true,

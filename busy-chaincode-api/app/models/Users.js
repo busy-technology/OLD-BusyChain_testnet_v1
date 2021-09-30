@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
     required: false,
   },
   walletBalance: {
-    type: Number,
+    type: String,
     required: false,
   },
   password: {

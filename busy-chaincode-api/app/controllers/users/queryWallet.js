@@ -1,6 +1,7 @@
 const User = require("../../models/Users");
 const Wallet = require("../../models/Wallets");
 const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
+const bs58 = require("bs58");
 
 module.exports = async (req, res, next) => {
   const userId = req.body.userId,
@@ -11,6 +12,33 @@ module.exports = async (req, res, next) => {
   if (user) {
     const wallet = await Wallet.findOne({ userId: userId });
     if (wallet) {
+      const commanName = Certificate.fromPEM(
+        Buffer.from(blockchain_credentials.credentials.certificate, "utf-8")
+      ).subject.commonName;
+      if (user.userId != commanName) {
+        return res.send(404, {
+          status: false,
+          message: `This certificate is not valid.`,
+        });
+      }
+
+      if (
+        blockchain_credentials.type != "X.509" ||
+        blockchain_credentials.mspId != "BusyMSP"
+      ) {
+        console.log("type of certificate incorrect.");
+        return res.send(404, {
+          status: false,
+          message: `Incorrect type or MSPID.`,
+        });
+      }
+      const decodedPrivateKey = bs58.decode(
+        blockchain_credentials.credentials.privateKey
+      );
+
+      blockchain_credentials.credentials.privateKey =
+        decodedPrivateKey.toString();
+
       const response = await QueryScript.queryWallet(
         userId,
         blockchain_credentials,

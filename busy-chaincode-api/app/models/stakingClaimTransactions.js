@@ -34,6 +34,16 @@ const ClaimTransactionSchema = new Schema({
     type: String,
     required: true,
   },
+  walletId: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  stakingWalletId: {
+    type: String,
+    required: true,
+    trim: true,
+  },
 });
 
 module.exports = mongoose.model("claimTransactions", ClaimTransactionSchema);

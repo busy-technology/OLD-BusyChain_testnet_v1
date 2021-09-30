@@ -278,6 +278,14 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	// bigZero, _ := new(big.Int).SetString("0", 10)
 	commonName, _ := getCommonName(ctx)
 	defaultWalletAddress, _ := getDefaultWalletAddress(ctx, commonName)
+
+	balance, err := getBalanceHelper(ctx, defaultWalletAddress, BUSY_COIN_SYMBOL)
+	if balance.Cmp(stakingAmount) == -1 {
+		response.Message = fmt.Sprintf("User %s does not enough coins %s to create a staking address", commonName, currentPhaseConfig.CurrentStakingLimit)
+		logger.Error(response.Message)
+		return response
+	}
+
 	stakingAddress := Wallet{
 		DocType:   "stakingAddr",
 		UserID:    commonName,
@@ -313,13 +321,14 @@ func (bt *Busy) CreateStakingAddress(ctx contractapi.TransactionContextInterface
 	}
 
 	stakingInfo := StakingInfo{
-		DocType:        "stakingInfo",
-		StakingAddress: stakingAddress.Address,
-		Amount:         stakingAddress.Balance,
-		TimeStamp:      uint64(now.Seconds),
-		Phase:          currentPhaseConfig.CurrentPhase,
-		TotalReward:    bigZero.String(),
-		Claimed:        bigZero.String(),
+		DocType:              "stakingInfo",
+		StakingAddress:       stakingAddress.Address,
+		Amount:               stakingAddress.Balance,
+		TimeStamp:            uint64(now.Seconds),
+		Phase:                currentPhaseConfig.CurrentPhase,
+		TotalReward:          bigZero.String(),
+		Claimed:              bigZero.String(),
+		DefaultWalletAddress: defaultWalletAddress,
 	}
 	stakingInfoAsBytes, _ := json.Marshal(stakingInfo)
 	err = ctx.GetStub().PutState(fmt.Sprintf("info~%s", stakingAddress.Address), stakingInfoAsBytes)
@@ -376,7 +385,7 @@ func (bt *Busy) GetBalance(ctx contractapi.TransactionContextInterface, address 
 
 	response.Message = fmt.Sprintf("Balance for wallet %s has been successfully fetched", address)
 	response.Success = true
-	response.Data = fmt.Sprintf("%s %s", balance.String(), token)
+	response.Data = balance.String()
 	logger.Info(response.Message)
 	return response
 }

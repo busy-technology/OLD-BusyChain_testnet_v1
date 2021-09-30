@@ -13,7 +13,7 @@ const is_voting_time = (value) => {
       if (req.method === "GET") params = req.params;
   
       let errors = fields.filter((field) => {
-        if (params[field] && !is_voting_time(params[field].trim())) return field;
+        if (params[field] && !is_voting_time(params[field])) return field;
       });
   
       if (errors.length)

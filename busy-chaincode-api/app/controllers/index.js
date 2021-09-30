@@ -43,6 +43,9 @@ module.exports = {
     updatePoolConfig: require("./users/updatePoolConfig"),
     updateBlocks: require("./users/updateBlocks"),
     getBlocks: require("./users/getBlocks"),
+    stakingTransactions: require("./users/stakingTransactions"),
+    claimTransactions: require("./users/claimTransactions"),
+    unstakeTransactions: require("./users/unstakeTransactions"),
   },
 
   auth: {

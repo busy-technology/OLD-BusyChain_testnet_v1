@@ -232,6 +232,29 @@ module.exports = (server) => {
     controller.users.fetchWallets
   );
 
+
+  server.get(
+    "/stakingTransactions",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.stakingTransactions
+  );
+
+
+  server.get(
+    "/claimTransactions",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.claimTransactions,
+  );
+
+  server.get(
+    "/unstakeTransactions",
+    middleware.auth.generateToken,
+    controller.auth.apiKey,
+    controller.users.unstakeTransactions,
+  );
+  
   server.get(
     "/defaultWallets",
     middleware.auth.generateToken,
