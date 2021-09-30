@@ -2,6 +2,7 @@ const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
 const attemptUnlockScript = require("../../../blockchain/test-scripts/attemptUnlock");
 const bs58 = require("bs58");
+const constants = require("../../../constants");
 
 module.exports = async (req, res, next) => {
   try {
@@ -52,6 +53,27 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
+
+        const balanceResponse = await QueryScript.queryWallet(
+          user.userId,
+          blockchain_credentials,
+          user.walletId,
+          constants.BUSY_TOKEN
+        );
+        const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+        await User.updateOne({
+          walletId: user.walletId
+        }, {
+          "$set": {
+            "walletBalance": balanceResp.data
+          }
+        }).exec().then(doc => {
+          console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+        }).catch(err => {
+          console.log(err);
+          throw new Error(err);
+        });
+
         return res.send(200, {
           status: true,
           message: "Coins unlocked.",

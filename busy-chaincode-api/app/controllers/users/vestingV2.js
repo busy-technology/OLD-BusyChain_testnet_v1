@@ -3,6 +3,8 @@ const User = require("../../models/Users");
 const vestingTransactions = require("../../models/vesting2");
 const vestingV2 = require("../../../blockchain/test-scripts/vestingV2");
 const config = require("../../../blockchain/test-scripts/config");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -14,7 +16,9 @@ module.exports = async (req, res, next) => {
     var userId = "sample";
 
     console.log("IN USER");
-    const adminData = await Admin.findOne({ userId: adminId });
+    const adminData = await Admin.findOne({
+      userId: adminId
+    });
     console.log("ADMIN", adminData);
 
     const credentials = {
@@ -28,7 +32,9 @@ module.exports = async (req, res, next) => {
       type: adminData.certificate.type,
     };
 
-    const user = await User.findOne({ walletId: recipient });
+    const user = await User.findOne({
+      walletId: recipient
+    });
     console.log("User", user);
     if (user) {
       userId = user.userId;
@@ -72,6 +78,26 @@ module.exports = async (req, res, next) => {
           .catch((error) => {
             console.log("ERROR DB", error);
           });
+
+        const balanceResponse = await QueryScript.queryWallet(
+          user.userId,
+          blockchain_credentials,
+          user.walletId,
+          constants.BUSY_TOKEN
+        );
+        const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+        await User.updateOne({
+          walletId: user.walletId
+        }, {
+          "$set": {
+            "walletBalance": balanceResp.data
+          }
+        }).exec().then(user => {
+          console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+        }).catch(err => {
+          console.log(err);
+          throw new Error(err);
+        });
 
         return res.send(200, {
           status: true,

@@ -3,11 +3,12 @@ const Admin = require("../../models/admin");
 const transactions = require("../../models/transactions");
 const transferScript = require("../../../blockchain/test-scripts/transferTokens");
 const config = require("../../../blockchain/test-scripts/config");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
+const constants = require("../../../constants");
 
 module.exports = async (req, res, next) => {
   try {
     const recipiant = req.body.recipiant,
-      userId = req.body.recipiant,
       amount = req.body.amount,
       token = req.body.token,
       adminId = "busy_network";
@@ -34,7 +35,7 @@ module.exports = async (req, res, next) => {
     console.log("User", user);
     if (user) {
       const response1 = await transferScript.transferToken(
-        userId,
+        recipiant,
         blockchain_credentials,
         recipiant,
         amount,
@@ -79,14 +80,21 @@ module.exports = async (req, res, next) => {
             console.log("ERROR DB", error);
           });
 
+        const balanceResponse = await QueryScript.queryWallet(
+          user.userId,
+          blockchain_credentials,
+          user.walletId,
+          constants.BUSY_TOKEN
+        );
+        const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
         await User.updateOne({
-          userId: user.userId
+          walletId: user.walletId
         }, {
-          "$inc": {
-            "walletBalance": amount
+          "$set": {
+            "walletBalance": balanceResp.data
           }
-        }).exec().then(user => {
-          console.log('Updating Default wallet Balance for');
+        }).exec().then(doc => {
+          console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
         }).catch(err => {
           console.log(err);
           throw new Error(err);

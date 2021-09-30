@@ -15,7 +15,9 @@ module.exports = async (req, res, next) => {
       country = req.body.country || "",
       confirmPassword = req.body.confirmPassword;
 
-    const user = await User.findOne({ userId: userId });
+    const user = await User.findOne({
+      userId: userId
+    });
     console.log("User", user);
     if (user) {
       console.log("UserId already taken.");

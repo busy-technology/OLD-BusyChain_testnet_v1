@@ -3,6 +3,8 @@ const transactions = require("../../models/transactions");
 const burn = require("../../../blockchain/test-scripts/burnTokens");
 const config = require("../../../blockchain/test-scripts/config");
 const User = require("../../models/Users");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -27,7 +29,11 @@ module.exports = async (req, res, next) => {
       mspId: adminData.certificate.mspId,
       type: adminData.certificate.type,
     };
+    const user = await User.findOne({
+      walletId: address
+    });
 
+   if(user){
     const response1 = await burn.burnTokens(
       userId,
       blockchain_credentials,
@@ -48,18 +54,7 @@ module.exports = async (req, res, next) => {
         txId
       );
       const blockResp = blockResponse.chaincodeResponse;
-      await User.updateOne({
-        userId: user.userId
-      }, {
-        "$inc": {
-          "walletBalance": amount
-        }
-      }).exec().then(user => {
-        console.log('Updating Default wallet Balance');
-      }).catch(err => {
-        console.log(err);
-        throw new Error(err);
-      });
+      
 
 
       const tokenEntry = await new transactions({
@@ -85,6 +80,27 @@ module.exports = async (req, res, next) => {
           console.log("ERROR DB", error);
         });
 
+        const balanceResponse = await QueryScript.queryWallet(
+          user.userId,
+          blockchain_credentials,
+          user.walletId,
+          constants.BUSY_TOKEN
+        );
+        const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+        await User.updateOne({
+          walletId: user.walletId
+        }, {
+          "$set": {
+            "walletBalance": balanceResp.data
+          }
+        }).exec().then(doc => {
+          console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+        }).catch(err => {
+          console.log(err);
+          throw new Error(err);
+        });
+
+
       return res.send(200, {
         status: true,
         message: "Tokens burned.",
@@ -98,6 +114,13 @@ module.exports = async (req, res, next) => {
         chaincodeResponse: response,
       });
     }
+  } else {
+    console.log("Address do not exists.");
+      return res.send(404, {
+        status: false,
+        message: `Address do not exists.`,
+      });
+  }
   } catch (exception) {
     console.log(exception);
     return res.send(404, {

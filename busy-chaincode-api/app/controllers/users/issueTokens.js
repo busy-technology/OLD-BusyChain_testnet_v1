@@ -1,9 +1,13 @@
 const User = require("../../models/Users");
-const { Certificate } = require("@fidm/x509");
+const {
+  Certificate
+} = require("@fidm/x509");
 const IssuetokenTransactions = require("../../models/issued-tokens");
 const IssueToken = require("../../../blockchain/test-scripts/issueTokens");
 const config = require("../../../blockchain/test-scripts/config");
 const bs58 = require("bs58");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -17,7 +21,9 @@ module.exports = async (req, res, next) => {
     console.log("TokenName", tokenName);
     console.log("Symbol", symbol);
 
-    const user = await User.findOne({ walletId: walletId });
+    const user = await User.findOne({
+      walletId: walletId
+    });
     console.log("User", user);
 
     if (user) {
@@ -104,8 +110,7 @@ module.exports = async (req, res, next) => {
               sender: "Busy network",
               receiver: walletId,
               createdDate: new Date(blockResp.timestamp),
-              description:
-                user.userId +
+              description: user.userId +
                 " issued " +
                 amount +
                 " " +
@@ -125,6 +130,27 @@ module.exports = async (req, res, next) => {
               .catch((error) => {
                 console.log("ERROR DB", error);
               });
+
+              const balanceResponse = await QueryScript.queryWallet(
+                user.userId,
+                blockchain_credentials,
+                user.walletId,
+                constants.BUSY_TOKEN
+              );
+              const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+              await User.updateOne({
+                walletId: user.walletId
+              }, {
+                "$set": {
+                  "walletBalance": balanceResp.data
+                }
+              }).exec().then(doc => {
+                console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+              }).catch(err => {
+                console.log(err);
+                throw new Error(err);
+              });
+      
 
             return res.send(200, {
               status: true,

@@ -6,6 +6,8 @@ const {
 const WalletScript = require("../../../blockchain/test-scripts/walletCreate");
 const config = require("../../../blockchain/test-scripts/config");
 const bs58 = require("bs58");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -92,6 +94,26 @@ module.exports = async (req, res, next) => {
               console.log("ERROR DB", error);
             });
 
+            const balanceResponse = await QueryScript.queryWallet(
+              user.userId,
+              blockchain_credentials,
+              user.walletId,
+              constants.BUSY_TOKEN
+            );
+            const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+            await User.updateOne({
+              walletId: user.walletId
+            }, {
+              "$set": {
+                "walletBalance": balanceResp.data
+              }
+            }).exec().then(doc => {
+              console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+            }).catch(err => {
+              console.log(err);
+              throw new Error(err);
+            });
+    
           return res.send(200, {
             status: true,
             message: "Staking Address Created.",

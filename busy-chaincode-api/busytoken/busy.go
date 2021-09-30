@@ -385,7 +385,7 @@ func (bt *Busy) GetBalance(ctx contractapi.TransactionContextInterface, address 
 
 	response.Message = fmt.Sprintf("Balance for wallet %s has been successfully fetched", address)
 	response.Success = true
-	response.Data = fmt.Sprintf("%s %s", balance.String(), token)
+	response.Data = balance.String()
 	logger.Info(response.Message)
 	return response
 }

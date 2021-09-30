@@ -3,6 +3,8 @@ const sendMessage = require("../../../blockchain/test-scripts/sendMessage");
 const config = require("../../../blockchain/test-scripts/config");
 const sendMessageTransactions = require("../../models/sendmessage");
 const bs58 = require("bs58");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
+const constants = require("../../../constants");
 
 const {
   Certificate
@@ -79,7 +81,50 @@ module.exports = async (req, res, next) => {
              .catch((error) => {
                console.log("ERROR DB", error);
              });
-   
+            
+             const balanceResponseSender = await QueryScript.queryWallet(
+              sendUser.userId,
+              blockchain_credentials,
+              sendUser.walletId,
+              constants.BUSY_TOKEN
+            );
+            const balanceRespSender = JSON.parse(balanceResponseSender.chaincodeResponse);
+
+             await User.updateOne({
+              walletId: sendUser.walletId
+            }, {
+              "$set": {
+                "walletBalance": balanceRespSender.data
+              }
+            }).exec().then(doc => {
+              console.log('Updating Default wallet Balance for ' + sendUser.walletId + ' setting amount to ' + balanceRespSender.data);
+            }).catch(err => {
+              console.log(err);
+              throw new Error(err);
+            });
+
+
+            const balanceResponseRecipient = await QueryScript.queryWallet(
+              recUser.userId,
+              blockchain_credentials,
+              recUser.walletId,
+              constants.BUSY_TOKEN
+            );
+            const balanceRespRecipient = JSON.parse(balanceResponseRecipient.chaincodeResponse);
+
+             await User.updateOne({
+              walletId: recUser.walletId
+            }, {
+              "$set": {
+                "walletBalance": balanceRespRecipient.data
+              }
+            }).exec().then(doc => {
+              console.log('Updating Default wallet Balance for ' + recUser.walletId + ' setting amount to ' + balanceRespRecipient.data);
+            }).catch(err => {
+              console.log(err);
+              throw new Error(err);
+            });
+
 
            return res.send(200, {
              status: true,

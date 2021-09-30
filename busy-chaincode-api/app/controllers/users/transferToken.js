@@ -1,9 +1,13 @@
 const User = require("../../models/Users");
-const { Certificate } = require("@fidm/x509");
+const {
+  Certificate
+} = require("@fidm/x509");
 const transactions = require("../../models/transactions");
 const transferScript = require("../../../blockchain/test-scripts/transferTokens");
 const config = require("../../../blockchain/test-scripts/config");
 const bs58 = require("bs58");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   try {
@@ -83,8 +87,7 @@ module.exports = async (req, res, next) => {
             blockNum: blockResp.blockNum,
             dataHash: blockResp.dataHash,
             createdDate: new Date(blockResp.timestamp),
-            description:
-              sender +
+            description: sender +
               " transferred " +
               amount +
               " " +
@@ -102,10 +105,51 @@ module.exports = async (req, res, next) => {
               console.log("ERROR DB", error);
             });
 
+          const balanceResponse = await QueryScript.queryWallet(
+            user.userId,
+            blockchain_credentials,
+            user.walletId,
+            constants.BUSY_TOKEN
+          );
+          const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+          await User.updateOne({
+            walletId: user.walletId
+          }, {
+            "$set": {
+              "walletBalance": balanceResp.data
+            }
+          }).exec().then(user => {
+            console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+          }).catch(err => {
+            console.log(err);
+            throw new Error(err);
+          });
+
+          const balanceResponseRecipient = await QueryScript.queryWallet(
+            receiver.userId,
+            blockchain_credentials,
+            receiver.walletId,
+            constants.BUSY_TOKEN
+          );
+          const balanceRespRecipient = JSON.parse(balanceResponseRecipient.chaincodeResponse);
+
+          await User.updateOne({
+            walletId: receiver.walletId,
+          }, {
+            "$set": {
+              "walletBalance": balanceRespRecipient.data,
+            }
+          }).exec().then(doc => {
+            console.log('Updating Default wallet Balance for ' + receiver.walletId + ' setting amount to ' + balanceRespRecipient.data);
+          }).catch(err => {
+            console.log(err);
+            throw new Error(err);
+          });
+
+
           return res.send(200, {
             status: true,
-            message:
-              sender +
+            message: sender +
               " transferred " +
               amount +
               " " +

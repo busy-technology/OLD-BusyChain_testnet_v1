@@ -4,6 +4,8 @@ const transactions = require("../../models/transactions");
 const { Certificate } = require("@fidm/x509");
 const config = require("../../../blockchain/test-scripts/config");
 const bs58 = require("bs58");
+const constants = require("../../../constants");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 
 module.exports = async (req, res, next) => {
   const walletId = req.body.walletId;
@@ -43,7 +45,7 @@ module.exports = async (req, res, next) => {
 
       blockchain_credentials.credentials.privateKey =
         decodedPrivateKey.toString();
-        
+
       const response = await voting.CreateVote(walletId,user.userId, blockchain_credentials, votingAddress, amount, voteType);
       const resp = JSON.parse(response.chaincodeResponse);
       if (resp.success == true) {
@@ -70,6 +72,27 @@ module.exports = async (req, res, next) => {
           .catch((error) => {
             console.log("ERROR DB", error);
           });
+
+          const balanceResponse = await QueryScript.queryWallet(
+            user.userId,
+            blockchain_credentials,
+            user.walletId,
+            constants.BUSY_TOKEN
+          );
+          const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
+          await User.updateOne({
+            walletId: user.walletId
+          }, {
+            "$set": {
+              "walletBalance": balanceResp.data
+            }
+          }).exec().then(doc => {
+            console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
+          }).catch(err => {
+            console.log(err);
+            throw new Error(err);
+          });
+  
 
         console.log("Voted successfully")
         return res.send(200, {
