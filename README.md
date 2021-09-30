@@ -1,4 +1,4 @@
-Developing next-generation DAO platform for freelancers, cutting edge blockchain technology, DeFi and NFT solutions.
+Developing next-generation DAO platforms, cutting edge blockchain technology, DeFi and NFT solutions.
 
 Revolutionizing B2C/C2C model through leveraging the utility of Web 3.0.
 
