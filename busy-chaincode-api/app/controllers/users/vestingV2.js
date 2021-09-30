@@ -92,7 +92,7 @@ module.exports = async (req, res, next) => {
           "$set": {
             "walletBalance": balanceResp.data
           }
-        }).exec().then(user => {
+        }).exec().then(doc => {
           console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
         }).catch(err => {
           console.log(err);
