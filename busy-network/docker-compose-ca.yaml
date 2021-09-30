@@ -11,7 +11,7 @@ services:
     image: postgres:12.3-alpine
     container_name: ca-database
     environment:
-      - POSTGRES_PASSWORD=Busy@@123
+      - POSTGRES_PASSWORD=********
       - POSTGRES_USER=fabric
       - POSTGRES_DB=busy_ca_db
       - PGDATA=/var/lib/postgresql/data/pgdata
@@ -39,7 +39,7 @@ services:
       - FABRIC_CA_SERVER_TLS_ENABLED=true
       - FABRIC_CA_SERVER_CA_NAME=busy-ca
       - FABRIC_CA_SERVER_DB_TYPE=postgres
-      - FABRIC_CA_SERVER_DB_DATASOURCE=host=ca-database port=5432 user=fabric password=Busy@@123 dbname=busy_ca_db sslmode=disable
+      - FABRIC_CA_SERVER_DB_DATASOURCE=host=ca-database port=5432 user=fabric password=****** dbname=busy_ca_db sslmode=disable
       - FABRIC_CA_SERVER_CSR_HOSTS=busy-ca-server, localhost, ca.busy.technology
     networks:
       - busy-blockchain
@@ -48,5 +48,5 @@ services:
         condition: service_healthy
     volumes:
       - "./busy-ca-server:/etc/hyperledger/fabric-ca-server"
-    command: sh -c 'fabric-ca-server start -b admin:adminpw'
+    command: sh -c 'fabric-ca-server start -b *****:******'
 
