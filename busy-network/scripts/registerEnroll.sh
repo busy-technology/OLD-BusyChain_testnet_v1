@@ -7,7 +7,7 @@ function createBusy() {
   export FABRIC_CA_CLIENT_HOME=${PWD}/organizations/peerOrganizations/busy.technology/
 
   set -x
-  fabric-ca-client enroll -u https://admin:adminpw@localhost:7054 --caname busy-ca --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
+  fabric-ca-client enroll -u https://****:******@localhost:7054 --caname busy-ca --tls.certfiles ${PWD}/busy-ca-server/tls-cert.pem
   { set +x; } 2>/dev/null
 
   echo 'NodeOUs:
