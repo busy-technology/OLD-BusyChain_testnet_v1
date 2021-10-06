@@ -18,7 +18,7 @@ module.exports = (fields) => {
     if (errors.length)
         return res.send(422, {
         status: false,
-        message: `${errors.join(", ")} not valid.`,
+        message: `The ${errors.join(", ")} is not valid`,
         });
 
     return next();

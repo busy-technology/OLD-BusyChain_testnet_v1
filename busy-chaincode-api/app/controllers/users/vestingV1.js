@@ -105,22 +105,22 @@ module.exports = async (req, res, next) => {
 
         return res.send(200, {
           status: true,
-          message: "Tokens vested.",
+          message: "Vesting has been successfully created",
           chaincodeResponse: response,
         });
       } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
           chaincodeResponse: response,
         });
       }
     } else {
-      console.log("WalletId do not exists.");
+      console.log("Wallet does not exist");
       return res.send(404, {
         status: false,
-        message: `WalletId do not exists.`,
+        message: `Wallet does not exist`,
       });
     }
   } catch (exception) {

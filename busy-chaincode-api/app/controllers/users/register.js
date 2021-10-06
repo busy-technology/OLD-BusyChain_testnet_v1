@@ -20,16 +20,16 @@ module.exports = async (req, res, next) => {
     });
     console.log("User", user);
     if (user) {
-      console.log("UserId already taken.");
+      console.log("Nickname is already taken");
       return res.send(404, {
         status: false,
-        message: `UserId ${user.userId} already taken.`,
+        message: `Nickname is already taken`,
       });
     } else if (password != confirmPassword) {
-      console.log("Passwords do not match.");
+      console.log("Passwords do not match");
       return res.send(404, {
         status: false,
-        message: "Passwords do not match.",
+        message: "Passwords do not match",
       });
     } else {
       const salt = await bcrypt.genSaltSync(saltRounds);
@@ -75,7 +75,7 @@ module.exports = async (req, res, next) => {
 
         return res.send(200, {
           status: true,
-          message: "User registered.",
+          message: "User has been successfully registered",
           seedPhase: data.seed,
           privateKey: data.blockchain_credentials,
           chaincodeResponse: data.chaincodeResponse,
@@ -84,7 +84,7 @@ module.exports = async (req, res, next) => {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
         });
       }
     }

@@ -22,10 +22,10 @@ module.exports = async (req, res, next) => {
     const response = await voting.QueryPool(adminId, blockchain_credentials);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Pool Data Fetched successfully");
+      console.log("Pool data has been successfully fetched");
       return res.send(200, {
         status: true,
-        message: "Pool Data Fetched Successfully",
+        message: "Pool data has been successfully fetched",
         chaincodeResponse: resp,
       });
     } else {

@@ -18,7 +18,7 @@ module.exports = async (req, res, next) => {
       if (user.userId != commanName) {
         return res.send(404, {
           status: false,
-          message: `This certificate is not valid.`,
+          message: `User’s certificate is not valid`,
         });
       }
 
@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
         console.log("type of certificate incorrect.");
         return res.send(404, {
           status: false,
-          message: `Incorrect type or MSPID.`,
+          message: `Incorrect type or MSPID`,
         });
       }
       const decodedPrivateKey = bs58.decode(
@@ -51,28 +51,28 @@ module.exports = async (req, res, next) => {
       if (response.chaincodeResponse.success == true) {
         return res.send(200, {
           status: true,
-          message: "Balance fetched",
+          message: "Balance has been successfully fetched",
           chaincodeResponse: response.chaincodeResponse,
         });
       } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
         });
       }
     } else {
-      console.log("Wallet do not exists.");
+      console.log("Wallet does not exist");
       return res.send(404, {
         status: false,
-        message: `Wallet do not exists.`,
+        message: `Wallet does not exist`,
       });
     }
   } else {
-    console.log("UserId do not exists.");
+    console.log("User does not exist");
     return res.send(404, {
       status: false,
-      message: `UserId do not exists.`,
+      message: `User does not exist`,
     });
   }
 };

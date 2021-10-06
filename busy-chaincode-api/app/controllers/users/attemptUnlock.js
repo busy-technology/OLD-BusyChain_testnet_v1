@@ -1,6 +1,7 @@
 const User = require("../../models/Users");
 const { Certificate } = require("@fidm/x509");
 const attemptUnlockScript = require("../../../blockchain/test-scripts/attemptUnlock");
+const QueryScript = require("../../../blockchain/test-scripts/queryWallet");
 const bs58 = require("bs58");
 const constants = require("../../../constants");
 
@@ -19,7 +20,7 @@ module.exports = async (req, res, next) => {
       if (user.userId != commanName) {
         return res.send(404, {
           status: false,
-          message: `This certificate is not valid.`,
+          message: `User’s certificate is not valid`,
         });
       }
 
@@ -30,7 +31,7 @@ module.exports = async (req, res, next) => {
         console.log("type of certificate incorrect.");
         return res.send(404, {
           status: false,
-          message: `Incorrect type or MSPID.`,
+          message: `Incorrect type or MSPID`,
         });
       }
 
@@ -53,7 +54,6 @@ module.exports = async (req, res, next) => {
       console.log("TRANSACTION ID", txId);
 
       if (response.success == true) {
-
         const balanceResponse = await QueryScript.queryWallet(
           user.userId,
           blockchain_credentials,
@@ -61,37 +61,48 @@ module.exports = async (req, res, next) => {
           constants.BUSY_TOKEN
         );
         const balanceResp = JSON.parse(balanceResponse.chaincodeResponse);
-        await User.updateOne({
-          walletId: user.walletId
-        }, {
-          "$set": {
-            "walletBalance": balanceResp.data
+        await User.updateOne(
+          {
+            walletId: user.walletId,
+          },
+          {
+            $set: {
+              walletBalance: balanceResp.data,
+            },
           }
-        }).exec().then(doc => {
-          console.log('Updating Default wallet Balance for ' + user.walletId + ' setting amount to ' + balanceResp.data);
-        }).catch(err => {
-          console.log(err);
-          throw new Error(err);
-        });
+        )
+          .exec()
+          .then((doc) => {
+            console.log(
+              "Updating Default wallet Balance for " +
+                user.walletId +
+                " setting amount to " +
+                balanceResp.data
+            );
+          })
+          .catch((err) => {
+            console.log(err);
+            throw new Error(err);
+          });
 
         return res.send(200, {
           status: true,
-          message: "Coins unlocked.",
+          message: "Coins have been successfully unlocked from the vesting",
           chaincodeResponse: response,
         });
       } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
           chaincodeResponse: response,
         });
       }
     } else {
-      console.log("WalletId do not exists.");
+      console.log("Wallet does not exist");
       return res.send(404, {
         status: false,
-        message: `WalletId do not exists.`,
+        message: `Wallet does not exist`,
       });
     }
   } catch (exception) {

@@ -47,22 +47,22 @@ module.exports = async (req, res, next) => {
       if (response.success == true) {
         return res.send(200, {
           status: true,
-          message: "Total supply fetched.",
+          message: "Total supply has been successfully fetched",
           chaincodeResponse: response,
         });
       } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
           chaincodeResponse: response,
         });
       }
     } else {
-      console.log("symbol do not exists.");
+      console.log("Token symbol does not exist");
       return res.send(404, {
         status: false,
-        message: `symbol do not exists`,
+        message: `Token symbol does not exist`,
       });
     }
   } catch (exception) {

@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
         if (user.userId != commanName) {
           return res.send(404, {
             status: false,
-            message: `This certificate is not valid.`,
+            message: `User’s certificate is not valid`,
           });
         }
         if (
@@ -46,7 +46,7 @@ module.exports = async (req, res, next) => {
           console.log("type of certificate incorrect.");
           return res.send(404, {
             status: false,
-            message: `Incorrect type or MSPID.`,
+            message: `Incorrect type or MSPID`,
           });
         }
 
@@ -125,29 +125,29 @@ module.exports = async (req, res, next) => {
 
           return res.send(200, {
             status: true,
-            message: "Unstaking successful.",
+            message: "Staking address has been successfully unstaked",
             chaincodeResponse: response,
           });
         } else {
           console.log("Failed to execute chaincode function");
           return res.send(404, {
             status: false,
-            message: `Failed to execute chaincode function.`,
+            message: `Failed to execute chaincode function`,
             chaincodeResponse: response,
           });
         }
       } else {
-        console.log("User having this stakking address not found.");
+        console.log("User does not own this staking address");
         return res.send(404, {
           status: false,
-          message: `User having this stakking address not found.`,
+          message: `User does not own this staking address`,
         });
       }
     } else {
-      console.log("stakingAddr do not exists.");
+      console.log("Staking address does not exist");
       return res.send(404, {
         status: false,
-        message: `stakingAddr do not exists`,
+        message: `Staking address does not exist`,
       });
     }
   } catch (exception) {

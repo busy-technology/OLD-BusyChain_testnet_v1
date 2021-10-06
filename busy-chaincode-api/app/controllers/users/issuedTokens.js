@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
           message: err,
         });
       }
-      console.log("Number of issued Coins:", count);
+      console.log("Number of issued Tokens:", count);
       console.log("OUTPUT", result);
 
       const output = [];
@@ -36,7 +36,7 @@ module.exports = async (req, res, next) => {
 
       return res.send(200, {
         status: true,
-        message: "Coins fetched.",
+        message: "Token has been successfully fetched",
         output: output,
       });
     });

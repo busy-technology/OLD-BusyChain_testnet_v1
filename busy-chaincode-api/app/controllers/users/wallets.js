@@ -24,7 +24,7 @@ module.exports = async (req, res, next) => {
 
       return res.send(200, {
         status: true,
-        message: "wallets fetched.",
+        message: "Wallets have been successfully fetched",
         output: output,
       });
     });

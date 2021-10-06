@@ -22,10 +22,10 @@ module.exports = async (req, res, next) => {
     const response = await config.CurrentFees(adminId, blockchain_credentials);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Successfully fetched Current Transfer fee");
+      console.log("The current transfer fee has been successfully fetched");
       return res.send(200, {
         status: true,
-        message: "Successfully fetched Current Transfer fee",
+        message: "The current transfer fee has been successfully fetched",
         chaincodeResponse: resp,
       });
     } else {

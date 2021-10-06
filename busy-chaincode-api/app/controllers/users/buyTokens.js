@@ -102,22 +102,22 @@ module.exports = async (req, res, next) => {
 
         return res.send(200, {
           status: true,
-          message: "Coins have been successfully purchased.",
+          message: "Coins have been successfully transferred",
           chaincodeResponse: response,
         });
       } else {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
           chaincodeResponse: response,
         });
       }
     } else {
-      console.log("Recipient do not exists.");
+      console.log("Recipient's address does not exist");
       return res.send(404, {
         status: false,
-        message: `Recipient do not exists.`,
+        message: `Recipient's address does not exist`,
       });
     }
   } catch (exception) {

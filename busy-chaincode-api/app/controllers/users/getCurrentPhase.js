@@ -22,10 +22,10 @@ module.exports = async (req, res, next) => {
     const response = await config.CurrentPhase(adminId, blockchain_credentials);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Successfully fetched Current Phase");
+      console.log("Current BusyChain phase has been successfully fetched");
       return res.send(200, {
         status: true,
-        message: "Successfully fetched Current Phase",
+        message: "Current BusyChain phase has been successfully fetched",
         chaincodeResponse: resp,
       });
     } else {

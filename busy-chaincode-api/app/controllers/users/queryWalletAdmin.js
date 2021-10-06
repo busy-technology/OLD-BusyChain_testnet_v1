@@ -59,7 +59,7 @@ module.exports = async (req, res, next) => {
       console.log("Failed to execute chaincode function");
       return res.send(404, {
         status: false,
-        message: `Failed to execute chaincode function.`,
+        message: `Failed to execute chaincode function`,
         chaincodeResponse: response,
       });
     }

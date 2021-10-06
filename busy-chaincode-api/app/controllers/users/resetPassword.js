@@ -14,10 +14,10 @@ module.exports = async (req, res, next) => {
     });
     if (user) {
       if (password != confirmPassword) {
-        console.log("Passwords do not match.");
+        console.log("Passwords do not match");
         return res.send(404, {
           status: false,
-          message: "Passwords do not match.",
+          message: "Passwords do not match",
         });
       }
       try {
@@ -33,27 +33,27 @@ module.exports = async (req, res, next) => {
         });
         return res.send(200, {
           status: false,
-          message: `Password Updated successfully.`,
+          message: `Password has been updated successfully`,
         });
       } catch (exception) {
         console.log("exception in User exists", exception);
         return res.send(404, {
           status: false,
-          message: `Seed phase is not correct.`,
+          message: `The entered seed phrase is not correct`,
         });
       }
   } else {
-    console.log("UserId do not exists.");
+    console.log("User does not exist");
     return res.send(404, {
       status: false,
-      message: `UserId do not exists.`,
+      message: `User does not exist`,
     });
   }
 } catch (exception) {
   console.log(exception);
   return res.send(404, {
     status: false,
-    message: `Something went wrong.`,
+    message: `Something went wrong`,
   });
 }
 };

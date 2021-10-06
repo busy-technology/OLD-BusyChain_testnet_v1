@@ -9,7 +9,7 @@ module.exports = async (req, res, next) => {
           message: err,
         });
       }
-      console.log("Number of wallets:", count);
+      console.log("Number of wallets: ", count);
       console.log("OUTPUT", result);
 
       const output = [];
@@ -25,7 +25,7 @@ module.exports = async (req, res, next) => {
 
       return res.send(200, {
         status: true,
-        message: "wallets fetched.",
+        message: "Wallets have been fetched",
         output: output,
       });
     });

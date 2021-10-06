@@ -10,15 +10,15 @@ module.exports = async (req, res, next) => {
       console.log("USER DATA", user);
       const result = bcrypt.compareSync(password, user.password);
       if (result == false) {
-        console.log("Password is incorrect.");
+        console.log("Password is incorrect");
         return res.send(404, {
           status: false,
-          message: "Password is incorrect.",
+          message: "Password is incorrect",
         });
       } else {
         return res.send(200, {
           status: true,
-          message: "Login Successfull.",
+          message: "Login has been successful",
         });
       }
     })
@@ -28,7 +28,7 @@ module.exports = async (req, res, next) => {
         console.log("error", error);
         return res.send(404, {
           status: false,
-          message: "This UserId do not exist.",
+          message: "User does not exist",
         });
       }
     });

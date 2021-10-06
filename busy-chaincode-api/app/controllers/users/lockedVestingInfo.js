@@ -50,15 +50,15 @@ module.exports = async (req, res, next) => {
         console.log("Failed to execute chaincode function");
         return res.send(404, {
           status: false,
-          message: `Failed to execute chaincode function.`,
+          message: `Failed to execute chaincode function`,
           chaincodeResponse: response,
         });
       }
     } else {
-      console.log("WalletId do not exists.");
+      console.log("Wallet does not exist");
       return res.send(404, {
         status: false,
-        message: `WalletId do not exists.`,
+        message: `Wallet does not exist`,
       });
     }
   } catch (exception) {

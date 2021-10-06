@@ -38,13 +38,13 @@ module.exports = (fields) => {
         if (errors.length)
         return res.send(422, {
             status: false,
-            message: `${errors.join(", ")} not valid.`,
+            message: `The ${errors.join(", ")} is not valid`,
         });
 
         if (!fraction(params[fields[0]].trim(),params[fields[1]].trim())){
             return res.send(422, {
                 status: false,
-                message: `vesting fraction not valid.`,
+                message: `The vesting fraction is not valid`,
             });
         }
 

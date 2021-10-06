@@ -23,10 +23,10 @@ module.exports = async (req, res, next) => {
     const resp = response.chaincodeResponse;
   
     if (resp.success == true) {
-        console.log("Blocks updated SuccessFully")
+        console.log("Blocks have been updated successfully")
         return res.send(200, {
             status: true,
-            message: "Blocks updated SuccessFully",
+            message: "Blocks have been updated successfully",
             maxBlockNum: resp.data,
         })
     } else {

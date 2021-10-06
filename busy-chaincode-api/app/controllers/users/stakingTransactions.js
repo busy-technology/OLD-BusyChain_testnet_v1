@@ -5,13 +5,13 @@ module.exports = async (req, res, next) => {
     if (err) {
       return res.send(200, {
         status: false,
-        message: "Error in fetching transactions",
+        message: "Error occured while fetching the staking transactions",
         Error: err,
       });
     }
     return res.send(200, {
       status: true,
-      message: "Transactions fetched.",
+      message: "Staking transactions have been successfully fetched",
       data: result,
     });
   });

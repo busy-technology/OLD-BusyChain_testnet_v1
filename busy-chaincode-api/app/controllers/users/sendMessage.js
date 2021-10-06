@@ -26,7 +26,7 @@ module.exports = async (req, res, next) => {
       if (sendUser.userId != commanName) {
         return res.send(404, {
           status: false,
-          message: `This certificate is not valid.`,
+          message: `User’s certificate is not valid`,
         });
       }
 
@@ -37,7 +37,7 @@ module.exports = async (req, res, next) => {
         console.log("type of certificate incorrect.");
         return res.send(404, {
           status: false,
-          message: `Incorrect type or MSPID.`,
+          message: `Incorrect type or MSPID`,
         });
       }
 
@@ -55,7 +55,7 @@ module.exports = async (req, res, next) => {
         );
         const resp = JSON.parse(response.chaincodeResponse);
         if (resp.success == true) {
-           console.log("Message Sent Successfully")
+           console.log("Message has been successfully sent")
 
            // Storing the data from the blockchain
            await User.updateOne({walletId: sender}, {messageCoins: resp.data.Sender})
@@ -128,7 +128,7 @@ module.exports = async (req, res, next) => {
 
            return res.send(200, {
              status: true,
-             message: "Message Sent",
+             message: "Message has been successfully sent",
              chaincodeResponse: resp,
            })
         } else {
@@ -140,16 +140,16 @@ module.exports = async (req, res, next) => {
         };
     } else {
       if (!sendUser){
-        console.log("Sender WalletId do not exist.");
+        console.log("Sender’s address does not exist");
         return res.send(404, {
           status: false,
-          message: `Sender do not exist.`,
+          message: `Sender’s address does not exist`,
         });
       } else {
-        console.log("Recipient WalletId do not exist.");
+        console.log("Recipient's address does not exist");
         return res.send(404, {
           status: false,
-          message: `Recipient do not exist.`,
+          message: `Recipient's address does not exist`,
         });
       };
     }

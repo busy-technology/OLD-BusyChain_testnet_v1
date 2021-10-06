@@ -29,7 +29,7 @@ module.exports = async (req, res, next) => {
 
           return res.send(200, {
             status: true,
-            message: "User enrollment with CA successfull.",
+            message: "Enrollment with CA has been successfully verified",
             privateKey: response.blockchain_credentials,
           });
         }
@@ -37,14 +37,14 @@ module.exports = async (req, res, next) => {
         console.log("exception in User exists", exception);
         return res.send(404, {
           status: false,
-          message: `Seed phase is not correct.`,
+          message: `The entered seed phrase is not correct`,
         });
       }
     } else {
-      console.log("UserId do not exists.");
+      console.log("User does not exist");
       return res.send(404, {
         status: false,
-        message: `UserId do not exists.`,
+        message: `User does not exist`,
       });
     }
   } catch (exception) {

@@ -22,10 +22,10 @@ module.exports = async (req, res, next) => {
     const response = await voting.DestroyPool(adminId, blockchain_credentials);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Pool Destroyed Successfully");
+      console.log("Ended pool has been successfully destroyed");
       return res.send(200, {
         status: true,
-        message: "Pool Destroyed",
+        message: "Ended pool has been successfully destroyed",
         chaincodeResponse: resp,
       });
     } else {

@@ -22,10 +22,10 @@ module.exports = async (req, res, next) => {
     const response = await voting.PoolConfig(adminId, blockchain_credentials);
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Voting Config Fetched successfully");
+      console.log("Voting configuration has been successfully fetched");
       return res.send(200, {
         status: true,
-        message: "Voting Config Fetched successfully",
+        message: "Voting configuration has been successfully fetched",
         chaincodeResponse: resp,
       });
     } else {

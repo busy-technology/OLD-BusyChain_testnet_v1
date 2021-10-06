@@ -7,7 +7,7 @@ module.exports = (fields) => {
     if (!params)
       return res.send(422, {
         status: false,
-        message: `Parameter required: ${fields.join(", ")}`,
+        message: `There is missing required parameter: ${fields.join(", ")}`,
       });
 
     const errors = fields.filter((e) => !params[e]);
@@ -15,7 +15,7 @@ module.exports = (fields) => {
     if (errors.length)
       return res.send(422, {
         status: false,
-        message: `Parameter required: ${errors.join(", ")}`,
+        message: `There is missing required parameter: ${errors.join(", ")}`,
       });
 
     return next();

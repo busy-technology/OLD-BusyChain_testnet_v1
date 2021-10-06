@@ -6,13 +6,13 @@ module.exports = async (req, res, next) => {
         if (err) {
           return res.send(200, {
             status: false,
-            message: "Error in fetching transactions",
+            message: "Error occured while fetching the blocks",
             Error: err,
           });
         }
         return res.send(200, {
           status: true,
-          message: "Blocks Fetched",
+          message: "Blocks have been successfully fetched",
           data: result,
         });
       });

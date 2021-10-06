@@ -32,10 +32,10 @@ module.exports = async (req, res, next) => {
     );
     const resp = JSON.parse(response.chaincodeResponse);
     if (resp.success == true) {
-      console.log("Voting Config Updated successfully");
+      console.log("Voting configuration has been successfully updated");
       return res.send(200, {
         status: true,
-        message: "Voting Config Updated successfully",
+        message: "Voting configuration has been successfully updated",
         chaincodeResponse: resp,
       });
     } else {

@@ -31,17 +31,17 @@ module.exports = async (req, res, next) => {
       if (user.userId != commanName) {
         return res.send(404, {
           status: false,
-          message: `This certificate is not valid.`,
+          message: `User’s certificate is not valid`,
         });
       }
       if (
         blockchain_credentials.type != "X.509" ||
         blockchain_credentials.mspId != "BusyMSP"
       ) {
-        console.log("type of certificate incorrect.");
+        console.log("Incorrect type or MSPID");
         return res.send(404, {
           status: false,
-          message: `Incorrect type or MSPID.`,
+          message: `Incorrect type or MSPID`,
         });
       }
 
@@ -162,22 +162,22 @@ module.exports = async (req, res, next) => {
           console.log("Failed to execute chaincode function");
           return res.send(404, {
             status: false,
-            message: `Failed to execute chaincode function.`,
+            message: `Failed to execute chaincode function`,
             chaincodeResponse: response,
           });
         }
       } else {
-        console.log("recipient walletId do not exists.");
+        console.log("Recipient's address does not exist");
         return res.send(404, {
           status: false,
-          message: `recipient walletId do not exists.`,
+          message: `Recipient's address does not exist`,
         });
       }
     } else {
-      console.log("sender walletId do not exists.");
+      console.log("Sender’s address does not exist");
       return res.send(404, {
         status: false,
-        message: `sender walletId do not exists.`,
+        message: `Sender’s address does not exist`,
       });
     }
   } catch (exception) {
